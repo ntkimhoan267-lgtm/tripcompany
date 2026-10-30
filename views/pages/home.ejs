@@ -27,6 +27,10 @@
         <svg class="hero__arrow" viewBox="0 0 160 120" fill="none"><path d="M8 14 C 60 4, 120 22, 132 80" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 0"/><path d="M116 70 L 133 92 L 147 66" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </p>
       <% } %>
+      <%- include('../partials/stamp', { top: 'VISA · CHINA · TRUNG QUỐC · ', mid: '中国', sub: 'APPROVED', cls: 'stamp--cn' }) %>
+      <%- include('../partials/stamp', { top: 'VISA · KOREA · HÀN QUỐC · ', mid: '한국', sub: 'APPROVED', cls: 'stamp--kr' }) %>
+      <%- include('../partials/stamp', { top: 'VISA · JAPAN · NHẬT BẢN · ', mid: '日本', sub: 'APPROVED', cls: 'stamp--jp' }) %>
+      <%- include('../partials/stamp', { top: 'SCHENGEN · EUROPE · ', mid: 'EU', sub: 'APPROVED', cls: 'stamp--eu' }) %>
       <div class="porthole">
         <div class="porthole__glass">
           <img class="porthole__thumb" src="/media/trip-thumb.jpg" alt="" width="720" height="960" fetchpriority="high">

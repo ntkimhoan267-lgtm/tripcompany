@@ -1,0 +1,12 @@
+<%
+  // Con dấu visa tròn. Tham số: top (chữ vòng trên), mid (chữ giữa), sub (dòng nhỏ), cls (màu/vị trí)
+  const sid = 'st' + Math.random().toString(36).slice(2, 8);
+%>
+<svg class="stamp <%= typeof cls !== 'undefined' ? cls : '' %>" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+  <defs><path id="<%= sid %>" d="M60 60 m-44 0 a44 44 0 1 1 88 0 a44 44 0 1 1 -88 0"/></defs>
+  <circle cx="60" cy="60" r="56" fill="none" stroke-width="3"/>
+  <circle cx="60" cy="60" r="35" fill="none" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text class="stamp__ring"><textPath href="#<%= sid %>" startOffset="0"><%= top %></textPath></text>
+  <text class="stamp__mid" x="60" y="62" text-anchor="middle" dominant-baseline="middle"><%= mid %></text>
+  <% if (typeof sub !== 'undefined' && sub) { %><text class="stamp__sub" x="60" y="80" text-anchor="middle"><%= sub %></text><% } %>
+</svg>

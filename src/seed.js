@@ -82,7 +82,7 @@ Câu trả lời phụ thuộc vào **yêu cầu của nơi nhận hồ sơ**. T
 
 ## Bảng giá tham khảo
 
-Xem chi tiết tại trang [Bảng giá dịch thuật](/dich-vu/dich-thuat#bang-gia).`,
+Xem chi tiết tại trang [Bảng giá dịch thuật](/dich-vu/dich-thuat).`,
   },
   {
     slug: 'kinh-nghiem-phong-van-visa-my',

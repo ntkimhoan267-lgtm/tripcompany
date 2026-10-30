@@ -38,15 +38,20 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const postJson = (url, body) => fetch(base + url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 test('các trang công khai hiển thị', async () => {
-  for (const p of ['/', '/gioi-thieu', '/dich-vu/visa', '/dich-vu/dich-thuat', '/dich-vu/thue-xe', '/bang-gia', '/tour', '/blog', '/lien-he', '/sitemap.xml']) {
+  for (const p of ['/', '/gioi-thieu', '/visa', '/visa/trung-quoc', '/visa/han-quoc', '/visa/nhat-ban', '/visa/chau-au', '/visa/nuoc-khac', '/visa/e-visa', '/dich-vu/dich-thuat', '/dich-vu/hop-phap-hoa-lanh-su', '/dich-vu/thue-xe', '/bang-gia', '/tour', '/blog', '/lien-he', '/sitemap.xml']) {
     const r = await fetch(base + p);
     assert.equal(r.status, 200, p);
   }
   assert.equal((await fetch(base + '/khong-ton-tai')).status, 404);
+  assert.equal((await fetch(base + '/visa/khong-co')).status, 404);
+  const old = await fetch(base + '/dich-vu/visa', { redirect: 'manual' });
+  assert.equal(old.status, 301);
+  assert.equal(old.headers.get('location'), '/visa');
 });
 
 test('trang web không lộ giá đại lý (Net)', async () => {
-  const html = await (await fetch(base + '/bang-gia')).text();
+  let html = '';
+  for (const p of ['/bang-gia', '/visa/trung-quoc', '/visa/nhat-ban', '/visa/chau-au', '/visa/nuoc-khac', '/dich-vu/dich-thuat']) html += await (await fetch(base + p)).text();
   // Các mức giá chỉ có ở cột Giá Đại Lý (Net) trong bảng báo giá nội bộ
   for (const net of ['2.600.000', '7.600.000', '2.990.000', '5.770.000', '$241', '$370', '35.000đ']) assert.ok(!html.includes(net), `lộ giá net ${net}`);
 });

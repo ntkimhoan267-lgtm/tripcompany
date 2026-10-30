@@ -14,8 +14,6 @@ const renderMarkdown = (md) => sanitizeHtml(marked.parse(md || ''), {
 
 const publishedTours = (where = '', ...args) =>
   db.prepare(`SELECT * FROM tours WHERE status = 'published' ${where} ORDER BY featured DESC, sort, id`).all(...args);
-const latestPosts = (n) =>
-  db.prepare("SELECT * FROM posts WHERE status = 'published' ORDER BY published_at DESC LIMIT ?").all(n);
 
 router.get('/', (req, res) => {
   res.render('pages/home', {
@@ -25,7 +23,6 @@ router.get('/', (req, res) => {
     },
     services,
     tours: publishedTours('AND featured = 1').slice(0, 4),
-    posts: latestPosts(3),
   });
 });
 
@@ -42,16 +39,54 @@ router.get('/dich-vu', (req, res) => {
   });
 });
 
-router.get('/dich-vu/visa', (req, res) => {
-  res.render('pages/service-visa', {
-    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: 'Bảng giá visa trọn gói tại TRIP Đà Nẵng: Trung Quốc từ 2.800.000đ, Hàn Quốc từ 120 USD, Nhật Bản từ 3.800.000đ, Schengen từ 220 USD. Luyện phỏng vấn 1 kèm 1.' },
-    services,
+// ----- Visa: trang tổng quan + mỗi thị trường một trang riêng -----
+const VISA_EXTRA = {
+  'nuoc-khac': {
+    id: 'nuoc-khac', country: 'Mỹ · Úc · Canada & nước khác', short: 'Mỹ, Úc, Canada & nước khác', code: 'us',
+    leadService: 'Visa Mỹ / Úc / Canada', from: { usd: 70 }, time: '2–5 tuần',
+    blurb: 'Hoa Kỳ, Canada, Úc, New Zealand, Đài Loan, Hồng Kông, Macau, Ấn Độ, Dubai…',
+  },
+  'e-visa': {
+    id: 'e-visa', country: 'E-visa Việt Nam', short: 'E-visa Việt Nam', code: 'vn',
+    leadService: 'E-visa Việt Nam (người nước ngoài)', from: { usd: 40 }, time: 'Từ 2 giờ',
+    blurb: 'Dành cho người nước ngoài nhập cảnh Việt Nam, kèm Fast Track tại sân bay.',
+  },
+};
+const visaPageOf = (slug) => services.markets.find((m) => m.id === slug) || VISA_EXTRA[slug];
+
+router.get('/dich-vu/visa', (req, res) => res.redirect(301, '/visa'));
+
+router.get('/visa', (req, res) => {
+  res.render('pages/visa-index', {
+    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: 'Dịch vụ visa du lịch trọn gói tại TRIP Đà Nẵng: Trung Quốc từ 2.800.000đ, Hàn Quốc từ 120 USD, Nhật Bản từ 3.800.000đ, Schengen từ 220 USD. Luyện phỏng vấn 1 kèm 1.' },
+    services, extras: Object.values(VISA_EXTRA),
+  });
+});
+
+router.get('/visa/:slug', (req, res, next) => {
+  const page = visaPageOf(req.params.slug);
+  if (!page) return next();
+  const others = [...services.markets, ...Object.values(VISA_EXTRA)].filter((m) => m.id !== page.id);
+  res.render('pages/visa-market', {
+    meta: {
+      title: page.id === 'e-visa' ? 'E-visa Việt Nam cho người nước ngoài' : `Visa ${page.country} trọn gói`,
+      description: `${page.blurb} Giá trọn gói từ ${require('../lib/helpers').money(page.from)}. Tư vấn miễn phí tại TRIP Đà Nẵng.`,
+      image: page.art ? `/img/visa/${page.art}.jpg` : undefined,
+    },
+    services, page, others,
   });
 });
 
 router.get('/dich-vu/dich-thuat', (req, res) => {
   res.render('pages/service-translation', {
     meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật tại Đà Nẵng', description: 'Dịch thuật công chứng dấu công ty, dấu tư pháp từ 40.000đ/trang. Hợp pháp hoá, chứng nhận lãnh sự. Dịch hoả tốc trong ngày tại TRIP Đà Nẵng.' },
+    services,
+  });
+});
+
+router.get('/dich-vu/hop-phap-hoa-lanh-su', (req, res) => {
+  res.render('pages/legalization', {
+    meta: { title: 'Hợp pháp hoá & Chứng nhận lãnh sự', description: 'Chứng nhận lãnh sự, hợp pháp hoá lãnh sự giấy tờ dân sự, học thuật, kinh tế trọn gói tại TRIP Đà Nẵng.' },
     services,
   });
 });
@@ -140,7 +175,9 @@ router.get('/robots.txt', (req, res) => {
 
 router.get('/sitemap.xml', (req, res) => {
   const base = res.locals.siteUrl;
-  const urls = ['/', '/gioi-thieu', '/dich-vu', '/dich-vu/visa', '/dich-vu/dich-thuat',
+  const urls = ['/', '/gioi-thieu', '/dich-vu', '/visa',
+    ...services.markets.map((m) => `/visa/${m.id}`), ...Object.keys(VISA_EXTRA).map((k) => `/visa/${k}`),
+    '/dich-vu/dich-thuat', '/dich-vu/hop-phap-hoa-lanh-su',
     ...Object.keys(services.otherServices).map((s) => `/dich-vu/${s}`),
     '/bang-gia', '/tour', '/blog', '/lien-he'];
   for (const t of publishedTours()) urls.push(`/tour/${t.slug}`);

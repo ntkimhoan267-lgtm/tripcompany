@@ -26,10 +26,11 @@
       }
     });
   }
-  $$('.nav__toggle').forEach(function (btn) {
-    btn.addEventListener('click', function () {
+  $$('.nav__caret').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
       var item = btn.parentElement; var open = !item.classList.contains('is-open');
-      $$('.nav__item.is-open').forEach(function (i) { if (i !== item) { i.classList.remove('is-open'); $('.nav__toggle', i).setAttribute('aria-expanded', 'false'); } });
+      $$('.nav__item.is-open').forEach(function (i) { if (i !== item) { i.classList.remove('is-open'); $('.nav__caret', i).setAttribute('aria-expanded', 'false'); } });
       item.classList.toggle('is-open', open); btn.setAttribute('aria-expanded', String(open));
     });
   });

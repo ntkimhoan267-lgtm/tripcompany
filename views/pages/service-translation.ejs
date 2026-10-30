@@ -22,7 +22,7 @@
       </div>
 
       <div id="bang-gia">
-        <h2 class="mt-4">Bảng giá dịch thuật</h2>
+        <h2>Bảng giá dịch thuật</h2>
         <p class="muted">Đơn vị tính: trang. Áp dụng cho tài liệu phổ thông.</p>
         <div class="table-wrap">
           <table class="table">
@@ -49,17 +49,10 @@
         <div class="notice mt-2"><%- icon('info') %><div><% tr.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
       </div>
 
-      <div id="hop-phap-hoa">
-        <h2 class="mt-4">Hợp pháp hoá & Chứng nhận lãnh sự</h2>
-        <p>Giấy tờ Việt Nam khi sử dụng ở nước ngoài (và ngược lại) thường phải được chứng nhận hoặc hợp pháp hoá lãnh sự. TRIP nhận làm trọn gói cho giấy tờ dân sự (độc thân, khai sinh, kết hôn…), giấy tờ học thuật (bằng cấp, bảng điểm, học bạ) và giấy tờ kinh tế (hợp đồng lao động, thương mại).</p>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Dịch vụ</th><th>Giấy tờ</th><th class="num">Giá trọn gói</th></tr></thead>
-            <tbody><% tr.legalization.forEach(function (x) { %><tr><td><strong><%= x.name %></strong></td><td class="muted"><%= x.detail %></td><td class="num"><%= h.vnd(x.price) %></td></tr><% }) %></tbody>
-          </table>
-        </div>
-        <p class="table-note">Hợp pháp hoá lãnh sự cho các nước khác: vui lòng liên hệ để được báo giá theo loại giấy tờ và quốc gia sử dụng.</p>
-      </div>
+      <a class="card card--link legal-link" href="/dich-vu/hop-phap-hoa-lanh-su">
+        <div class="card__icon"><%- icon('stamp') %></div>
+        <div><h3>Cần hợp pháp hoá / chứng nhận lãnh sự?</h3><p>Giấy tờ dùng ở nước ngoài thường phải hợp pháp hoá. Xem thủ tục và bảng giá trọn gói.</p><span class="more">Xem trang Hợp pháp hoá lãnh sự <%- icon('arrow') %></span></div>
+      </a>
 
       <div>
         <h2 class="mt-4">Quy trình dịch thuật</h2>

@@ -780,3 +780,67 @@ a.market:hover .market__art video { transform: scale(1.05); }
 .porthole__glass .porthole__play .porthole__btn { top: 64%; width: 66px; height: 66px; }
 .porthole__glass .porthole__play .porthole__label { padding: 0 30px 32px; font-size: 1.15rem; }
 @media (max-width: 480px) { .porthole__glass .porthole__play .porthole__label { padding: 0 34px 30px; font-size: 1rem; } }
+
+/* ---------- Cấu trúc nhiều trang ---------- */
+.markets--4 { grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.markets--4 .market__art { aspect-ratio: 4 / 3.4; }
+.markets--4 .market h3, .markets--4 h3 { font-size: 1.55rem; margin-bottom: 0; }
+.markets--4 .market__body { padding: 16px 20px 20px; }
+.markets--4 .market__foot { margin-top: 14px; }
+.markets--4 .market__foot strong { font-size: 1.45rem; }
+@media (max-width: 1100px) { .markets--4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .markets--4 { grid-template-columns: 1fr; } }
+
+.feature-band { margin-top: 26px; display: grid; grid-template-columns: auto 1fr auto auto; gap: 24px; align-items: center; padding: 26px 30px; border-radius: 28px; color: #fff;
+  background: linear-gradient(120deg, var(--navy) 0%, #2f74a4 100%); box-shadow: 0 24px 50px -28px rgba(17,34,51,.6); transition: transform .3s ease; }
+.feature-band:hover { color: #fff; transform: translateY(-4px); }
+.feature-band__icon { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #bfe3fa; }
+.feature-band__icon .icon { width: 32px; height: 32px; }
+.feature-band h3 { color: #fff; font-family: var(--serif); font-size: 1.7rem; margin: 2px 0 6px; }
+.feature-band h3 em { color: #ffd9a8; }
+.feature-band p { margin: 0; color: #cfe1ef; }
+.feature-band .market__en { color: #9fd3f5; }
+.feature-band__price { text-align: right; line-height: 1.15; }
+.feature-band__price small { display: block; color: #9fd3f5; font-size: .8rem; }
+.feature-band__price strong { font-family: var(--serif); font-size: 2rem; }
+.feature-band .market__go { background: #fff; color: var(--navy); }
+@media (max-width: 760px) { .feature-band { grid-template-columns: 1fr; text-align: left; } .feature-band__price { text-align: left; } .feature-band__icon { display: none; } }
+
+.section-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+.section-top h2 { margin: 0; font-size: clamp(1.9rem, 3.6vw, 2.8rem); }
+
+.page-hero--photo { background: linear-gradient(90deg, rgba(13,28,43,.92) 0%, rgba(13,28,43,.75) 50%, rgba(13,28,43,.45) 100%), var(--bg) center / cover no-repeat; }
+
+.visa-extra { display: flex; gap: 18px; align-items: flex-start; }
+.visa-extra img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: none; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+.visa-extra h3 { font-family: var(--serif); font-size: 1.4rem; margin-bottom: 4px; }
+.visa-facts .card { padding: 20px; display: flex; flex-direction: column; gap: 2px; }
+.visa-facts .card__icon { margin-bottom: 10px; width: 44px; height: 44px; }
+.visa-facts strong { font-size: 1.25rem; color: var(--navy); }
+.visa-facts strong.serif { font-size: 1.6rem; }
+.other-visas { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.other-visas a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; background: #fff; border: 1.5px solid var(--line); color: var(--navy); }
+.other-visas a:hover { border-color: var(--sky); background: var(--sky-50); }
+.other-visas img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.other-visas span { flex: 1; font-size: .82rem; color: var(--muted); line-height: 1.3; }
+.other-visas strong { display: block; color: var(--navy); font-size: .95rem; }
+.other-visas .icon { width: 18px; height: 18px; color: var(--sky-600); }
+.legal-link { display: flex; gap: 18px; align-items: flex-start; background: var(--sky-50); border: 0; }
+.legal-link .card__icon { background: #fff; margin: 0; flex: none; }
+/* Menu: chữ là link sang trang, mũi tên nhỏ để mở menu con */
+.nav__item { display: flex; align-items: center; }
+.nav .nav__link { padding-right: 4px; }
+.nav__caret { width: 26px; height: 36px; display: grid; place-items: center; border: 0; background: none; color: var(--navy); cursor: pointer; border-radius: 8px; padding: 0; margin-left: -2px; }
+.nav__caret .icon { width: 16px; height: 16px; transition: transform .2s; }
+.nav__item:hover .nav__caret .icon, .nav__item.is-open .nav__caret .icon { transform: rotate(180deg); }
+.nav__caret:hover { background: var(--sky-50); }
+@media (max-width: 980px) {
+  .nav__item { flex-wrap: wrap; }
+  .nav .nav__item > .nav__link { flex: 1; width: auto; }
+  .nav__caret { width: 52px; height: 52px; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; }
+  .nav__item .nav__sub { flex-basis: 100%; }
+}
+.markets--4 .market__native { font-size: clamp(1.3rem, 2vw, 1.7rem); top: 14px; left: 16px; }
+.markets--4 .market__badge { top: auto; bottom: 12px; right: 12px; font-size: .68rem; padding: 5px 10px; }
+.nav__sub { min-width: 320px; }
+@media (max-width: 980px) { .nav .nav__sub a { justify-content: flex-start; text-align: left; } .nav__sub { min-width: 0; } }

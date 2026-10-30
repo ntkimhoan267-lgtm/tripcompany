@@ -8,10 +8,13 @@
 
 <section class="section">
   <div class="container why">
-    <div class="why__visual reveal"><img src="/img/logo-vertical.png" alt="Logo TRIP" width="400" height="400"></div>
+    <figure class="photo-frame photo-frame--tall reveal">
+      <img src="/img/team/heart.jpg" alt="Nhân viên TRIP tại văn phòng" width="1000" height="1250" loading="lazy">
+      <figcaption class="photo-caption"><img src="/img/logo-icon.png" alt="" width="40" height="40"><span><strong>Trẻ · Đam mê · Tận tâm</strong>Đội ngũ TRIP Đà Nẵng</span></figcaption>
+    </figure>
     <div class="reveal prose">
       <span class="eyebrow">Câu chuyện của chúng tôi</span>
-      <h2 class="mt-0">Let Your Adventures Begin With Us</h2>
+      <h2 class="mt-0">Let Your <em>Adventures</em> Begin With Us</h2>
       <p>TRIP ra đời với mong muốn giúp mỗi chuyến đi của bạn bắt đầu thật nhẹ nhàng, từ những thủ tục giấy tờ tưởng chừng phức tạp nhất.</p>
       <p>Chúng tôi tập trung vào hai thế mạnh: <strong>dịch vụ visa</strong> và <strong>dịch thuật công chứng</strong>. Visa và dịch thuật luôn đi cùng nhau, nên làm cả hai tại một nơi giúp hồ sơ của bạn đồng bộ, chính xác và nhanh hơn.</p>
       <p>Từ nền tảng đó, TRIP mở rộng thành hệ sinh thái du lịch trọn gói: hộ chiếu, vé máy bay, bảo hiểm, eSIM, tour, khách sạn và xe đưa đón. Bạn chỉ cần một đầu mối cho cả chuyến đi.</p>
@@ -21,7 +24,11 @@
 
 <section class="section section--soft">
   <div class="container">
-    <div class="section-head reveal">
+    <figure class="photo-banner reveal">
+      <img src="/img/team/team-banner.jpg" alt="Tập thể nhân viên TRIP" width="1600" height="686" loading="lazy">
+      <figcaption><span class="eyebrow" style="color:#bfe3fa">Đội ngũ TRIP</span><strong>Những người đồng hành cùng hồ sơ của bạn</strong></figcaption>
+    </figure>
+    <div class="section-head reveal mt-4">
       <span class="eyebrow">Giá trị cốt lõi</span>
       <h2>Điều TRIP cam kết với bạn</h2>
     </div>
@@ -40,6 +47,11 @@
       <span class="eyebrow">Đội ngũ tư vấn</span>
       <h2>Chuyên viên theo từng mảng dịch vụ</h2>
       <p>Mỗi thị trường visa và mảng dịch vụ đều có chuyên viên phụ trách riêng.</p>
+    </div>
+    <div class="team-gallery">
+      <figure class="photo-frame reveal"><img src="/img/team/thumbs-up.jpg" alt="Nhân viên TRIP" width="1000" height="1000" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><img src="/img/team/consultant.jpg" alt="Tư vấn viên TRIP" width="800" height="1000" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><img src="/img/team/team.jpg" alt="Tập thể TRIP" width="1400" height="1050" loading="lazy"></figure>
     </div>
     <div class="grid grid--3">
       <div class="card reveal"><div class="card__icon"><%- icon('passport') %></div><h3>Visa</h3><ul class="consultants"><% company.consultants.visa.forEach(function (c) { %><li><a href="tel:<%= h.phoneTel(c.phone) %>"><%= c.name %> <span><%= h.phoneDisplay(c.phone) %></span></a></li><% }) %></ul></div>

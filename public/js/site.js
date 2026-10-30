@@ -80,17 +80,24 @@
   });
 
   // ---------- Popup nhận tin tự động ----------
+  // Không làm phiền: không hiện ở trang bảng giá / liên hệ, không hiện cho người vừa gửi form tư vấn,
+  // chỉ hiện sau N giây VÀ khi đã đọc tới nửa trang (hoặc khi định rời trang trên máy tính).
+  var WEEK = 7 * 24 * 3600 * 1000;
   var news = $('#news-modal');
-  if (news && news.dataset.auto === '1' && !store.get('trip_subscribed')) {
+  var quietPage = /^\/(bang-gia|lien-he|huy-dang-ky)/.test(location.pathname);
+  var recentLead = Date.now() - Number(store.get('trip_lead') || 0) < WEEK;
+  if (news && news.dataset.auto === '1' && !store.get('trip_subscribed') && !quietPage && !recentLead) {
     var seen = Number(store.get('trip_news_seen') || 0);
-    if (Date.now() - seen > 7 * 24 * 3600 * 1000) {
-      var shown = false;
+    if (Date.now() - seen > WEEK) {
+      var shown = false; var timeUp = false;
       var show = function () {
-        if (shown || $('.modal.is-open')) return;
+        if (shown || $('.modal.is-open') || Date.now() - Number(store.get('trip_lead') || 0) < WEEK) return;
         shown = true; openModal(news);
       };
-      setTimeout(show, (Number(news.dataset.delay) || 15) * 1000);
-      document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY < 10) show(); });
+      var scrolledHalf = function () { return (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight > 0.5; };
+      setTimeout(function () { timeUp = true; if (scrolledHalf()) show(); }, (Number(news.dataset.delay) || 45) * 1000);
+      window.addEventListener('scroll', function () { if (timeUp && scrolledHalf()) show(); }, { passive: true });
+      document.addEventListener('mouseout', function (e) { if (timeUp && !e.relatedTarget && e.clientY < 10) show(); });
     }
   }
 
@@ -119,8 +126,9 @@
         .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
         .then(function (res) {
           if (res.ok) {
-            msg.className = 'form-msg is-ok'; msg.textContent = res.message || 'Đã gửi thành công!';
-            form.reset(); onOk && onOk();
+            form.reset();
+            if (onOk) { msg.className = 'form-msg is-ok'; msg.textContent = res.message || 'Đã gửi thành công!'; onOk(); }
+            else showThanks(form, res.message);
           } else if (res.errors) {
             showErrors(form, res.errors);
           } else {
@@ -130,6 +138,19 @@
         .catch(function () { msg.className = 'form-msg is-err'; msg.textContent = 'Mất kết nối. Vui lòng thử lại hoặc gọi hotline.'; })
         .finally(function () { btn.disabled = false; btn.innerHTML = label; });
     });
+  }
+  // Sau khi gửi form tư vấn: thay form bằng màn hình cảm ơn (tránh gửi trùng) + nút Zalo/Gọi
+  function showThanks(form, message) {
+    store.set('trip_lead', String(Date.now()));
+    var tpl = $('#lead-thanks');
+    var box = document.createElement('div');
+    box.className = 'form-done';
+    box.setAttribute('role', 'status');
+    box.innerHTML = tpl ? tpl.innerHTML : '';
+    var p = $('[data-thanks-msg]', box); if (p && message) p.textContent = message;
+    form.replaceWith(box);
+    var again = $('[data-thanks-again]', box);
+    if (again) again.addEventListener('click', function () { box.replaceWith(form); });
   }
   function showErrors(form, errs) {
     var keys = Object.keys(errs);
@@ -143,6 +164,14 @@
   $$('.js-lead-form').forEach(function (f) { bindForm(f); });
   $$('.js-sub-form').forEach(function (f) {
     bindForm(f, function () { store.set('trip_subscribed', '1'); setTimeout(function () { closeModal($('#news-modal')); }, 2500); });
+  });
+
+  // ---------- Bảng trên điện thoại: gắn nhãn cột để hiển thị dạng thẻ ----------
+  $$('.table').forEach(function (t) {
+    var heads = $$('thead th', t).map(function (th) { return th.textContent.trim(); });
+    $$('tbody tr', t).forEach(function (tr) {
+      $$('td', tr).forEach(function (td, i) { if (heads[i]) td.setAttribute('data-label', heads[i]); });
+    });
   });
 
   // ---------- Tabs ----------

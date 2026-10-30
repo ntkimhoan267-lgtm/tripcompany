@@ -36,7 +36,7 @@
           <li><a href="/bang-gia">Bảng giá</a></li>
           <li><a href="/blog">Cẩm nang</a></li>
           <li><a href="/lien-he">Liên hệ</a></li>
-          <li><button class="btn btn--sm btn--outline-white mt-2" data-open-news><%- icon('mail') %> Nhận tin tour hàng tháng</button></li>
+          <li><button class="btn btn--sm btn--outline-white mt-2" data-open-news><%- icon('mail') %> Nhận tin visa & tour</button></li>
         </ul>
       </div>
       <div>
@@ -64,9 +64,23 @@
   <a class="fab__call" href="tel:<%= h.phoneTel(s.hotline) %>" aria-label="Gọi hotline"><%- icon('phone') %><span class="fab__label"><%= h.phoneDisplay(s.hotline) %></span></a>
 </div>
 <div class="mobile-bar">
-  <a class="btn btn--navy" href="tel:<%= h.phoneTel(s.hotline) %>"><%- icon('phone') %> Gọi ngay</a>
+  <a class="btn btn--navy" href="tel:<%= h.phoneTel(s.hotline) %>"><%- icon('phone') %> Gọi</a>
+  <% if (s.zalo) { %><a class="btn btn--zalo" href="https://zalo.me/<%= h.phoneTel(s.zalo) %>" target="_blank" rel="noopener">Zalo</a><% } %>
   <button class="btn btn--accent" data-open-lead><%- icon('chat') %> Tư vấn</button>
 </div>
+
+<!-- Màn hình cảm ơn sau khi gửi form tư vấn -->
+<template id="lead-thanks">
+  <div class="form-done__icon"><%- icon('check-circle') %></div>
+  <h3>Cảm ơn bạn!</h3>
+  <p data-thanks-msg>TRIP đã nhận thông tin. Tư vấn viên sẽ gọi lại cho bạn trong giờ làm việc.</p>
+  <p class="muted">Cần gấp? Nhắn ngay cho TRIP:</p>
+  <div class="form-done__actions">
+    <% if (s.zalo) { %><a class="btn btn--zalo" href="https://zalo.me/<%= h.phoneTel(s.zalo) %>" target="_blank" rel="noopener">Nhắn Zalo ngay</a><% } %>
+    <a class="btn btn--navy" href="tel:<%= h.phoneTel(s.hotline) %>"><%- icon('phone') %> <%= h.phoneDisplay(s.hotline) %></a>
+  </div>
+  <button class="form-done__again" type="button" data-thanks-again>Gửi thêm yêu cầu khác</button>
+</template>
 
 <!-- Popup tư vấn -->
 <div class="modal" id="lead-modal" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title" hidden>
@@ -92,11 +106,11 @@
     <button class="modal__close" data-close aria-label="Đóng"><%- icon('x') %></button>
     <div class="modal__art">
       <img src="/img/logo-icon.png" alt="" width="74" height="74">
-      <strong>Lịch tour & ưu đãi mới nhất mỗi tháng</strong>
+      <strong>Cập nhật visa & lịch tour mỗi tháng</strong>
       <ul>
-        <li><%- icon('check') %> Tour mới khởi hành từ Đà Nẵng</li>
+        <li><%- icon('check') %> Chính sách visa Trung – Hàn – Nhật mới nhất</li>
         <li><%- icon('check') %> Ưu đãi visa & vé máy bay</li>
-        <li><%- icon('check') %> Cập nhật chính sách visa mới</li>
+        <li><%- icon('check') %> Tour mới khởi hành từ Đà Nẵng</li>
       </ul>
     </div>
     <div>

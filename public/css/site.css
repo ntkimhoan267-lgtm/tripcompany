@@ -864,3 +864,42 @@ a.market:hover .market__art video { transform: scale(1.05); }
   .stamp--kr { top: 16%; right: -2%; } .stamp--cn { top: 50%; left: -2%; } .stamp--jp { bottom: -2%; left: 2%; } .stamp--eu { bottom: 2%; right: -2%; }
 }
 @media (prefers-reduced-motion: reduce) { .hero__visual .stamp { animation: none; } }
+
+/* ---------- Cải thiện UX sau review ---------- */
+.btn--zalo { --b: #0068ff; }
+.mobile-bar { grid-template-columns: 1fr .8fr 1.2fr !important; }
+@media (max-width: 560px) { .fab { display: none; } }
+
+.form-done { text-align: center; padding: 18px 8px; animation: fadeUp .35s ease; }
+.form-done__icon { width: 64px; height: 64px; margin: 0 auto 10px; border-radius: 50%; display: grid; place-items: center; background: #e7f7ef; color: var(--ok); }
+.form-done__icon .icon { width: 34px; height: 34px; }
+.form-done h3 { font-family: var(--serif); font-size: 1.6rem; margin-bottom: 6px; }
+.form-done__actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 6px 0 12px; }
+.form-done__again { border: 0; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; font: inherit; font-size: .88rem; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.form-privacy { display: flex; gap: 6px; align-items: flex-start; margin: 2px 0 0; font-size: .8rem; color: var(--muted); grid-column: 1 / -1; }
+.form-privacy .icon { width: 15px; height: 15px; margin-top: 2px; color: var(--ok); }
+
+/* Giá: dùng font thân bài cho chữ số dễ đọc (Playfair làm số 0 giống chữ o) */
+.market__foot strong, .pillar__price strong, .feature-band__price strong, .tour-card__foot strong, .visa-card__price strong, .visa-facts strong.serif {
+  font-family: var(--font); font-weight: 800; letter-spacing: -.02em;
+}
+
+/* Bảng trên điện thoại: mỗi dòng thành một thẻ, giá luôn nhìn thấy */
+@media (max-width: 640px) {
+  .table-wrap { overflow: visible; border: 0; background: none; }
+  .table { min-width: 0; }
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+  .table tbody tr + tr td { border-top: 0; }
+  .table td { padding: 5px 0; display: flex; justify-content: space-between; gap: 14px; text-align: right; }
+  .table td::before { content: attr(data-label); color: var(--muted); font-size: .8rem; font-weight: 600; text-align: left; flex: none; max-width: 45%; }
+  .table td:first-child { text-align: left; font-size: 1rem; }
+  .table td:first-child::before { display: none; }
+  .table td:empty { display: none; }
+  .table .num { font-size: 1.05rem; }
+  .table__country { white-space: normal; }
+}
+.tour-card__ask { font-size: 1rem !important; color: var(--navy) !important; }
+@media (max-width: 560px) { .hero__markets { display: none; } .hero__lead { margin-bottom: 18px; } }

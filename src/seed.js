@@ -16,7 +16,7 @@ const DEFAULT_SETTINGS = {
   // Đoạn video ngắn không tiếng, tự chạy lặp trong khung cửa sổ máy bay ở trang chủ
   hero_teaser: '/media/trip-teaser.mp4',
   popup_newsletter_enabled: '1',
-  popup_newsletter_delay: '15',
+  popup_newsletter_delay: '45',
 };
 
 const POSTS = [

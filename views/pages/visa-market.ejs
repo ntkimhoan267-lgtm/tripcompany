@@ -64,8 +64,8 @@
 
       <% if (!isEvisa) { %>
       <div class="grid grid--2">
-        <div class="card"><h3>Giá trọn gói đã bao gồm</h3><ul class="checklist"><% services.visaIncluded.forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul></div>
-        <div class="card"><h3>Chưa bao gồm</h3><ul class="checklist checklist--x"><% services.visaExcluded.forEach(function (x) { %><li><%- icon('minus') %><%= x %></li><% }) %></ul></div>
+        <div class="card"><h3>Giá trọn gói đã bao gồm</h3><ul class="checklist"><% services.visaListFor(services.visaIncluded, page.id).forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul></div>
+        <div class="card"><h3>Chưa bao gồm</h3><ul class="checklist checklist--x"><% services.visaListFor(services.visaExcluded, page.id).forEach(function (x) { %><li><%- icon('minus') %><%= x %></li><% }) %></ul></div>
       </div>
       <% } %>
 

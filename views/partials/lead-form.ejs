@@ -37,4 +37,5 @@
     <button class="btn btn--accent btn--block" type="submit"><%- icon('send') %> <%= label %></button>
   </div>
   <div class="form-msg" role="status" aria-live="polite" style="grid-column:1/-1"></div>
+  <% if (lay === 'stack') { %><p class="form-privacy"><%- icon('shield') %> Thông tin chỉ dùng để TRIP liên hệ tư vấn, không chia sẻ cho bên thứ ba.</p><% } %>
 </form>

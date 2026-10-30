@@ -75,7 +75,7 @@ router.post('/subscribe', subscribeLimiter, (req, res) => {
   const sub = db.prepare('SELECT * FROM subscribers WHERE id = ?').get(info.lastInsertRowid);
 
   google.syncSubscriber(sub).catch((e) => console.error(e));
-  res.json({ ok: true, message: 'Đăng ký thành công! Bạn sẽ nhận lịch tour & ưu đãi mới nhất mỗi tháng.' });
+  res.json({ ok: true, message: 'Đăng ký thành công! Mỗi tháng TRIP sẽ gửi bạn cập nhật visa và lịch tour mới nhất.' });
 });
 
 module.exports = router;

@@ -53,8 +53,8 @@
       <li class="step reveal"><div class="card__icon"><%- icon('award') %></div><h3>Nhận kết quả</h3><p>Nhận hộ chiếu và visa, kèm tư vấn vé máy bay, bảo hiểm, eSIM.</p></li>
     </ol>
     <div class="grid grid--2 mt-4">
-      <div class="card"><h3>Giá trọn gói đã bao gồm</h3><ul class="checklist"><% services.visaIncluded.forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul></div>
-      <div class="card"><h3>Chưa bao gồm</h3><ul class="checklist checklist--x"><% services.visaExcluded.forEach(function (x) { %><li><%- icon('minus') %><%= x %></li><% }) %></ul></div>
+      <div class="card"><h3>Giá trọn gói đã bao gồm</h3><ul class="checklist"><% services.visaListFor(services.visaIncluded, null).forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul></div>
+      <div class="card"><h3>Chưa bao gồm</h3><ul class="checklist checklist--x"><% services.visaListFor(services.visaExcluded, null).forEach(function (x) { %><li><%- icon('minus') %><%= x %></li><% }) %></ul></div>
     </div>
   </div>
 </section>

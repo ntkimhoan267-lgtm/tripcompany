@@ -58,7 +58,24 @@ const isValidVnPhone = (p) => /^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(String(p).repla
 const normalizePhone = (p) => String(p).replace(/[\s.\-()]/g, '').replace(/^\+?84/, '0');
 const isValidEmail = (e) => /^[^\s@]{1,64}@[^\s@]{1,255}\.[a-z]{2,}$/i.test(String(e));
 
+// Đường dẫn trang -> tên dễ hiểu cho nhân viên
+const PAGE_NAMES = {
+  '/': 'Trang chủ', '/visa': 'Visa (tổng quan)', '/visa/trung-quoc': 'Visa Trung Quốc', '/visa/han-quoc': 'Visa Hàn Quốc',
+  '/visa/nhat-ban': 'Visa Nhật Bản', '/visa/chau-au': 'Visa Châu Âu', '/visa/nuoc-khac': 'Visa nước khác', '/visa/e-visa': 'E-visa Việt Nam',
+  '/dich-vu': 'Dịch vụ', '/dich-vu/dich-thuat': 'Dịch thuật', '/dich-vu/hop-phap-hoa-lanh-su': 'Hợp pháp hoá lãnh sự',
+  '/dich-vu/ho-chieu': 'Hộ chiếu', '/dich-vu/ve-may-bay': 'Vé máy bay', '/dich-vu/thue-xe': 'Thuê xe', '/dich-vu/bao-hiem-esim': 'Bảo hiểm & eSIM',
+  '/dich-vu/tour': 'Dịch vụ tour', '/bang-gia': 'Bảng giá', '/tour': 'Danh sách tour', '/blog': 'Cẩm nang', '/gioi-thieu': 'Giới thiệu', '/lien-he': 'Liên hệ',
+};
+function pageName(p) {
+  p = String(p || '');
+  if (PAGE_NAMES[p]) return PAGE_NAMES[p];
+  if (p.startsWith('/tour/')) return 'Tour: ' + p.slice(6);
+  if (p.startsWith('/blog/')) return 'Bài viết: ' + p.slice(6);
+  return p;
+}
+
 module.exports = {
+  pageName,
   vnd, usd, money, phoneDisplay, phoneTel, slugify, fmtDate,
   getSettings, setSettings, parseVideo, isValidVnPhone, normalizePhone, isValidEmail,
 };

@@ -903,3 +903,25 @@ a.market:hover .market__art video { transform: scale(1.05); }
 }
 .tour-card__ask { font-size: 1rem !important; color: var(--navy) !important; }
 @media (max-width: 560px) { .hero__markets { display: none; } .hero__lead { margin-bottom: 18px; } }
+
+/* ---------- Số liệu thành tích ---------- */
+.section--stats { padding: clamp(40px, 6vw, 72px) 0 clamp(24px, 4vw, 40px); }
+.stats__lead { text-align: center; font-family: var(--serif); font-size: clamp(1.25rem, 2.4vw, 1.75rem); color: var(--navy); max-width: 760px; margin: 0 auto 28px; line-height: 1.35; }
+.stats__lead strong { color: var(--accent-600); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.stat-item { text-align: center; padding: 22px 16px; border-radius: 22px; background: #fff; border: 1px solid var(--line); box-shadow: 0 16px 34px -26px rgba(17,34,51,.4); }
+.stat-item strong { display: block; font-family: var(--font); font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1; letter-spacing: -.03em; color: var(--navy); }
+.stat-item > span { display: block; margin-top: 8px; color: var(--muted); font-weight: 600; font-size: .95rem; }
+.stat-item:nth-child(2) strong { color: var(--sky-600); }
+.stat-item:nth-child(3) strong { color: var(--accent-600); }
+.stats--inline .stat-item { padding: 16px 12px; border-radius: 18px; box-shadow: none; background: var(--sky-50); border: 0; }
+.stats--inline .stat-item strong { font-size: clamp(1.8rem, 4vw, 2.4rem); }
+@media (max-width: 560px) {
+  .stats { gap: 10px; }
+  .stat-item { padding: 16px 8px; border-radius: 16px; }
+  .stat-item strong { font-size: 1.9rem; }
+  .stat-item > span { font-size: .78rem; }
+}
+.stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stat-item strong { white-space: nowrap; }
+@media (max-width: 560px) { .stat-item strong, .stats--inline .stat-item strong { font-size: 1.45rem; } }

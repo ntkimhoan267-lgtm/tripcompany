@@ -222,6 +222,28 @@
     lazyVideos.forEach(function (v) { vio.observe(v); });
   }
 
+  // ---------- Số liệu chạy tăng dần khi cuộn tới ----------
+  var counters = $$('.js-count');
+  var fmt = function (n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+  if (counters.length && 'IntersectionObserver' in window && !reduce) {
+    var cio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        cio.unobserve(en.target);
+        var el = en.target; var to = Number(el.getAttribute('data-to')) || 0; var t0 = null;
+        var step = function (t) {
+          if (!t0) t0 = t;
+          var p = Math.min(1, (t - t0) / 1600);
+          el.textContent = fmt(to * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        el.textContent = '0';
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (c) { cio.observe(c); });
+  }
+
   // ---------- Hiệu ứng khi cuộn ----------
   var items = $$('.reveal');
   if ('IntersectionObserver' in window) {

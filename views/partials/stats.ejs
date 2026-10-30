@@ -1,0 +1,12 @@
+<%
+  // Tham số: variant = 'band' (dải lớn) | 'inline' (gọn, nằm trong trang)
+  const v = typeof variant !== 'undefined' ? variant : 'band';
+%>
+<div class="stats stats--<%= v %>">
+  <% company.stats.forEach(function (st) { %>
+    <div class="stat-item reveal">
+      <strong><span class="js-count" data-to="<%= st.value %>"><%= st.value.toLocaleString('vi-VN').replace(/,/g, '.') %></span><%= st.suffix %></strong>
+      <span><%= st.label %></span>
+    </div>
+  <% }) %>
+</div>

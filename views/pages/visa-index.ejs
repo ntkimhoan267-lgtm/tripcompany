@@ -9,7 +9,8 @@
 
 <section class="section">
   <div class="container">
-    <div class="markets markets--4">
+    <%- include('../partials/stats', { variant: 'inline' }) %>
+    <div class="markets markets--4 mt-4">
       <% services.markets.forEach(function (m, i) { %>
         <a class="market market--<%= m.art %> reveal" href="/visa/<%= m.id %>">
           <div class="market__art">

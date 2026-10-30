@@ -20,7 +20,12 @@
 
     <h2 style="margin-top:10px">Video trang chủ</h2>
     <div>
-      <label for="hero_video">Link video</label>
+      <label for="hero_teaser">Đoạn video ngắn trong khung cửa sổ máy bay (tự chạy, không tiếng)</label>
+      <input type="text" id="hero_teaser" name="hero_teaser" value="<%= s.hero_teaser %>">
+      <p class="hint">File MP4 dọc tỉ lệ 3:4, khoảng 10–15 giây, dưới 2MB. Để trống để hiển thị hình bầu trời thay thế.</p>
+    </div>
+    <div>
+      <label for="hero_video">Video giới thiệu đầy đủ (phát khi khách bấm "Xem video")</label>
       <input type="text" id="hero_video" name="hero_video" value="<%= s.hero_video %>">
       <p class="hint">Hỗ trợ: file MP4 trên website (VD <code>/media/trip-intro.mp4</code>, tự chạy), link YouTube, hoặc link Google Drive (file phải để chế độ "Bất kỳ ai có đường liên kết").
         Hiện tại: <strong><%= v ? ({ file: 'File MP4', youtube: 'YouTube', drive: 'Google Drive' })[v.type] : 'Không hợp lệ' %></strong></p>

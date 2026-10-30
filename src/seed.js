@@ -11,8 +11,10 @@ const DEFAULT_SETTINGS = {
   facebook: company.facebook,
   messenger: 'https://m.me/triptranslate',
   email: company.email,
-  // Video trang chủ: đường dẫn file mp4 (vd /media/trip-intro.mp4), link YouTube, hoặc link Google Drive
-  hero_video: 'https://drive.google.com/file/d/1ZwLGxFLYSqUHiAkruRlOzm-FE_koMk9R/view',
+  // Video giới thiệu đầy đủ (phát khi bấm "Xem video"): file mp4, link YouTube hoặc link Google Drive
+  hero_video: '/media/trip-intro.mp4',
+  // Đoạn video ngắn không tiếng, tự chạy lặp trong khung cửa sổ máy bay ở trang chủ
+  hero_teaser: '/media/trip-teaser.mp4',
   popup_newsletter_enabled: '1',
   popup_newsletter_delay: '15',
   notify_emails: 'ntkimhoan267@gmail.com, triptranslate.com@gmail.com',

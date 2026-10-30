@@ -95,14 +95,20 @@ pm2 start npm --name trip -- start
 
 ## Video trang chủ
 
-Vào Dashboard → **Cài đặt → Video trang chủ** và dán một trong ba loại link:
+Trang chủ dùng 2 file trong `public/media/`, dựng từ video `TRIP_final.mp4`:
 
-- **File MP4 trong `public/media/`** (khuyên dùng, video tự chạy). Ví dụ `/media/trip-intro.mp4`. Nên nén video xuống dưới 15MB:
-  ```bash
-  ffmpeg -i TRIP_final.mp4 -vf scale=-2:720 -c:v libx264 -crf 28 -preset slow -an -movflags +faststart public/media/trip-intro.mp4
-  ```
-- **Link YouTube.**
-- **Link Google Drive.** File phải để chế độ "Bất kỳ ai có đường liên kết".
+| File | Dùng ở đâu |
+|---|---|
+| `trip-teaser.mp4` | Đoạn khoảng 11 giây, khổ dọc 3:4, không tiếng, ~1MB. Tự chạy lặp trong khung cửa sổ máy bay. |
+| `trip-intro.mp4` | Video đầy đủ 720p, có tiếng. Phát khi khách bấm **Xem video về TRIP**. |
+
+Khi có video mới, bạn có hai cách:
+- Đổi link trong Dashboard → **Cài đặt → Video trang chủ**. Hỗ trợ file MP4, link YouTube, hoặc link Google Drive (file phải chia sẻ "Bất kỳ ai có đường liên kết").
+- Nén lại rồi thay file trong `public/media/`:
+
+```bash
+ffmpeg -i TRIP_final.mp4 -map 0:v:0 -map 0:a:0 -vf scale=1280:720 -c:v libx264 -crf 28 -preset slow -c:a aac -b:a 96k -movflags +faststart public/media/trip-intro.mp4
+```
 
 ## Cấu trúc thư mục
 

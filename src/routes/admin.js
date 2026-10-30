@@ -305,7 +305,7 @@ router.post('/tours/:id/delete', csrf, (req, res) => {
 });
 
 // ---------- Cài đặt ----------
-const SETTING_KEYS = ['hotline', 'hotline_translation', 'zalo', 'facebook', 'messenger', 'email', 'hero_video', 'popup_newsletter_delay', 'notify_emails'];
+const SETTING_KEYS = ['hotline', 'hotline_translation', 'zalo', 'facebook', 'messenger', 'email', 'hero_video', 'hero_teaser', 'popup_newsletter_delay', 'notify_emails'];
 
 router.get('/settings', csrf, (req, res) => {
   res.render('admin/settings', { title: 'Cài đặt website', s: getSettings(), parseVideo });

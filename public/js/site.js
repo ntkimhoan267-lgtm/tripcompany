@@ -158,7 +158,10 @@
   document.addEventListener('click', function (e) {
     var vm = e.target.closest('[data-video-modal]');
     if (vm) {
-      $('#video-modal-frame').innerHTML = '<iframe src="' + vm.getAttribute('data-video-modal') + '" title="Video giới thiệu TRIP" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+      var src = vm.getAttribute('data-video-modal');
+      $('#video-modal-frame').innerHTML = vm.getAttribute('data-video-type') === 'file'
+        ? '<video src="' + src + '" controls autoplay playsinline></video>'
+        : '<iframe src="' + src + '" title="Video giới thiệu TRIP" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
       openModal($('#video-modal'));
     }
   });
@@ -168,13 +171,9 @@
     var frame = p.parentElement;
     frame.innerHTML = '<iframe src="' + p.getAttribute('data-video-embed') + '" title="Video giới thiệu TRIP" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
   });
-  var hv = $('#hero-video'); var hs = $('#hero-sound');
-  if (hv && hs) {
-    hs.addEventListener('click', function () {
-      hv.muted = !hv.muted; if (!hv.muted) hv.play();
-      hs.lastChild.textContent = hv.muted ? ' Bật tiếng' : ' Tắt tiếng';
-    });
-  }
+  // Tạm dừng video nền khi mở video đầy đủ; tôn trọng người dùng muốn giảm chuyển động
+  var teaser = $('.porthole__teaser');
+  if (teaser && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { teaser.removeAttribute('autoplay'); teaser.pause(); }
 
   // ---------- Hiệu ứng khi cuộn ----------
   var items = $$('.reveal');

@@ -1,5 +1,5 @@
 <%- include('../partials/head') %>
-<% const video = h.parseVideo(settings.hero_video); %>
+<% const video = h.parseVideo(settings.hero_video); const teaser = h.parseVideo(settings.hero_teaser); %>
 
 <section class="hero hero--art">
   <div class="sparkles"><i style="top:12%;left:8%;--s:12px"></i><i style="top:22%;left:44%;--s:9px;--d:-1s"></i><i style="top:8%;left:62%;--s:16px;--d:-2s"></i><i style="top:40%;left:3%;--s:8px;--d:-.5s"></i><i style="top:30%;right:4%;--s:12px;--d:-2.5s"></i><i style="top:62%;left:48%;--s:10px;--d:-1.6s"></i></div>
@@ -27,19 +27,18 @@
       <%- include('../partials/stamp', { top: 'SCHENGEN · EUROPE · ', mid: 'EU', sub: 'APPROVED', cls: 'stamp--eu' }) %>
       <div class="porthole">
         <div class="porthole__glass">
-          <% if (video && video.type === 'file') { %>
-            <video id="hero-video" src="<%= video.src %>" autoplay muted loop playsinline preload="metadata"></video>
-            <button class="btn btn--sm btn--white porthole__sound" id="hero-sound" type="button"><%- icon('volume') %> Bật tiếng</button>
+          <% if (teaser) { %>
+            <video class="porthole__teaser" src="<%= teaser.src %>" poster="/media/trip-teaser.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
           <% } else { %>
             <div class="porthole__sky">
               <span class="sun"></span>
               <svg viewBox="0 0 400 200" preserveAspectRatio="none"><path class="p1" d="M0 90c30-30 80-30 110 0 30-36 90-36 120 0 30-30 80-30 110 0 20-16 46-16 60 0V200H0z"/><path class="p2" d="M0 130c30-26 76-26 104 0 34-32 92-32 124 0 30-24 76-24 104 0 26-20 52-20 68 0V200H0z"/><path class="p3" d="M0 168c34-22 80-22 112 0 34-26 90-26 122 0 32-20 76-20 104 0 24-16 48-16 62 0V200H0z"/></svg>
             </div>
-            <% if (video) { %>
-              <button class="porthole__play" type="button" data-video-modal="<%= video.embed %>" aria-label="Xem video giới thiệu TRIP">
-                <span><%- icon('play') %></span><span>Xem video về TRIP</span>
-              </button>
-            <% } %>
+          <% } %>
+          <% if (video) { %>
+            <button class="porthole__play<%= teaser ? ' porthole__play--corner' : '' %>" type="button" data-video-modal="<%= video.type === 'file' ? video.src : video.embed %>" data-video-type="<%= video.type %>" aria-label="Xem video giới thiệu TRIP">
+              <span><%- icon('play') %></span><span>Xem video về TRIP</span>
+            </button>
           <% } %>
         </div>
       </div>

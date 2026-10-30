@@ -730,3 +730,12 @@ a.market:hover .market__go { transform: rotate(-45deg); }
 .market__body { position: relative; }
 .market .market__stamp { top: -54px; right: 16px; width: 96px; height: 96px; background: #fff; border-radius: 50%; padding: 4px; opacity: 1; color: var(--ink2); box-shadow: 0 8px 18px -10px rgba(0,0,0,.35); }
 .market__foot .time { display: flex; }
+.porthole__teaser { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.porthole__play--corner { inset: auto 0 24px 0; padding: 0; grid-auto-flow: column; justify-content: center; align-items: center; gap: 8px; }
+.porthole__play--corner span:first-child { width: 48px; height: 48px; box-shadow: 0 0 0 6px rgba(242,120,75,.3), 0 10px 20px -6px rgba(224,96,47,.7); }
+.porthole__play--corner .icon { width: 20px; height: 20px; }
+.modal--video video { width: 100%; height: 100%; background: #000; }
+@media (max-width: 560px) {
+  .hero__visual .stamp { z-index: 1; }
+  .porthole__play--corner span:last-child { font-size: .8rem; padding: 5px 11px; }
+}

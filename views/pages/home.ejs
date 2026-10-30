@@ -1,39 +1,30 @@
 <%- include('../partials/head') %>
 <% const video = h.parseVideo(settings.hero_video); const teaser = h.parseVideo(settings.hero_teaser); %>
 
-<section class="hero hero--art">
-  <div class="sparkles"><i style="top:12%;left:8%;--s:12px"></i><i style="top:22%;left:44%;--s:9px;--d:-1s"></i><i style="top:8%;left:62%;--s:16px;--d:-2s"></i><i style="top:40%;left:3%;--s:8px;--d:-.5s"></i><i style="top:30%;right:4%;--s:12px;--d:-2.5s"></i><i style="top:62%;left:48%;--s:10px;--d:-1.6s"></i></div>
+<section class="hero hero--video">
+  <video class="hero__bg" src="/media/hero-montage.mp4" poster="/media/hero-montage.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+  <div class="hero__shade"></div>
   <div class="container">
     <div>
-      <span class="eyebrow" style="color:#9fd3f5">TRIP Đà Nẵng · <%= company.slogan %></span>
-      <h1>Chuyên visa <em>Trung · Hàn · Nhật</em> & Châu Âu</h1>
-      <p class="hero__lead">Kèm dịch thuật công chứng Anh – Trung – Hàn – Nhật ngay tại văn phòng. TRIP lo trọn hồ sơ, bạn chỉ việc xếp vali.</p>
+      <span class="eyebrow" style="color:#bfe3fa">TRIP Đà Nẵng · <%= company.slogan %></span>
+      <h1>Visa & Dịch thuật <em>trọn gói</em>, nhanh gọn ngay tại Đà Nẵng</h1>
+      <p class="hero__lead">Từ hồ sơ visa Trung Quốc, Hàn Quốc, Nhật Bản, Châu Âu đến bản dịch công chứng Anh – Trung – Hàn – Nhật. TRIP lo trọn thủ tục để bạn yên tâm lên đường.</p>
       <ul class="hero__markets">
         <% services.markets.forEach(function (m, i) { %>
-          <li><a class="<%= i < 3 ? 'is-strong' : '' %>" href="/dich-vu/visa#<%= m.id %>"><img src="<%= flag(m.code) %>" alt="" width="28" height="28"><%= m.country %></a></li>
+          <li><a class="<%= i < 3 ? 'is-strong' : '' %>" href="/dich-vu/visa#<%= m.id %>"><img src="<%= flag(m.code) %>" alt="" width="28" height="28">Visa <%= m.country %></a></li>
         <% }) %>
       </ul>
       <div class="hero__actions">
-        <button class="btn btn--accent" data-open-lead data-service="Visa Trung Quốc"><%- icon('passport') %> Tư vấn visa miễn phí</button>
+        <button class="btn btn--accent" data-open-lead data-service="Visa Trung Quốc"><%- icon('passport') %> Tư vấn visa</button>
         <button class="btn btn--outline-white" data-open-lead data-service="Dịch thuật công chứng"><%- icon('lang') %> Báo giá dịch thuật</button>
       </div>
     </div>
 
     <div class="hero__visual">
-      <svg class="flight-path" viewBox="0 0 500 560" aria-hidden="true"><path id="fp" d="M30 470 C 60 300, 160 360, 220 250 S 400 80, 480 60"/><path class="plane" d="M0 0l-12 5 3-5-3-5z" transform="translate(470 64) rotate(-18)"/></svg>
-      <%- include('../partials/stamp', { top: 'VISA · CHINA · TRUNG QUỐC · ', mid: '中国', sub: 'APPROVED', cls: 'stamp--cn' }) %>
-      <%- include('../partials/stamp', { top: 'VISA · KOREA · HÀN QUỐC · ', mid: '한국', sub: 'APPROVED', cls: 'stamp--kr' }) %>
-      <%- include('../partials/stamp', { top: 'VISA · JAPAN · NHẬT BẢN · ', mid: '日本', sub: 'APPROVED', cls: 'stamp--jp' }) %>
-      <%- include('../partials/stamp', { top: 'SCHENGEN · EUROPE · ', mid: 'EU', sub: 'APPROVED', cls: 'stamp--eu' }) %>
       <div class="porthole">
         <div class="porthole__glass">
           <% if (teaser) { %>
             <video class="porthole__teaser" src="<%= teaser.src %>" poster="/media/trip-teaser.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
-          <% } else { %>
-            <div class="porthole__sky">
-              <span class="sun"></span>
-              <svg viewBox="0 0 400 200" preserveAspectRatio="none"><path class="p1" d="M0 90c30-30 80-30 110 0 30-36 90-36 120 0 30-30 80-30 110 0 20-16 46-16 60 0V200H0z"/><path class="p2" d="M0 130c30-26 76-26 104 0 34-32 92-32 124 0 30-24 76-24 104 0 26-20 52-20 68 0V200H0z"/><path class="p3" d="M0 168c34-22 80-22 112 0 34-26 90-26 122 0 32-20 76-20 104 0 24-16 48-16 62 0V200H0z"/></svg>
-            </div>
           <% } %>
           <% if (video) { %>
             <button class="porthole__play<%= teaser ? ' porthole__play--corner' : '' %>" type="button" data-video-modal="<%= video.type === 'file' ? video.src : video.embed %>" data-video-type="<%= video.type %>" aria-label="Xem video giới thiệu TRIP">
@@ -44,7 +35,6 @@
       </div>
     </div>
   </div>
-  <%- include('../partials/clouds', { end: '#ffffff' }) %>
 </section>
 
 <div class="quick-lead">
@@ -73,8 +63,7 @@
     <div class="pillars">
       <article class="pillar pillar--visa reveal">
         <span class="pillar__tag">Dịch vụ Visa</span>
-        <%- include('../partials/stamp', { top: 'VISA · APPROVED · VISA · APPROVED · ', mid: 'TRIP', sub: '', cls: '' }) %>
-        <h3>Visa <em style="color:#bfe3fa">Trung · Hàn · Nhật</em> & Châu Âu</h3>
+        <h3>Visa du lịch <em style="color:#bfe3fa">nhanh gọn, trọn gói</em></h3>
         <p>Tư vấn đúng loại visa, chuẩn bị hồ sơ, đặt lịch hẹn và theo dõi đến khi có kết quả.</p>
         <ul>
           <li><%- icon('check') %> Trung Quốc: du lịch, thăm thân, thương mại, du học, kết hôn</li>
@@ -89,7 +78,6 @@
       </article>
       <article class="pillar pillar--trans reveal">
         <span class="pillar__tag">Dịch thuật công chứng</span>
-        <%- include('../partials/stamp', { top: 'CÔNG CHỨNG · CERTIFIED · ', mid: '译', sub: '', cls: '' }) %>
         <h3>Bản dịch <em style="color:#fff3d6">chuẩn</em>, có dấu, lấy nhanh</h3>
         <p>Dịch thuật công chứng dấu công ty và dấu tư pháp, hợp pháp hoá và chứng nhận lãnh sự cho mọi loại giấy tờ.</p>
         <ul>
@@ -119,11 +107,11 @@
       <% services.markets.slice(0, 3).forEach(function (m) { %>
         <a class="market market--<%= m.art %> reveal" href="/dich-vu/visa#<%= m.id %>">
           <div class="market__art">
+            <video class="js-inview" src="/media/markets/<%= m.art %>.mp4" poster="/media/markets/<%= m.art %>.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
             <span class="market__native"><%= m.native %></span>
-            <%- include('../partials/art', { kind: m.art }) %>
+            <span class="market__badge">✦ Thế mạnh</span>
           </div>
           <div class="market__body">
-            <%- include('../partials/stamp', { top: 'TRIP · THẾ MẠNH · TRIP · THẾ MẠNH · ', mid: '✦', sub: '', cls: 'market__stamp' }) %>
             <span class="market__en">Visa <%= m.en %></span>
             <h3><%= m.country %></h3>
             <p><%= m.blurb %></p>
@@ -139,8 +127,8 @@
     <% const eu = services.markets[3]; %>
     <a class="market market--eu market--wide reveal" href="/dich-vu/visa#<%= eu.id %>">
       <div class="market__art">
+        <video class="js-inview" src="/media/markets/eu.mp4" poster="/media/markets/eu.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
         <span class="market__native"><%= eu.native %></span>
-        <%- include('../partials/art', { kind: 'eu' }) %>
       </div>
       <div class="market__body">
         <span class="market__en">Visa <%= eu.en %></span>

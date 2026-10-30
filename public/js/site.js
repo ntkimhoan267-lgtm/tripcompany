@@ -171,9 +171,20 @@
     var frame = p.parentElement;
     frame.innerHTML = '<iframe src="' + p.getAttribute('data-video-embed') + '" title="Video giới thiệu TRIP" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
   });
-  // Tạm dừng video nền khi mở video đầy đủ; tôn trọng người dùng muốn giảm chuyển động
-  var teaser = $('.porthole__teaser');
-  if (teaser && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { teaser.removeAttribute('autoplay'); teaser.pause(); }
+  // Video nền: chỉ phát khi nằm trong màn hình; tôn trọng người dùng muốn giảm chuyển động
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) $$('.hero__bg, .porthole__teaser').forEach(function (v) { v.removeAttribute('autoplay'); v.pause(); });
+  var lazyVideos = $$('video.js-inview');
+  if (!reduce && lazyVideos.length && 'IntersectionObserver' in window) {
+    var vio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var v = en.target;
+        if (en.isIntersecting) { if (v.preload === 'none') v.preload = 'auto'; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+        else v.pause();
+      });
+    }, { threshold: 0.25 });
+    lazyVideos.forEach(function (v) { vio.observe(v); });
+  }
 
   // ---------- Hiệu ứng khi cuộn ----------
   var items = $$('.reveal');

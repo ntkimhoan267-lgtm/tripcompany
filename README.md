@@ -110,6 +110,18 @@ Khi có video mới, bạn có hai cách:
 ffmpeg -i TRIP_final.mp4 -map 0:v:0 -map 0:a:0 -vf scale=1280:720 -c:v libx264 -crf 28 -preset slow -c:a aac -b:a 96k -movflags +faststart public/media/trip-intro.mp4
 ```
 
+### Video và ảnh các nước
+
+Video nền phần đầu trang chủ (`hero-montage.mp4`), video 4 thị trường (`public/media/markets/`), ảnh trang Visa (`public/img/visa/`) và ảnh tour (`public/img/tours/`) lấy từ [Mixkit](https://mixkit.co). Giấy phép Mixkit Free License cho phép dùng miễn phí cho mục đích thương mại, không bắt buộc ghi nguồn. Mã video gốc:
+
+| Nước | Mã video gốc |
+|---|---|
+| Trung Quốc | Vạn Lý Trường Thành 20806, 28660 · Tử Cấm Thành 31010 |
+| Hàn Quốc | Cổng Gwanghwamun 22139 · Cung điện 20095 |
+| Nhật Bản | Núi Phú Sĩ 30148 · Chùa Senso-ji 4403 · Hoa anh đào 30141 |
+| Châu Âu | Tháp Eiffel 25220, 27046 |
+| Tour | Singapore 20177 · Bangkok 22171 |
+
 ## Cấu trúc thư mục
 
 ```

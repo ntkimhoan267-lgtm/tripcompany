@@ -26,7 +26,7 @@
 
       <% function head(m, strong) { %>
         <div class="market-head market--<%= m.art %>" id="<%= m.id %>">
-          <div class="market-head__art"><%- include('../partials/art', { kind: m.art }) %></div>
+          <div class="market-head__art"><img src="/img/visa/<%= m.art %>.jpg" alt="<%= m.country %>" width="120" height="90" loading="lazy"></div>
           <div>
             <h2>Visa <%= m.country %> <span class="serif" style="font-weight:600;color:var(--muted);font-size:.7em"><%= m.native %></span><% if (strong) { %><span class="badge-strong">Thế mạnh</span><% } %></h2>
             <p><%= m.blurb %></p>

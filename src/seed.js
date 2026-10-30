@@ -115,15 +115,15 @@ TRIP hỗ trợ **luyện phỏng vấn 1 kèm 1** cho khách làm visa Mỹ và
 ];
 
 const TOURS = [
-  { slug: 'tour-bac-kinh-7n6d', title: 'Tour Bắc Kinh 7N6Đ', destination: 'Trung Quốc', region: 'quoc-te', duration: '7 ngày 6 đêm', departure: 'Đà Nẵng', price: 13990000, featured: 1,
+  { slug: 'tour-bac-kinh-7n6d', image: '/img/tours/bac-kinh.jpg', title: 'Tour Bắc Kinh 7N6Đ', destination: 'Trung Quốc', region: 'quoc-te', duration: '7 ngày 6 đêm', departure: 'Đà Nẵng', price: 13990000, featured: 1,
     highlights: 'Tử Cấm Thành, Thiên An Môn\nVạn Lý Trường Thành\nDi Hoà Viên\nHỗ trợ visa Trung Quốc trọn gói' },
-  { slug: 'tour-seoul-han-quoc-6n5d', title: 'Tour Seoul – Hàn Quốc 6N5Đ', destination: 'Hàn Quốc', region: 'quoc-te', duration: '6 ngày 5 đêm', departure: 'Đà Nẵng', price: 16490000, featured: 1,
+  { slug: 'tour-seoul-han-quoc-6n5d', image: '/img/tours/seoul.jpg', title: 'Tour Seoul – Hàn Quốc 6N5Đ', destination: 'Hàn Quốc', region: 'quoc-te', duration: '6 ngày 5 đêm', departure: 'Đà Nẵng', price: 16490000, featured: 1,
     highlights: 'Cung điện Gyeongbokgung\nĐảo Nami\nTháp Namsan\nHỗ trợ visa Hàn Quốc' },
-  { slug: 'tour-singapore-malaysia-6n5d', title: 'Tour Singapore – Malaysia 6N5Đ', destination: 'Singapore · Malaysia', region: 'quoc-te', duration: '6 ngày 5 đêm', departure: 'Đà Nẵng', price: 13490000, featured: 1,
+  { slug: 'tour-singapore-malaysia-6n5d', image: '/img/tours/singapore.jpg', title: 'Tour Singapore – Malaysia 6N5Đ', destination: 'Singapore · Malaysia', region: 'quoc-te', duration: '6 ngày 5 đêm', departure: 'Đà Nẵng', price: 13490000, featured: 1,
     highlights: 'Gardens by the Bay\nTháp đôi Petronas\nCao nguyên Genting' },
-  { slug: 'tour-bangkok-pattaya-5n4d', title: 'Tour Bangkok – Pattaya 5N4Đ', destination: 'Thái Lan', region: 'quoc-te', duration: '5 ngày 4 đêm', departure: 'Đà Nẵng', price: 7490000, featured: 1,
+  { slug: 'tour-bangkok-pattaya-5n4d', image: '/img/tours/bangkok.jpg', title: 'Tour Bangkok – Pattaya 5N4Đ', destination: 'Thái Lan', region: 'quoc-te', duration: '5 ngày 4 đêm', departure: 'Đà Nẵng', price: 7490000, featured: 1,
     highlights: 'Chùa Phật Vàng\nĐảo Coral\nChợ nổi Bốn Miền' },
-  { slug: 'tour-nhat-ban', title: 'Tour Nhật Bản', destination: 'Nhật Bản', region: 'quoc-te', duration: 'Theo lịch', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-nhat-ban', image: '/img/tours/nhat-ban.jpg', title: 'Tour Nhật Bản', destination: 'Nhật Bản', region: 'quoc-te', duration: 'Theo lịch', departure: 'Đà Nẵng', price: null,
     highlights: 'Cung đường vàng Tokyo – Phú Sĩ – Osaka\nHỗ trợ visa Nhật Bản' },
   { slug: 'tour-da-nang-phu-quoc-4n3d', title: 'Tour Đà Nẵng – Phú Quốc 4N3Đ', destination: 'Phú Quốc', region: 'trong-nuoc', duration: '4 ngày 3 đêm', departure: 'Đà Nẵng', price: null,
     highlights: 'Grand World\nCáp treo Hòn Thơm\nNam đảo & Bắc đảo' },
@@ -167,9 +167,9 @@ function seed() {
   }
 
   if (db.prepare('SELECT COUNT(*) AS n FROM tours').get().n === 0) {
-    const ins = db.prepare(`INSERT INTO tours (slug, title, destination, region, duration, departure, price, highlights, featured, sort)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-    TOURS.forEach((t, i) => ins.run(t.slug, t.title, t.destination, t.region, t.duration, t.departure, t.price, t.highlights, t.featured || 0, i));
+    const ins = db.prepare(`INSERT INTO tours (slug, title, destination, region, duration, departure, price, image, highlights, featured, sort)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+    TOURS.forEach((t, i) => ins.run(t.slug, t.title, t.destination, t.region, t.duration, t.departure, t.price, t.image || null, t.highlights, t.featured || 0, i));
   }
 }
 

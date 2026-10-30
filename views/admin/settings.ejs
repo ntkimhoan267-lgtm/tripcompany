@@ -38,11 +38,7 @@
     </div>
 
     <h2 style="margin-top:10px">Email nhận thông báo</h2>
-    <div>
-      <label for="notify_emails">Danh sách Gmail nhận thông báo & quyền truy cập Google Sheet</label>
-      <input type="text" id="notify_emails" name="notify_emails" value="<%= s.notify_emails %>">
-      <p class="hint">Phân cách bằng dấu phẩy. Mỗi khi có khách đăng ký, các email này nhận thông báo ngay.</p>
-    </div>
+    <p class="hint" style="margin-top:0">Khách mới được gửi ngay tới: <strong><%= notifyEmails.join(', ') %></strong>. Vì lý do bảo mật, danh sách này chỉ đổi được trong Google Apps Script (biến <code>NOTIFY_EMAILS</code> trong file Code.gs).</p>
     <div class="actions"><button class="btn">Lưu cài đặt</button></div>
   </form>
 
@@ -52,7 +48,7 @@
       <p>Đã cấu hình <code>GOOGLE_SCRIPT_URL</code>. Bấm nút dưới để kiểm tra kết nối và lấy link Google Sheet.</p>
       <form method="post" action="/admin/test-google"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Kiểm tra kết nối</button></form>
     <% } else { %>
-      <p class="muted">Chưa cấu hình. Làm theo hướng dẫn trong file <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> (khoảng 5 phút), sau đó đặt biến môi trường <code>GOOGLE_SCRIPT_URL</code> và <code>GOOGLE_SCRIPT_SECRET</code> trên hosting.</p>
+      <p class="muted">Chưa kết nối. Người quản trị kỹ thuật làm theo hướng dẫn <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> (khoảng 5 phút). Trong lúc chờ, mọi đăng ký vẫn được lưu đầy đủ ở mục Khách tư vấn.</p>
     <% } %>
   </div>
 </div>

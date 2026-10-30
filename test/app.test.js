@@ -7,7 +7,9 @@ const os = require('node:os');
 const path = require('node:path');
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'trip-test-'));
+const crypto = require('node:crypto');
 const received = [];
+let mockMode = 'ok';
 let mock; let server; let base;
 
 before(async () => {
@@ -16,17 +18,22 @@ before(async () => {
     let body = '';
     req.on('data', (c) => { body += c; });
     req.on('end', () => {
-      const data = JSON.parse(body);
-      received.push(data);
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(data.secret === 's3cret' ? { ok: true, sent: (data.data.recipients || []).length, sheetUrl: 'https://sheet' } : { ok: false, error: 'bad secret' }));
+      if (mockMode === 'null') return res.end('null');
+      const { payload, sig } = JSON.parse(body);
+      const expected = crypto.createHmac('sha256', 's3cret-0123456789-0123456789-abcdef').update(payload).digest('hex');
+      if (sig !== expected) return res.end(JSON.stringify({ ok: false, error: 'bad sig' }));
+      const data = JSON.parse(payload);
+      received.push(data);
+      const recips = (data.data.recipients || []).map((r) => r.email);
+      res.end(JSON.stringify({ ok: true, sent: recips, sheetUrl: 'https://sheet' }));
     });
   }).listen(0);
   process.env.DATA_DIR = tmp;
   process.env.ADMIN_USERNAME = 'admin';
   process.env.ADMIN_PASSWORD = 'matkhau123';
   process.env.GOOGLE_SCRIPT_URL = `http://127.0.0.1:${mock.address().port}/exec`;
-  process.env.GOOGLE_SCRIPT_SECRET = 's3cret';
+  process.env.GOOGLE_SCRIPT_SECRET = 's3cret-0123456789-0123456789-abcdef';
   const app = require('../server');
   server = app.listen(0);
   base = `http://127.0.0.1:${server.address().port}`;
@@ -71,7 +78,8 @@ test('form tư vấn: lưu và gửi sang Google Sheet', async () => {
   const call = received.find((x) => x.action === 'lead');
   assert.ok(call, 'đã gọi Apps Script');
   assert.equal(call.data.phone, '0935191394');
-  assert.deepEqual(call.notifyEmails, ['ntkimhoan267@gmail.com', 'triptranslate.com@gmail.com']);
+  assert.equal(call.notifyEmails, undefined, 'website không được tự chọn email nhận thông báo');
+  assert.ok(Math.abs(Date.now() - call.ts) < 10000, 'có dấu thời gian');
 });
 
 test('honeypot chặn bot', async () => {
@@ -167,5 +175,91 @@ test('gửi bản tin qua Apps Script', async () => {
   assert.equal(r.status, 302);
   const call = received.find((x) => x.action === 'newsletter');
   assert.equal(call.data.recipients.length, 1);
+  const page = await (await fetch(base + '/admin/newsletter', { headers: { cookie } })).text();
+  assert.match(page, /1 người/);
   assert.equal(call.data.tours[0].url.endsWith('/tour/tour-bac-kinh-7n6d'), true);
+});
+
+test('API: Origin null và dữ liệu dạng mảng không gây lỗi 500', async () => {
+  const r1 = await fetch(base + '/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'null' }, body: '{}' });
+  assert.equal(r1.status, 403);
+  const r2 = await postJson('/api/leads', { name: ['a', 'b'], phone: { x: 1 }, service: [] });
+  assert.equal(r2.status, 400);
+  const r3 = await fetch(base + '/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{bad json' });
+  assert.equal(r3.status, 400);
+  assert.equal((await fetch(base + '/tour?loai[toString]=x')).status, 200);
+  assert.equal((await fetch(base + '/blog?page=99999999999999999999')).status, 200);
+});
+
+test('admin: query dạng mảng, id không phải số', async () => {
+  assert.equal((await fetch(base + '/admin/leads?status[]=new&page=9e99', { headers: { cookie } })).status, 200);
+  const csrf = await getCsrf('/admin/posts');
+  const before = (await (await fetch(base + '/admin/posts', { headers: { cookie } })).text()).match(/\/admin\/posts\/\d+"/g).length;
+  const r = await form('/admin/posts/abc', { _csrf: csrf, title: 'X' });
+  assert.equal(r.status, 404);
+  const after = (await (await fetch(base + '/admin/posts', { headers: { cookie } })).text()).match(/\/admin\/posts\/\d+"/g).length;
+  assert.equal(after, before, 'không tạo bài mới');
+});
+
+test('upload: chặn file giả ảnh, ảnh thật được mã hoá lại thành webp', async () => {
+  const csrf = await getCsrf('/admin/posts/new');
+  const fake = new FormData();
+  fake.append('_csrf', csrf);
+  fake.append('file', new Blob(['<script>alert(1)</script>'], { type: 'image/png' }), 'x.html');
+  const r1 = await fetch(base + '/admin/upload', { method: 'POST', headers: { cookie }, body: fake });
+  assert.equal(r1.status, 400);
+  const png = await require('sharp')({ create: { width: 4, height: 4, channels: 3, background: '#5ba4d4' } }).png().toBuffer();
+  const good = new FormData();
+  good.append('_csrf', csrf);
+  good.append('file', new Blob([png], { type: 'image/png' }), 'a.js');
+  const r2 = await fetch(base + '/admin/upload', { method: 'POST', headers: { cookie }, body: good });
+  const j = await r2.json();
+  assert.match(j.url, /^\/uploads\/[\w-]+\.webp$/);
+  const img = await fetch(base + j.url);
+  assert.equal(img.headers.get('content-type'), 'image/webp');
+  assert.match(img.headers.get('content-security-policy'), /sandbox/);
+});
+
+test('đồng bộ khi Google trả về dữ liệu lạ không làm sập server', async () => {
+  mockMode = 'null';
+  await postJson('/api/leads', { name: 'Khách B', phone: '0905123456', service: 'Visa Nhật Bản' });
+  await wait(200);
+  const csrf = await getCsrf('/admin');
+  const r = await form('/admin/sync', { _csrf: csrf });
+  assert.equal(r.status, 302);
+  assert.equal((await fetch(base + '/')).status, 200);
+  mockMode = 'ok';
+});
+
+test('huỷ nhận tin cần bấm xác nhận', async () => {
+  const db = require('../src/db');
+  const sub = db.prepare('SELECT * FROM subscribers LIMIT 1').get();
+  await fetch(base + '/huy-dang-ky?token=' + sub.token);
+  assert.equal(db.prepare('SELECT status FROM subscribers WHERE id = ?').get(sub.id).status, 'active', 'GET không tự huỷ');
+  await fetch(base + '/huy-dang-ky', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'token=' + sub.token });
+  assert.equal(db.prepare('SELECT status FROM subscribers WHERE id = ?').get(sub.id).status, 'unsubscribed');
+});
+
+test('phiên đăng nhập bị thu hồi khi đăng xuất / xoá tài khoản', async () => {
+  // tạo nhân viên, đăng nhập bằng nhân viên đó
+  let csrf = await getCsrf('/admin/account');
+  await form('/admin/account/users', { _csrf: csrf, username: 'nhanvien', password: 'matkhau456' });
+  const adminCookie = cookie;
+  cookie = '';
+  csrf = await getCsrf('/admin/login');
+  await form('/admin/login', { _csrf: csrf, username: 'nhanvien', password: 'matkhau456' });
+  const staffCookie = cookie;
+  assert.equal((await fetch(base + '/admin', { headers: { cookie: staffCookie }, redirect: 'manual' })).status, 200);
+  // admin xoá nhân viên -> cookie của nhân viên hết hiệu lực
+  cookie = adminCookie;
+  const page = await (await fetch(base + '/admin/account', { headers: { cookie } })).text();
+  const id = page.match(/\/admin\/account\/users\/(\d+)\/delete/)[1];
+  csrf = await getCsrf('/admin/account');
+  await form(`/admin/account/users/${id}/delete`, { _csrf: csrf });
+  assert.equal((await fetch(base + '/admin', { headers: { cookie: staffCookie }, redirect: 'manual' })).status, 302);
+  // đăng xuất -> cookie cũ (đã sao chép) không dùng lại được
+  const copied = cookie;
+  csrf = await getCsrf('/admin');
+  await form('/admin/logout', { _csrf: csrf });
+  assert.equal((await fetch(base + '/admin', { headers: { cookie: copied }, redirect: 'manual' })).status, 302);
 });

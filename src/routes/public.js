@@ -111,7 +111,8 @@ router.get('/bang-gia', (req, res) => {
 
 router.get('/tour', (req, res) => {
   const regions = { 'quoc-te': 'Tour nước ngoài', 'trong-nuoc': 'Tour trong nước', 'trong-ngay': 'Tour trong ngày Đà Nẵng' };
-  const region = regions[req.query.loai] ? req.query.loai : '';
+  const loai = typeof req.query.loai === 'string' ? req.query.loai : '';
+  const region = Object.prototype.hasOwnProperty.call(regions, loai) ? loai : '';
   res.render('pages/tours', {
     meta: { title: 'Tour du lịch khởi hành từ Đà Nẵng', description: 'Tour Trung Quốc, Hàn Quốc, Thái Lan, Singapore, Phú Quốc và tour trong ngày Bà Nà, Hội An, Cù Lao Chàm, Huế.' },
     tours: region ? publishedTours('AND region = ?', region) : publishedTours(),
@@ -132,8 +133,8 @@ router.get('/tour/:slug', (req, res, next) => {
 
 router.get('/blog', (req, res) => {
   const perPage = 9;
-  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
-  const category = String(req.query.chu_de || '').slice(0, 50);
+  const page = Math.min(1000, Math.max(1, parseInt(typeof req.query.page === 'string' ? req.query.page : '', 10) || 1));
+  const category = typeof req.query.chu_de === 'string' ? req.query.chu_de.slice(0, 50) : '';
   const where = category ? "status = 'published' AND category = ?" : "status = 'published'";
   const args = category ? [category] : [];
   const total = db.prepare(`SELECT COUNT(*) AS n FROM posts WHERE ${where}`).get(...args).n;
@@ -162,11 +163,18 @@ router.get('/lien-he', (req, res) => {
   });
 });
 
+// Huỷ nhận tin: GET chỉ hiện nút xác nhận (trình quét link trong email không tự huỷ hộ), POST mới thực hiện
+const subByToken = (t) => (typeof t === 'string' && /^[a-f0-9]{32}$/.test(t) ? db.prepare('SELECT * FROM subscribers WHERE token = ?').get(t) : null);
+
 router.get('/huy-dang-ky', (req, res) => {
-  const token = String(req.query.token || '');
-  const sub = token && db.prepare('SELECT * FROM subscribers WHERE token = ?').get(token);
+  const sub = subByToken(req.query.token);
+  res.render('pages/unsubscribe', { meta: { title: 'Huỷ nhận bản tin', robots: 'noindex' }, sub, done: false, token: sub ? sub.token : '' });
+});
+
+router.post('/huy-dang-ky', express.urlencoded({ extended: false }), (req, res) => {
+  const sub = subByToken(req.body.token);
   if (sub) db.prepare("UPDATE subscribers SET status = 'unsubscribed' WHERE id = ?").run(sub.id);
-  res.render('pages/unsubscribe', { meta: { title: 'Huỷ nhận bản tin', robots: 'noindex' }, ok: Boolean(sub) });
+  res.render('pages/unsubscribe', { meta: { title: 'Huỷ nhận bản tin', robots: 'noindex' }, sub, done: true, token: '' });
 });
 
 router.get('/robots.txt', (req, res) => {

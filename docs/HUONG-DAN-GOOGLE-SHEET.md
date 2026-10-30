@@ -13,28 +13,38 @@ Dashboard cũng dùng kết nối này để **gửi bản tin tour hàng tháng
 
 ---
 
-## Bước 1: Tạo Apps Script
+## Bước 1: Tạo mã bí mật
+
+Mã bí mật dùng để website và Apps Script nhận ra nhau. **Không dùng lại mã có sẵn ở bất kỳ đâu.** Hãy tạo một mã mới, ngẫu nhiên, dài ít nhất 32 ký tự. Có hai cách:
+
+- Trên máy có Node.js, chạy lệnh:
+  ```bash
+  node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  ```
+- Hoặc dùng trình quản lý mật khẩu (Bitwarden, 1Password…) để tạo chuỗi ngẫu nhiên 40 ký tự.
+
+Lưu mã này vào trình quản lý mật khẩu. **Không gửi qua chat, không dán vào code.**
+
+## Bước 2: Tạo Apps Script
 
 1. Mở https://script.google.com và đăng nhập Gmail của TRIP.
-2. Bấm **Dự án mới (New project)**. Đổi tên dự án thành `TRIP Website`.
-3. Xoá toàn bộ code mẫu. Dán toàn bộ nội dung file [`google-apps-script/Code.gs`](../google-apps-script/Code.gs) vào.
-4. Ở dòng đầu file, đổi `DOI-MA-BI-MAT-NAY` thành một chuỗi bí mật bất kỳ, dài và khó đoán. Ví dụ `trip-2026-Xk9pQ7mZ`. **Ghi lại chuỗi này**, sẽ dùng ở Bước 3.
-   ```js
-   var SECRET = 'trip-2026-Xk9pQ7mZ';
-   ```
-5. Bấm 💾 **Lưu**.
+2. Bấm **Dự án mới (New project)**. Đổi tên thành `TRIP Website`.
+3. Xoá code mẫu. Dán toàn bộ nội dung file [`google-apps-script/Code.gs`](../google-apps-script/Code.gs) vào, rồi bấm 💾 **Lưu**.
+4. Mở ⚙ **Cài đặt dự án (Project Settings)** và kéo xuống mục **Thuộc tính tập lệnh (Script properties)**. Bấm **Thêm thuộc tính**:
+   - Thuộc tính: `TRIP_SECRET`
+   - Giá trị: mã bí mật ở Bước 1
 
-## Bước 2: Cấp quyền và triển khai
-
-1. Trên thanh công cụ, chọn hàm **`setup`** rồi bấm **▶ Chạy (Run)**.
-2. Google sẽ hỏi cấp quyền. Bấm **Xem lại quyền**, chọn tài khoản, bấm **Nâng cao**, chọn **Đi tới TRIP Website (không an toàn)**, rồi bấm **Cho phép**.
+   Bấm **Lưu**.
+5. Quay lại trình soạn thảo. Chọn hàm **`setup`** rồi bấm **▶ Chạy (Run)**. Google sẽ hỏi cấp quyền: bấm **Xem lại quyền**, chọn tài khoản, bấm **Nâng cao**, chọn **Đi tới TRIP Website**, rồi bấm **Cho phép**.
    *Đây là script của chính bạn nên Google cảnh báo như vậy là bình thường.*
-3. Mở **Nhật ký thực thi (Execution log)**. Bạn sẽ thấy link Google Sheet vừa được tạo.
-4. Bấm **Triển khai (Deploy)**, chọn **Triển khai mới (New deployment)**.
-   - Bấm ⚙ chọn loại **Ứng dụng web (Web app)**.
-   - *Thực thi với tư cách (Execute as)*: **Tôi (Me)**.
-   - *Ai có quyền truy cập (Who has access)*: **Bất kỳ ai (Anyone)**.
-   - Bấm **Triển khai**. Sao chép **URL ứng dụng web**, có dạng `https://script.google.com/macros/s/AKfy.../exec`.
+6. Mở **Nhật ký thực thi (Execution log)** để thấy link Google Sheet vừa được tạo. Sheet được chia sẻ sẵn cho 2 Gmail trong `NOTIFY_EMAILS`.
+7. Bấm **Triển khai (Deploy)**, chọn **Triển khai mới (New deployment)**, rồi bấm ⚙ chọn loại **Ứng dụng web (Web app)**:
+   - *Thực thi với tư cách*: **Tôi (Me)**
+   - *Ai có quyền truy cập*: **Bất kỳ ai (Anyone)**
+
+   Bấm **Triển khai** và sao chép **URL ứng dụng web**, dạng `https://script.google.com/macros/s/.../exec`.
+
+> Vì sao chọn "Bất kỳ ai"? Website gọi script từ máy chủ, không đăng nhập Google. Script chỉ chấp nhận request được **ký bằng mã bí mật** (HMAC) và còn hạn trong 10 phút. Không có mã thì không gọi được.
 
 ## Bước 3: Khai báo cho website
 
@@ -43,7 +53,7 @@ Trên hosting (Render, Railway hoặc VPS), thêm 2 biến môi trường:
 | Biến | Giá trị |
 |---|---|
 | `GOOGLE_SCRIPT_URL` | URL ứng dụng web ở Bước 2 |
-| `GOOGLE_SCRIPT_SECRET` | Chuỗi bí mật ở Bước 1 |
+| `GOOGLE_SCRIPT_SECRET` | Mã bí mật ở Bước 1 (trùng với `TRIP_SECRET`) |
 
 Sau đó khởi động lại website.
 
@@ -59,13 +69,16 @@ Sau đó khởi động lại website.
 ## Câu hỏi thường gặp
 
 **Muốn thêm hoặc bớt Gmail nhận thông báo?**
-Vào Dashboard, mở **Cài đặt**, sửa ô *Email nhận thông báo*. Không cần sửa script.
+Vì lý do bảo mật, danh sách này chỉ đổi được trong script: sửa biến `NOTIFY_EMAILS` ở đầu file Code.gs, rồi triển khai lại (xem câu dưới). Khi bớt một Gmail, vào Google Sheet → **Chia sẻ** để gỡ quyền của Gmail đó.
+
+**Lộ mã bí mật thì làm gì?**
+Tạo mã mới (Bước 1), cập nhật đồng thời `TRIP_SECRET` trong Script properties và `GOOGLE_SCRIPT_SECRET` trên hosting.
 
 **Sửa code script thì có phải deploy lại không?**
 Có. Vào **Triển khai**, chọn **Quản lý triển khai**, bấm ✏️ rồi chọn *Phiên bản: Phiên bản mới*, sau đó bấm **Triển khai**. URL giữ nguyên.
 
 **Giới hạn gửi email?**
-Gmail cá nhân gửi tối đa khoảng **100 người nhận/ngày** qua Apps Script. Google Workspace gửi được khoảng 1.500 người/ngày. Nếu danh sách nhận tin vượt mức này, hãy gửi bản tin chia nhiều ngày, hoặc chuyển sang dịch vụ email marketing (Mailchimp, Brevo…). Dữ liệu xuất CSV từ Dashboard để import.
+Gmail cá nhân gửi tối đa khoảng **100 email/ngày** qua Apps Script, tính cả email thông báo khách mới. Google Workspace gửi được khoảng 1.500 email/ngày. Mỗi lần bấm gửi, bản tin chỉ đi tối đa 80 người và luôn chừa lại hạn mức cho email báo khách mới. Danh sách lớn hơn thì vào hôm sau bấm **Gửi tiếp** ở mục Lịch sử gửi. Khi danh sách vượt vài trăm người, nên chuyển sang dịch vụ email marketing (Mailchimp, Brevo…), dùng dữ liệu xuất CSV từ Dashboard để import.
 
 **Google bị lỗi thì dữ liệu có mất không?**
 Không. Mọi đăng ký luôn được lưu trong database của website trước. Bản ghi chưa đồng bộ được đánh dấu "chưa sync". Bấm **Đồng bộ** ở trang Tổng quan để gửi lại.

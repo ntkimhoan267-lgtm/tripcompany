@@ -34,7 +34,14 @@ app.use(helmet({
 }));
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: config.isProd ? '7d' : 0 }));
-app.use('/uploads', express.static(config.uploadDir, { maxAge: '30d' }));
+// Ảnh do admin tải lên: chỉ phục vụ như ảnh, không bao giờ chạy được script hay hiển thị như trang HTML
+app.use('/uploads', express.static(config.uploadDir, {
+  maxAge: '30d',
+  setHeaders: (res) => {
+    res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  },
+}));
 app.use(express.urlencoded({ extended: false, limit: '2mb' }));
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieSession({
@@ -46,8 +53,12 @@ app.use(cookieSession({
   maxAge: 7 * 24 * 60 * 60 * 1000,
 }));
 
+// Phiên bản tài nguyên tĩnh: đổi mỗi lần khởi động để trình duyệt tải CSS/JS mới sau khi cập nhật
+const ASSET_VERSION = Date.now().toString(36);
+
 // Biến dùng chung cho mọi view
 app.use((req, res, next) => {
+  res.locals.assetV = ASSET_VERSION;
   res.locals.h = helpers;
   res.locals.icon = (name, cls = '') => `<svg class="icon ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   res.locals.flag = (code) => `https://flagcdn.com/w80/${code}.png`;
@@ -65,9 +76,17 @@ app.use('/', require('./src/routes/public'));
 
 app.use((req, res) => res.status(404).render('pages/404', { meta: { title: 'Không tìm thấy trang' } }));
 app.use((err, req, res, _next) => {
-  console.error(err);
-  res.status(500).send('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+  // Lỗi do request sai (JSON hỏng, body quá lớn...) trả đúng mã 4xx; còn lại là lỗi máy chủ
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) console.error(err);
+  const message = status === 413 ? 'Dữ liệu gửi lên quá lớn.' : status < 500 ? 'Yêu cầu không hợp lệ.' : 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
+  if (res.headersSent) return;
+  res.status(status);
+  if (req.path.startsWith('/api/') || req.accepts(['html', 'json']) === 'json') return res.json({ ok: false, error: message });
+  res.send(message);
 });
+
+process.on('unhandledRejection', (reason) => console.error('[unhandledRejection]', reason));
 
 if (require.main === module) {
   app.listen(config.port, () => console.log(`TRIP website đang chạy tại http://localhost:${config.port}`));

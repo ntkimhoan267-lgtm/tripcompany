@@ -19,13 +19,15 @@ router.use(rateLimit({
 // Chỉ nhận request từ chính website (chống form giả mạo từ trang khác)
 router.use((req, res, next) => {
   const origin = req.get('origin');
-  if (origin && new URL(origin).host !== req.get('host')) {
-    return res.status(403).json({ ok: false, error: 'Nguồn gửi không hợp lệ.' });
+  if (origin) {
+    let host = null;
+    try { host = new URL(origin).host; } catch { /* Origin: null hoặc giá trị lạ */ }
+    if (host !== req.get('host')) return res.status(403).json({ ok: false, error: 'Nguồn gửi không hợp lệ.' });
   }
   next();
 });
 
-const clean = (v, max) => String(v == null ? '' : v).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
+const clean = (v, max) => (typeof v === 'string' || typeof v === 'number' ? String(v) : '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
 
 router.post('/leads', (req, res) => {
   const b = req.body || {};
@@ -50,7 +52,10 @@ router.post('/leads', (req, res) => {
   res.json({ ok: true, message: 'TRIP đã nhận thông tin! Tư vấn viên sẽ gọi lại cho bạn trong giờ làm việc.' });
 });
 
-router.post('/subscribe', (req, res) => {
+const subscribeLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { ok: false, error: 'Bạn đã đăng ký quá nhiều lần. Vui lòng thử lại sau.' } });
+
+router.post('/subscribe', subscribeLimiter, (req, res) => {
   const b = req.body || {};
   if (b.website) return res.json({ ok: true });
   const email = clean(b.email, 200).toLowerCase();
@@ -60,8 +65,10 @@ router.post('/subscribe', (req, res) => {
 
   const existing = db.prepare('SELECT * FROM subscribers WHERE email = ?').get(email);
   if (existing) {
-    if (existing.status !== 'active') db.prepare("UPDATE subscribers SET status = 'active' WHERE id = ?").run(existing.id);
-    return res.json({ ok: true, message: 'Email này đã có trong danh sách nhận tin của TRIP. Cảm ơn bạn!' });
+    // Không tự kích hoạt lại email đã huỷ (tránh người khác đăng ký hộ); khách muốn nhận lại thì liên hệ TRIP
+    return res.json({ ok: true, message: existing.status === 'active'
+      ? 'Email này đã có trong danh sách nhận tin của TRIP. Cảm ơn bạn!'
+      : 'Email này đã huỷ nhận tin trước đó. Nếu muốn nhận lại, bạn vui lòng nhắn TRIP qua Zalo hoặc hotline.' });
   }
   const info = db.prepare('INSERT INTO subscribers (email, name, source_page, token) VALUES (?, ?, ?, ?)')
     .run(email, name, source, crypto.randomBytes(16).toString('hex'));

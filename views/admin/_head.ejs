@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/admin.css?v=1">
+  <link rel="stylesheet" href="/css/admin.css?v=<%= assetV %>">
   <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
 </head>
 <body>
@@ -43,5 +43,5 @@
   <main class="main">
     <button class="btn btn--ghost burger" type="button" data-side-toggle style="margin-bottom:14px"><%- icon('menu') %> Menu</button>
     <% if (flash) { %><div class="flash flash--<%= flash.type %>"><%= flash.msg %></div><% } %>
-    <% if (!googleReady) { %><div class="alert"><%- icon('info') %><div>Chưa kết nối Google Sheet & Gmail. Dữ liệu vẫn được lưu trên website. Xem hướng dẫn trong <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> để bật đồng bộ và nhận email thông báo.</div></div><% } %>
+    <% if (!googleReady) { %><div class="alert"><%- icon('info') %><div>Website chưa kết nối Google Sheet & Gmail nên chưa gửi email báo khách mới. Mọi đăng ký vẫn được lưu đầy đủ ở mục <a href="/admin/leads">Khách tư vấn</a>.</div></div><% } %>
 <% } %>

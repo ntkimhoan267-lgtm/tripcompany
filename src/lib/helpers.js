@@ -49,7 +49,8 @@ function parseVideo(url) {
   if (m) return { type: 'youtube', id: m[1], embed: `https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&mute=1&loop=1&playlist=${m[1]}&controls=1&rel=0&playsinline=1` };
   m = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]{10,})/);
   if (m) return { type: 'drive', id: m[1], embed: `https://drive.google.com/file/d/${m[1]}/preview` };
-  if (/\.(mp4|webm)(\?.*)?$/i.test(url)) return { type: 'file', src: url };
+  // File video: đường dẫn nội bộ (/media/...) hoặc link https, chỉ gồm ký tự an toàn
+  if (/^(\/[\w\-./]+|https:\/\/[\w\-./%~]+)\.(mp4|webm)$/i.test(url)) return { type: 'file', src: url };
   return null;
 }
 

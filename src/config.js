@@ -23,7 +23,8 @@ module.exports = {
   siteUrl: (process.env.SITE_URL || 'https://tripdn.com').replace(/\/$/, ''),
   dataDir,
   uploadDir: path.join(dataDir, 'uploads'),
-  sessionSecret: process.env.SESSION_SECRET || 'dev-secret-change-me',
+  // Không có SESSION_SECRET (chỉ cho phép khi chạy thử trên máy): dùng chuỗi ngẫu nhiên mỗi lần khởi động
+  sessionSecret: process.env.SESSION_SECRET || require('node:crypto').randomBytes(32).toString('hex'),
   adminUsername: process.env.ADMIN_USERNAME || 'admin',
   adminPassword: process.env.ADMIN_PASSWORD || '',
   googleScriptUrl: process.env.GOOGLE_SCRIPT_URL || '',

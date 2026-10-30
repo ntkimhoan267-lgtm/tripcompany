@@ -82,6 +82,21 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT
 );
+-- Ghi nhận từng email đã nhận một bản tin (để gửi tiếp phần còn lại khi Gmail hết hạn mức trong ngày)
+CREATE TABLE IF NOT EXISTS newsletter_sends (
+  newsletter_id INTEGER NOT NULL REFERENCES newsletters(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  sent_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (newsletter_id, email)
+);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+CREATE INDEX IF NOT EXISTS idx_leads_synced ON leads(sheet_synced);
+CREATE INDEX IF NOT EXISTS idx_subs_token ON subscribers(token);
+CREATE INDEX IF NOT EXISTS idx_subs_synced ON subscribers(sheet_synced);
 `);
+
+// Nâng cấp schema cho database đã tạo từ phiên bản trước
+const hasColumn = (table, col) => db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === col);
+if (!hasColumn('users', 'session_version')) db.exec('ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1');
 
 module.exports = db;

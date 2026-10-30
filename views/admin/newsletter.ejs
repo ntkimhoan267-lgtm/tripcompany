@@ -17,17 +17,21 @@
       </div>
     </div>
     <div class="actions">
-      <button class="btn btn--ghost" name="mode" value="test">Gửi thử tới email quản trị</button>
+      <button class="btn btn--ghost" name="mode" value="test" title="<%= testEmails.join(', ') %>">Gửi thử tới email quản trị</button>
       <button class="btn btn--accent" name="mode" value="all">Gửi tới <%= active %> người nhận</button>
     </div>
-    <p class="hint">Email được gửi từ tài khoản Gmail đã cài Google Apps Script. Gmail cá nhân giới hạn khoảng 100 người nhận/ngày; Google Workspace khoảng 1.500/ngày. Mỗi email có link huỷ đăng ký.</p>
+    <p class="hint">Email được gửi từ Gmail đã cài Google Apps Script, mỗi lần tối đa 80 người. Gmail cá nhân giới hạn khoảng 100 email/ngày (cả email thông báo khách mới), nên danh sách lớn sẽ gửi trong nhiều ngày: bấm "Gửi tiếp" ở lịch sử bên phải. Mỗi email có link huỷ đăng ký.</p>
   </form>
 
   <div class="card">
     <h2>Lịch sử gửi</h2>
     <% if (history.length) { %>
-      <table><thead><tr><th>Ngày</th><th>Tiêu đề</th><th>Kết quả</th></tr></thead>
-      <tbody><% history.forEach(function (n) { %><tr><td class="small nowrap"><%= h.fmtDate(n.created_at, true) %></td><td><%= n.subject %></td><td class="small"><%= n.result %></td></tr><% }) %></tbody></table>
+      <table><thead><tr><th>Ngày</th><th>Tiêu đề</th><th>Đã gửi</th><th></th></tr></thead>
+      <tbody><% history.forEach(function (n) { %><tr>
+        <td class="small nowrap"><%= h.fmtDate(n.created_at, true) %></td><td><%= n.subject %></td>
+        <td class="small nowrap"><%= n.sent %> người<% if (n.remaining) { %><br><span class="muted">còn <%= n.remaining %></span><% } %></td>
+        <td><% if (n.remaining) { %><form method="post" action="/admin/newsletter/<%= n.id %>/continue"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm">Gửi tiếp</button></form><% } else { %><span class="badge badge--published">Xong</span><% } %></td>
+      </tr><% }) %></tbody></table>
     <% } else { %><p class="muted">Chưa gửi bản tin nào.</p><% } %>
   </div>
 </div>

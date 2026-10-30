@@ -17,7 +17,6 @@ const DEFAULT_SETTINGS = {
   hero_teaser: '/media/trip-teaser.mp4',
   popup_newsletter_enabled: '1',
   popup_newsletter_delay: '15',
-  notify_emails: 'ntkimhoan267@gmail.com, triptranslate.com@gmail.com',
 };
 
 const POSTS = [
@@ -146,6 +145,9 @@ function seed() {
   const userCount = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
   if (userCount === 0) {
     let password = config.adminPassword;
+    if (password && password.length < 8) {
+      throw new Error('ADMIN_PASSWORD quá ngắn (tối thiểu 8 ký tự).');
+    }
     if (!password) {
       password = crypto.randomBytes(9).toString('base64url');
       console.log('\n================================================================');
@@ -159,6 +161,11 @@ function seed() {
 
   const insSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
   for (const [k, v] of Object.entries(DEFAULT_SETTINGS)) insSetting.run(k, v);
+
+  // Dữ liệu mẫu (bài viết, tour) chỉ tạo 1 lần; xoá hết trong Dashboard thì không bị tạo lại khi khởi động
+  const seeded = db.prepare("SELECT value FROM settings WHERE key = 'seeded_content'").get();
+  if (seeded) return;
+  db.prepare("INSERT INTO settings (key, value) VALUES ('seeded_content', datetime('now'))").run();
 
   if (db.prepare('SELECT COUNT(*) AS n FROM posts').get().n === 0) {
     const ins = db.prepare(`INSERT INTO posts (slug, title, category, excerpt, content, status, published_at)

@@ -950,3 +950,5 @@ a.market:hover .market__art video { transform: scale(1.05); }
 .tour-card__foot { flex-wrap: wrap; gap: 10px; }
 .req { color: var(--accent-600); }
 @media (max-width: 1180px) and (min-width: 981px) { .header__cta { margin-left: auto; } }
+/* Bản xem trước tĩnh trên GitHub Pages */
+html[data-preview] body::before { content: 'Bản xem trước giao diện · Form và Dashboard sẽ hoạt động khi website chạy chính thức tại tripdn.com'; display: block; padding: 8px 16px; text-align: center; font-size: .8rem; font-weight: 600; background: #fff3cd; color: #6b4e00; }

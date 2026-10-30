@@ -137,6 +137,13 @@
       if ('email' in data && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(data.email).trim())) errs.email = 'Email chưa đúng định dạng.';
       if (showErrors(form, errs)) return;
 
+      // Bản xem trước tĩnh (GitHub Pages) không có máy chủ để nhận form
+      if (document.documentElement.getAttribute('data-preview')) {
+        msg.className = 'form-msg is-ok';
+        msg.textContent = 'Đây là bản xem trước giao diện nên form chưa gửi đi. Khi website chạy chính thức, thông tin sẽ được gửi tới TRIP. Cần tư vấn ngay, vui lòng gọi hotline.';
+        return;
+      }
+
       btn.disabled = true; var label = btn.innerHTML; btn.textContent = 'Đang gửi…';
       fetch(form.getAttribute('action'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
         .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })

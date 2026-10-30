@@ -2,7 +2,7 @@
 <% const video = h.parseVideo(settings.hero_video); const teaser = h.parseVideo(settings.hero_teaser); %>
 
 <section class="hero hero--video">
-  <video class="hero__bg" src="/media/hero-montage.mp4" poster="/media/hero-montage.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+  <video class="hero__bg" data-src="/media/hero-montage.mp4" poster="/media/hero-montage.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
   <div class="hero__shade"></div>
   <div class="container">
     <div>
@@ -133,12 +133,25 @@
 </section>
 <% } %>
 
+<!-- Đánh giá của khách (chỉ hiện khi đã có đánh giá thật được duyệt) -->
+<% if (reviews.length) { %>
+<section class="section">
+  <div class="container">
+    <div class="section-top reveal">
+      <div><span class="eyebrow">Đánh giá</span><h2>Khách hàng nói gì về <em>TRIP</em></h2></div>
+      <a class="btn btn--ghost" href="/danh-gia">Xem tất cả đánh giá <%- icon('arrow') %></a>
+    </div>
+    <div class="reviews-grid"><% reviews.slice(0, 3).forEach(function (r) { %><%- include('../partials/review-card', { r }) %><% }) %></div>
+  </div>
+</section>
+<% } %>
+
 <!-- Về TRIP (ngắn) -->
 <section class="section section--soft">
   <div class="container why">
     <figure class="photo-frame photo-frame--tilt reveal">
       <img src="/img/team/team.jpg" alt="Đội ngũ nhân viên TRIP tại văn phòng Đà Nẵng" width="1400" height="1050" loading="lazy">
-      <figcaption class="photo-caption"><img src="/img/logo-icon.png" alt="" width="40" height="40"><span><strong>Đội ngũ TRIP</strong>Văn phòng 35 Cao Thắng, Đà Nẵng</span></figcaption>
+      <figcaption class="photo-caption"><img src="/img/logo-icon-sm.png" alt="" width="40" height="40"><span><strong>Đội ngũ TRIP</strong>Văn phòng 35 Cao Thắng, Đà Nẵng</span></figcaption>
     </figure>
     <div class="reveal">
       <span class="eyebrow">Về TRIP</span>

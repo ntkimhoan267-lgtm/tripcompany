@@ -263,3 +263,27 @@ test('phiên đăng nhập bị thu hồi khi đăng xuất / xoá tài khoản'
   await form('/admin/logout', { _csrf: csrf });
   assert.equal((await fetch(base + '/admin', { headers: { cookie: copied }, redirect: 'manual' })).status, 302);
 });
+
+test('đánh giá: khách gửi phải chờ duyệt; nhân viên nhập phải xác nhận là thật', async () => {
+  const r = await postJson('/api/reviews', { name: 'Chị Test', rating: 5, content: 'Làm visa Nhật rất nhanh, tư vấn nhiệt tình.', service: 'Visa Nhật Bản' });
+  assert.ok((await r.json()).ok);
+  let home = await (await fetch(base + '/')).text();
+  assert.ok(!home.includes('Chị Test'), 'chưa duyệt thì không hiện');
+  const bad = await postJson('/api/reviews', { name: 'X', rating: 9, content: 'ngắn' });
+  assert.equal(bad.status, 400);
+
+  // đăng nhập lại (phiên trước đã đăng xuất ở test trước)
+  cookie = '';
+  let csrf = await getCsrf('/admin/login');
+  await form('/admin/login', { _csrf: csrf, username: 'admin', password: 'matkhau123' });
+  csrf = await getCsrf('/admin/reviews');
+  await form('/admin/reviews', { _csrf: csrf, name: 'Anh Không Xác Nhận', rating: '5', content: 'Nội dung đủ dài để lưu', source: 'zalo' });
+  let page = await (await fetch(base + '/admin/reviews', { headers: { cookie } })).text();
+  assert.ok(!page.includes('Anh Không Xác Nhận'), 'thiếu xác nhận thì không lưu');
+
+  const id = page.match(/\/admin\/reviews\/(\d+)\/status/)[1];
+  csrf = await getCsrf('/admin/reviews');
+  await form(`/admin/reviews/${id}/status`, { _csrf: csrf, status: 'published' });
+  home = await (await fetch(base + '/')).text();
+  assert.ok(home.includes('Chị Test'), 'duyệt xong thì hiện trên trang chủ');
+});

@@ -1,7 +1,7 @@
 <%- include('_head', { title: 'Đăng nhập' }) %>
 <div class="login">
   <form class="login__card form" method="post" action="/admin/login">
-    <img src="/img/logo-horizontal.png" alt="TRIP">
+    <img src="/img/logo-horizontal-sm.png" alt="TRIP">
     <h1>Đăng nhập quản trị</h1>
     <% if (error) { %><div class="flash flash--error"><%= error %></div><% } %>
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">

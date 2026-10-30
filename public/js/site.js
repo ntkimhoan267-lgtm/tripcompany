@@ -64,7 +64,22 @@
   $$('.modal').forEach(function (m) {
     m.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeModal(m); });
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $$('.modal.is-open').forEach(closeModal); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      $$('.modal.is-open').forEach(closeModal);
+      if (nav && nav.classList.contains('is-open')) { nav.classList.remove('is-open'); document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded', 'false'); burger.focus(); }
+    }
+    // Giữ focus trong popup đang mở
+    var open = $('.modal.is-open');
+    if (e.key === 'Tab' && open) {
+      var f = $$('a[href], button:not([disabled]), input:not([type="hidden"]):not(.hp), select, textarea, [tabindex]:not([tabindex="-1"])', open)
+        .filter(function (el) { return el.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0]; var last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !open.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !open.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    }
+  });
 
   var leadModal = $('#lead-modal');
   document.addEventListener('click', function (e) {
@@ -115,7 +130,8 @@
 
       // Kiểm tra nhanh phía trình duyệt
       var errs = {};
-      if ('name' in data && String(data.name).trim().length < 2) errs.name = 'Vui lòng nhập họ tên.';
+      var nameField = $('[name="name"]', form);
+      if (nameField && nameField.required && String(data.name || '').trim().length < 2) errs.name = 'Vui lòng nhập họ tên.';
       if ('phone' in data && !/^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(String(data.phone).replace(/[\s.\-()]/g, ''))) errs.phone = 'Số điện thoại chưa đúng (VD: 0935 191 394).';
       if ('service' in data && !data.service) errs.service = 'Vui lòng chọn dịch vụ.';
       if ('email' in data && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(data.email).trim())) errs.email = 'Email chưa đúng định dạng.';
@@ -149,19 +165,26 @@
     box.innerHTML = tpl ? tpl.innerHTML : '';
     var p = $('[data-thanks-msg]', box); if (p && message) p.textContent = message;
     form.replaceWith(box);
+    box.tabIndex = -1; box.focus();
     var again = $('[data-thanks-again]', box);
     if (again) again.addEventListener('click', function () { box.replaceWith(form); });
   }
   function showErrors(form, errs) {
     var keys = Object.keys(errs);
+    $$('[aria-invalid]', form).forEach(function (i) { i.removeAttribute('aria-invalid'); });
     keys.forEach(function (k) {
       var el = $('[data-error="' + k + '"]', form);
-      if (el) { el.textContent = errs[k]; el.closest('.field').classList.add('has-error'); }
+      if (el) {
+        el.textContent = errs[k]; el.closest('.field').classList.add('has-error');
+        if (!el.id) el.id = (form.id || 'f') + '-' + k + '-err-' + Math.random().toString(36).slice(2, 6);
+        $$('[name="' + k + '"]', form).forEach(function (i) { i.setAttribute('aria-invalid', 'true'); i.setAttribute('aria-describedby', el.id); });
+      }
     });
     if (keys.length) { var first = $('[name="' + keys[0] + '"]', form); first && first.focus(); }
     return keys.length > 0;
   }
   $$('.js-lead-form').forEach(function (f) { bindForm(f); });
+  $$('.js-review-form').forEach(function (f) { bindForm(f, function () {}); });
   $$('.js-sub-form').forEach(function (f) {
     bindForm(f, function () { store.set('trip_subscribed', '1'); setTimeout(function () { closeModal($('#news-modal')); }, 2500); });
   });
@@ -171,16 +194,6 @@
     var heads = $$('thead th', t).map(function (th) { return th.textContent.trim(); });
     $$('tbody tr', t).forEach(function (tr) {
       $$('td', tr).forEach(function (td, i) { if (heads[i]) td.setAttribute('data-label', heads[i]); });
-    });
-  });
-
-  // ---------- Tabs ----------
-  $$('[data-tabs]').forEach(function (wrap) {
-    var tabs = $$('[role="tab"]', wrap);
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t === tab)); $('#' + t.getAttribute('aria-controls')).hidden = t !== tab; });
-      });
     });
   });
 
@@ -203,7 +216,10 @@
   });
   // Video nền: chỉ phát khi nằm trong màn hình; tôn trọng người dùng muốn giảm chuyển động
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) $$('.hero__bg, .porthole__teaser').forEach(function (v) { v.removeAttribute('autoplay'); v.pause(); });
+  var heroBg = $('.hero__bg');
+  if (heroBg && heroBg.dataset.src && !reduce && window.matchMedia('(min-width: 768px)').matches) {
+    heroBg.src = heroBg.dataset.src; var hp = heroBg.play(); if (hp && hp.catch) hp.catch(function () {});
+  }
   // Rê chuột vào khung cửa sổ: phát thử đoạn video ngắn trên nền thumbnail
   var porthole = $('.porthole'); var pv = porthole && $('.porthole__teaser', porthole);
   if (porthole && pv && !reduce && window.matchMedia('(hover: hover)').matches) {

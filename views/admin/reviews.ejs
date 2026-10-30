@@ -1,0 +1,54 @@
+<%- include('_head') %>
+<div class="topline">
+  <h1>Đánh giá của khách</h1>
+  <div class="actions">
+    <a class="btn btn--ghost" href="/danh-gia" target="_blank">Xem trang đánh giá</a>
+    <button class="btn btn--ghost" type="button" data-copy="<%= siteUrl %>/danh-gia">Sao chép link gửi khách</button>
+  </div>
+</div>
+
+<div class="grid grid--2">
+  <div class="card">
+    <div class="filters" style="margin-bottom:8px">
+      <a class="btn btn--sm <%= !status ? '' : 'btn--ghost' %>" href="/admin/reviews">Tất cả</a>
+      <% Object.entries(REVIEW_STATUSES).forEach(function ([k, v]) { %><a class="btn btn--sm <%= status === k ? '' : 'btn--ghost' %>" href="/admin/reviews?status=<%= k %>"><%= v %></a><% }) %>
+    </div>
+    <% if (reviews.length) { %>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Khách</th><th>Đánh giá</th><th>Trạng thái</th><th></th></tr></thead>
+      <tbody><% reviews.forEach(function (r) { %>
+        <tr>
+          <td><strong><%= r.name %></strong><br><span class="muted small"><%= r.service || '—' %><br><%= REVIEW_SOURCES[r.source] %> · <%= h.fmtDate(r.created_at) %></span></td>
+          <td style="max-width:340px"><span style="color:#f2a01b"><%= '★'.repeat(r.rating) %></span><span class="muted"><%= '★'.repeat(5 - r.rating) %></span><br><span class="small"><%= r.content %></span></td>
+          <td><span class="badge badge--<%= r.status === 'published' ? 'published' : r.status === 'pending' ? 'new' : 'hidden' %>"><%= REVIEW_STATUSES[r.status] %></span></td>
+          <td class="actions">
+            <% if (r.status !== 'published') { %><form method="post" action="/admin/reviews/<%= r.id %>/status"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="status" value="published"><button class="btn btn--sm">Hiển thị</button></form><% } %>
+            <% if (r.status === 'published') { %><form method="post" action="/admin/reviews/<%= r.id %>/status"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="status" value="hidden"><button class="btn btn--sm btn--ghost">Ẩn</button></form><% } %>
+            <form method="post" action="/admin/reviews/<%= r.id %>/delete" data-confirm="Xoá đánh giá của <%= r.name %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">Xoá</button></form>
+          </td>
+        </tr>
+      <% }) %></tbody>
+    </table></div>
+    <% } else { %>
+      <div class="empty">Chưa có đánh giá nào.<br>Gửi link <strong><%= siteUrl %>/danh-gia</strong> cho khách cũ qua Zalo để nhận đánh giá đầu tiên.</div>
+    <% } %>
+  </div>
+
+  <form class="card form" method="post" action="/admin/reviews">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <h2>Nhập đánh giá khách đã gửi</h2>
+    <p class="hint" style="margin-top:0">Dùng khi khách khen qua Zalo, Facebook, Google hoặc trực tiếp. Chép đúng lời khách, và nên hỏi khách đồng ý cho đăng.</p>
+    <div class="form-row">
+      <div><label for="rv-name">Tên hiển thị</label><input type="text" id="rv-name" name="name" maxlength="60" placeholder="VD: Anh Minh (Đà Nẵng)" required></div>
+      <div><label for="rv-rating">Số sao</label><select id="rv-rating" name="rating"><% for (let i = 5; i >= 1; i--) { %><option value="<%= i %>"><%= i %> sao</option><% } %></select></div>
+    </div>
+    <div class="form-row">
+      <div><label for="rv-service">Dịch vụ</label><select id="rv-service" name="service"><option value="">—</option><% leadServiceOptions.forEach(function (o) { %><option><%= o %></option><% }) %></select></div>
+      <div><label for="rv-source">Nguồn</label><select id="rv-source" name="source"><% Object.entries(REVIEW_SOURCES).filter(([k]) => k !== 'web').forEach(function ([k, v]) { %><option value="<%= k %>"><%= v %></option><% }) %></select></div>
+    </div>
+    <div><label for="rv-content">Nội dung (lời của khách)</label><textarea id="rv-content" name="content" maxlength="1200" required></textarea></div>
+    <label class="check"><input type="checkbox" name="confirm_real" value="1" required> Tôi xác nhận đây là đánh giá thật của khách hàng đã dùng dịch vụ TRIP</label>
+    <div class="actions"><button class="btn">Thêm & hiển thị</button></div>
+  </form>
+</div>
+<%- include('_foot') %>

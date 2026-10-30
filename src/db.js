@@ -89,6 +89,18 @@ CREATE TABLE IF NOT EXISTS newsletter_sends (
   sent_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (newsletter_id, email)
 );
+-- Đánh giá của khách: khách tự gửi (chờ duyệt) hoặc nhân viên nhập lại từ Zalo/Facebook/Google
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  service TEXT,
+  rating INTEGER NOT NULL DEFAULT 5,
+  content TEXT NOT NULL,
+  source TEXT NOT NULL DEFAULT 'web',
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
 CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
 CREATE INDEX IF NOT EXISTS idx_leads_synced ON leads(sheet_synced);
 CREATE INDEX IF NOT EXISTS idx_subs_token ON subscribers(token);

@@ -1,0 +1,58 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Đánh giá' }],
+  heading: 'Khách hàng nói gì về TRIP',
+  sub: reviews.length ? `${reviews.length} đánh giá · trung bình ${avg.toFixed(1)}/5 sao` : 'Bạn đã từng làm visa, dịch thuật hay đi tour cùng TRIP? Hãy là người đầu tiên chia sẻ trải nghiệm.',
+  actions: null,
+}) %>
+
+<section class="section">
+  <div class="container layout-side">
+    <div>
+      <% if (reviews.length) { %>
+        <div class="reviews-grid reviews-grid--2"><% reviews.forEach(function (r) { %><%- include('../partials/review-card', { r }) %><% }) %></div>
+      <% } else { %>
+        <div class="card text-center" style="background:var(--sky-50);border:0">
+          <h3>Chưa có đánh giá nào được đăng</h3>
+          <p>Mọi đánh giá trên trang này đều đến từ khách hàng thật của TRIP và được kiểm duyệt trước khi hiển thị.</p>
+        </div>
+      <% } %>
+    </div>
+    <aside class="sidebar">
+      <div class="card" id="viet-danh-gia">
+        <h3>Chia sẻ trải nghiệm của bạn</h3>
+        <p class="muted" style="margin-bottom:14px">Đánh giá của bạn giúp TRIP phục vụ tốt hơn và giúp người khác yên tâm hơn.</p>
+        <form class="js-review-form form-grid" action="/api/reviews" method="post" novalidate>
+          <div class="field">
+            <span class="field__label">Bạn chấm TRIP mấy sao? <span class="req">*</span></span>
+            <div class="star-input" role="radiogroup" aria-label="Số sao">
+              <% for (let i = 5; i >= 1; i--) { %><input type="radio" id="star<%= i %>" name="rating" value="<%= i %>"<%= i === 5 ? ' checked' : '' %>><label for="star<%= i %>" title="<%= i %> sao">★</label><% } %>
+            </div>
+            <span class="field__error" data-error="rating"></span>
+          </div>
+          <div class="field">
+            <label for="rv-name">Tên của bạn <span class="req">*</span></label>
+            <input class="input" id="rv-name" name="name" maxlength="60" placeholder="VD: Chị Lan (Đà Nẵng)" required>
+            <span class="field__error" data-error="name"></span>
+          </div>
+          <div class="field">
+            <label for="rv-service">Dịch vụ đã dùng</label>
+            <select class="select" id="rv-service" name="service"><option value="">— Chọn dịch vụ —</option><% leadServiceOptions.forEach(function (o) { %><option><%= o %></option><% }) %></select>
+            <span class="field__error" data-error="service"></span>
+          </div>
+          <div class="field">
+            <label for="rv-content">Cảm nhận của bạn <span class="req">*</span></label>
+            <textarea class="textarea" id="rv-content" name="content" maxlength="1200" placeholder="Hồ sơ của bạn được hỗ trợ thế nào? Điều gì bạn hài lòng nhất?" required></textarea>
+            <span class="field__error" data-error="content"></span>
+          </div>
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn btn--accent btn--block" type="submit"><%- icon('send') %> Gửi đánh giá</button>
+          <div class="form-msg" role="status" aria-live="polite"></div>
+          <p class="form-privacy"><%- icon('shield') %> Đánh giá được TRIP xác nhận trước khi hiển thị. Chỉ hiện tên bạn nhập, không hiện số điện thoại hay email.</p>
+        </form>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

@@ -20,6 +20,7 @@
     ['/admin/leads', 'Khách tư vấn', 'users'],
     ['/admin/subscribers', 'Đăng ký nhận tin', 'mail'],
     ['/admin/newsletter', 'Gửi bản tin', 'send'],
+    ['/admin/reviews', 'Đánh giá', 'heart'],
     ['/admin/posts', 'Bài viết', 'book'],
     ['/admin/tours', 'Tour', 'map'],
     ['/admin/settings', 'Cài đặt', 'info'],
@@ -29,10 +30,10 @@
 %>
 <div class="layout">
   <aside class="side" id="side">
-    <div class="side__brand"><img src="/img/logo-icon.png" alt=""><div>TRIP<small>Bảng quản trị</small></div></div>
+    <div class="side__brand"><img src="/img/logo-icon-sm.png" alt=""><div>TRIP<small>Bảng quản trị</small></div></div>
     <nav>
       <% nav.forEach(function ([href, label, ic]) { const active = href === '/admin' ? cur === '/admin' : cur.startsWith(href); %>
-        <a href="<%= href %>" class="<%= active ? 'is-active' : '' %>"><%- icon(ic) %> <%= label %></a>
+        <a href="<%= href %>" class="<%= active ? 'is-active' : '' %>"><%- icon(ic) %> <%= label %><% if (href === '/admin/reviews' && typeof pendingReviews !== 'undefined' && pendingReviews) { %><span class="badge badge--new"><%= pendingReviews %></span><% } %></a>
       <% }) %>
     </nav>
     <div class="side__foot">

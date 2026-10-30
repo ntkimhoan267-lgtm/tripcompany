@@ -128,3 +128,4 @@ textarea.editor { min-height: 420px; font-family: ui-monospace, SFMono-Regular, 
   .form-row, .form-row--3, .grid--2e { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) { .grid--4 { grid-template-columns: 1fr 1fr; } .stat__value { font-size: 1.5rem; } }
+.side nav a .badge { margin-left: auto; }

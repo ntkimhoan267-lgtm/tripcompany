@@ -97,6 +97,10 @@ router.post('/logout', requireAdmin, csrf, (req, res) => {
 });
 
 router.use(requireAdmin);
+router.use((req, res, next) => {
+  res.locals.pendingReviews = db.prepare("SELECT COUNT(*) AS n FROM reviews WHERE status = 'pending'").get().n;
+  next();
+});
 
 // ---------- Tổng quan ----------
 router.get('/', csrf, (req, res) => {
@@ -369,6 +373,48 @@ router.post('/tours/:id(\\d+)/delete', csrf, (req, res) => {
   const r = db.prepare('DELETE FROM tours WHERE id = ?').run(req.params.id);
   flash(req, r.changes ? 'success' : 'error', r.changes ? 'Đã xoá tour.' : 'Không tìm thấy tour.');
   res.redirect('/admin/tours');
+});
+
+// ---------- Đánh giá của khách ----------
+const REVIEW_SOURCES = { zalo: 'Zalo', facebook: 'Facebook', google: 'Google', 'truc-tiep': 'Trực tiếp tại văn phòng', web: 'Khách gửi qua website' };
+const REVIEW_STATUSES = { pending: 'Chờ duyệt', published: 'Đang hiển thị', hidden: 'Ẩn' };
+
+router.get('/reviews', csrf, (req, res) => {
+  const status = REVIEW_STATUSES[qs(req.query.status, 20)] ? qs(req.query.status, 20) : '';
+  const reviews = status
+    ? db.prepare('SELECT * FROM reviews WHERE status = ? ORDER BY id DESC').all(status)
+    : db.prepare("SELECT * FROM reviews ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, id DESC").all();
+  res.render('admin/reviews', { title: 'Đánh giá', reviews, status, REVIEW_SOURCES, REVIEW_STATUSES, leadServiceOptions });
+});
+
+// Nhân viên nhập lại đánh giá thật của khách (từ tin nhắn Zalo/Facebook, Google...)
+router.post('/reviews', csrf, (req, res) => {
+  const b = req.body;
+  const name = qs(b.name, 60).trim();
+  const content = qs(b.content, 1200).trim();
+  const rating = Math.round(Number(qs(b.rating, 1)));
+  const source = REVIEW_SOURCES[b.source] && b.source !== 'web' ? b.source : 'zalo';
+  if (name.length < 2 || content.length < 10 || !(rating >= 1 && rating <= 5) || !b.confirm_real) {
+    flash(req, 'error', 'Vui lòng nhập tên, nội dung, số sao và xác nhận đây là đánh giá thật của khách.');
+    return res.redirect('/admin/reviews');
+  }
+  const service = leadServiceOptions.includes(b.service) ? b.service : '';
+  db.prepare("INSERT INTO reviews (name, service, rating, content, source, status) VALUES (?, ?, ?, ?, ?, 'published')").run(name, service, rating, content, source);
+  flash(req, 'success', 'Đã thêm và hiển thị đánh giá.');
+  res.redirect('/admin/reviews');
+});
+
+router.post('/reviews/:id(\\d+)/status', csrf, (req, res) => {
+  const status = REVIEW_STATUSES[req.body.status] ? req.body.status : 'hidden';
+  const r = db.prepare('UPDATE reviews SET status = ? WHERE id = ?').run(status, req.params.id);
+  flash(req, r.changes ? 'success' : 'error', r.changes ? `Đã chuyển sang "${REVIEW_STATUSES[status]}".` : 'Không tìm thấy đánh giá.');
+  res.redirect('/admin/reviews');
+});
+
+router.post('/reviews/:id(\\d+)/delete', csrf, (req, res) => {
+  const r = db.prepare('DELETE FROM reviews WHERE id = ?').run(req.params.id);
+  flash(req, r.changes ? 'success' : 'error', r.changes ? 'Đã xoá đánh giá.' : 'Không tìm thấy đánh giá.');
+  res.redirect('/admin/reviews');
 });
 
 // ---------- Cài đặt ----------

@@ -1,0 +1,11 @@
+<%
+  const SOURCES = { zalo: 'qua Zalo', facebook: 'trên Facebook', google: 'trên Google', 'truc-tiep': 'tại văn phòng', web: 'trên website' };
+%>
+<figure class="review-card reveal">
+  <div class="review-card__stars" aria-label="<%= r.rating %> trên 5 sao"><% for (let i = 1; i <= 5; i++) { %><span class="<%= i <= r.rating ? 'on' : '' %>">★</span><% } %></div>
+  <blockquote><%= r.content %></blockquote>
+  <figcaption>
+    <span class="review-card__avatar" aria-hidden="true"><%= (r.name.trim().split(/\s+/).pop() || '?').charAt(0).toUpperCase() %></span>
+    <span><strong><%= r.name %></strong><% if (r.service) { %><%= r.service %> · <% } %>Đánh giá <%= SOURCES[r.source] || '' %></span>
+  </figcaption>
+</figure>

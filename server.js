@@ -1,6 +1,7 @@
 const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
+const compression = require('compression');
 const cookieSession = require('cookie-session');
 const config = require('./src/config');
 const { seed } = require('./src/seed');
@@ -33,6 +34,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
+app.use(compression());
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: config.isProd ? '7d' : 0 }));
 // Ảnh do admin tải lên: chỉ phục vụ như ảnh, không bao giờ chạy được script hay hiển thị như trang HTML
 app.use('/uploads', express.static(config.uploadDir, {

@@ -29,6 +29,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css?v=<%= assetV %>">
+  <% if (path === '/') { %><link rel="preload" as="image" href="/media/hero-montage.jpg"><% } %>
   <script type="application/ld+json"><%- JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'TravelAgency',
@@ -64,7 +65,7 @@
 
 <header class="header" id="header">
   <div class="container">
-    <a class="header__logo" href="/" aria-label="TRIP – Trang chủ"><img src="/img/logo-horizontal.png" alt="TRIP – Let Your Adventures Begin With Us" width="160" height="46"></a>
+    <a class="header__logo" href="/" aria-label="TRIP – Trang chủ"><img src="/img/logo-horizontal-sm.png" alt="TRIP – Let Your Adventures Begin With Us" width="160" height="46"></a>
 
     <nav class="nav" id="nav" aria-label="Menu chính">
       <ul>

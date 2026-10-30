@@ -11,6 +11,16 @@
     if (side && side.classList.contains('is-open') && !e.target.closest('#side') && !e.target.closest('[data-side-toggle]')) side.classList.remove('is-open');
   });
 
+  // Sao chép link (VD: link trang đánh giá để gửi khách qua Zalo)
+  $$('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var text = b.getAttribute('data-copy'); var old = b.textContent;
+      var done = function () { b.textContent = '✓ Đã sao chép'; setTimeout(function () { b.textContent = old; }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { prompt('Sao chép link:', text); });
+      else prompt('Sao chép link:', text);
+    });
+  });
+
   // Xác nhận trước khi xoá / gửi
   $$('form[data-confirm]').forEach(function (f) {
     f.addEventListener('submit', function (e) { if (!confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });

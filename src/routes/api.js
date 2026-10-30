@@ -78,4 +78,26 @@ router.post('/subscribe', subscribeLimiter, (req, res) => {
   res.json({ ok: true, message: 'Đăng ký thành công! Mỗi tháng TRIP sẽ gửi bạn cập nhật visa và lịch tour mới nhất.' });
 });
 
+// Khách tự gửi đánh giá: luôn ở trạng thái chờ duyệt, chỉ hiện lên web khi nhân viên duyệt
+const reviewLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 3, standardHeaders: 'draft-7', legacyHeaders: false,
+  message: { ok: false, error: 'Bạn đã gửi đánh giá gần đây. Cảm ơn bạn!' } });
+
+router.post('/reviews', reviewLimiter, (req, res) => {
+  const b = req.body || {};
+  if (b.website) return res.json({ ok: true });
+  const name = clean(b.name, 60);
+  const service = clean(b.service, 100);
+  const content = clean(b.content, 1200);
+  const rating = Math.round(Number(b.rating));
+  const errors = {};
+  if (name.length < 2) errors.name = 'Vui lòng nhập tên của bạn.';
+  if (!(rating >= 1 && rating <= 5)) errors.rating = 'Vui lòng chọn số sao.';
+  if (content.length < 15) errors.content = 'Bạn chia sẻ thêm một chút nhé (ít nhất 15 ký tự).';
+  if (service && !leadServiceOptions.includes(service)) errors.service = 'Dịch vụ không hợp lệ.';
+  if (Object.keys(errors).length) return res.status(400).json({ ok: false, errors });
+  db.prepare("INSERT INTO reviews (name, service, rating, content, source, status) VALUES (?, ?, ?, ?, 'web', 'pending')")
+    .run(name, service, rating, content);
+  res.json({ ok: true, message: 'Cảm ơn bạn đã đánh giá! TRIP sẽ hiển thị sau khi xác nhận.' });
+});
+
 module.exports = router;

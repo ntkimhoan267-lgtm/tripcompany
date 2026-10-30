@@ -12,6 +12,8 @@ const renderMarkdown = (md) => sanitizeHtml(marked.parse(md || ''), {
   allowedAttributes: { a: ['href', 'title', 'target', 'rel'], img: ['src', 'alt', 'title', 'loading'] },
 });
 
+const publishedReviews = (n) => db.prepare("SELECT * FROM reviews WHERE status = 'published' ORDER BY id DESC LIMIT ?").all(n);
+
 const publishedTours = (where = '', ...args) =>
   db.prepare(`SELECT * FROM tours WHERE status = 'published' ${where} ORDER BY featured DESC, sort, id`).all(...args);
 
@@ -23,6 +25,7 @@ router.get('/', (req, res) => {
     },
     services,
     tours: publishedTours('AND featured = 1').slice(0, 4),
+    reviews: publishedReviews(6),
   });
 });
 
@@ -157,6 +160,15 @@ router.get('/blog/:slug', (req, res, next) => {
   });
 });
 
+router.get('/danh-gia', (req, res) => {
+  const reviews = publishedReviews(60);
+  const avg = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : 0;
+  res.render('pages/reviews', {
+    meta: { title: 'Đánh giá của khách hàng về TRIP', description: 'Khách hàng nói gì về dịch vụ visa, dịch thuật và du lịch của TRIP Đà Nẵng. Chia sẻ trải nghiệm của bạn.' },
+    reviews, avg,
+  });
+});
+
 router.get('/lien-he', (req, res) => {
   res.render('pages/contact', {
     meta: { title: 'Liên hệ TRIP', description: `Văn phòng TRIP: ${company.address}. Hotline visa & tour, dịch thuật. Tư vấn miễn phí.` },
@@ -187,7 +199,7 @@ router.get('/sitemap.xml', (req, res) => {
     ...services.markets.map((m) => `/visa/${m.id}`), ...Object.keys(VISA_EXTRA).map((k) => `/visa/${k}`),
     '/dich-vu/dich-thuat', '/dich-vu/hop-phap-hoa-lanh-su',
     ...Object.keys(services.otherServices).map((s) => `/dich-vu/${s}`),
-    '/bang-gia', '/tour', '/blog', '/lien-he'];
+    '/bang-gia', '/tour', '/blog', '/danh-gia', '/lien-he'];
   for (const t of publishedTours()) urls.push(`/tour/${t.slug}`);
   for (const p of db.prepare("SELECT slug FROM posts WHERE status = 'published'").all()) urls.push(`/blog/${p.slug}`);
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${base}${u}</loc></url>`).join('\n')}\n</urlset>`;

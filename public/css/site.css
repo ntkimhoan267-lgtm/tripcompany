@@ -746,3 +746,37 @@ a.market:hover .market__art video { transform: scale(1.05); }
 .team-gallery .photo-frame:nth-child(2) > img { object-position: center 62%; }
 @media (max-width: 860px) { .team-gallery { grid-template-columns: 1fr 1fr; } .team-gallery .photo-frame:last-child { grid-column: 1 / -1; } .team-gallery .photo-frame { height: 240px; } }
 @media (max-width: 560px) { .photo-banner { aspect-ratio: 4 / 3; } .photo-frame--tilt { transform: none; } .photo-frame--tilt .photo-caption { transform: none; } }
+
+/* ---------- Thumbnail video trong khung cửa sổ + mũi tên chỉ dẫn ---------- */
+.porthole { cursor: pointer; transition: transform .35s ease; }
+.porthole:hover { transform: rotate(-3deg) scale(1.02); }
+.porthole__glass::before { height: 7%; }
+.porthole__thumb, .porthole__teaser { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.porthole__thumb { object-position: center 30%; }
+.porthole__teaser { opacity: 0; transition: opacity .4s ease; }
+.porthole.is-previewing .porthole__teaser { opacity: 1; }
+.porthole__glass .porthole__play { inset: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0;
+  background: linear-gradient(180deg, transparent 38%, rgba(13,28,43,.15) 55%, rgba(13,28,43,.82) 100%); color: #fff; text-align: center; }
+.porthole__glass .porthole__play .porthole__btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 78px; height: 78px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--accent); color: #fff; box-shadow: 0 0 0 10px rgba(242,120,75,.3), 0 16px 30px -8px rgba(224,96,47,.8); animation: pulse 2.2s ease-out infinite; }
+.porthole__glass .porthole__play .porthole__btn .icon { width: 28px; height: 28px; fill: #fff; stroke: none; margin-left: 4px; }
+.porthole__glass .porthole__play:hover .porthole__btn { transform: translate(-50%, -50%) scale(1.08); }
+.porthole__glass .porthole__play .porthole__label { background: none; padding: 0 18px 30px; border-radius: 0; font-family: var(--serif); font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+.porthole__label small { display: block; font-family: var(--font); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #ffd9c4; margin-bottom: 4px; }
+.porthole__label em { color: #9fd3f5; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(242,120,75,.55), 0 16px 30px -8px rgba(224,96,47,.8); } 70% { box-shadow: 0 0 0 18px rgba(242,120,75,0), 0 16px 30px -8px rgba(224,96,47,.8); } 100% { box-shadow: 0 0 0 0 rgba(242,120,75,0), 0 16px 30px -8px rgba(224,96,47,.8); } }
+
+.hero__visual { position: relative; }
+.hero__callout { position: absolute; z-index: 3; left: -40px; top: -18px; margin: 0; width: 230px; color: #ffd27a; pointer-events: none;
+  font-family: 'Dancing Script', cursive; font-size: 1.65rem; line-height: 1.1; transform: rotate(-6deg); text-shadow: 0 2px 12px rgba(0,0,0,.45); }
+.hero__arrow { display: block; width: 110px; height: 82px; margin: 4px 0 0 70px; animation: nudge 1.6s ease-in-out infinite; filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+@keyframes nudge { 50% { transform: translate(6px, 6px); } }
+@media (max-width: 1100px) { .hero__callout { left: -10px; } }
+@media (max-width: 900px) {
+  .hero__callout { position: relative; left: auto; top: auto; width: auto; text-align: center; transform: none; margin: 0 0 4px; font-size: 1.5rem; }
+  .hero__arrow { margin: 2px auto 0; width: 70px; height: 56px; transform: rotate(40deg); animation: none; }
+}
+@media (prefers-reduced-motion: reduce) { .porthole__btn, .hero__arrow { animation: none !important; } }
+.porthole__glass .porthole__play .porthole__btn { top: 64%; width: 66px; height: 66px; }
+.porthole__glass .porthole__play .porthole__label { padding: 0 30px 32px; font-size: 1.15rem; }
+@media (max-width: 480px) { .porthole__glass .porthole__play .porthole__label { padding: 0 34px 30px; font-size: 1rem; } }

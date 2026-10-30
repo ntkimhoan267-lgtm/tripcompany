@@ -174,6 +174,12 @@
   // Video nền: chỉ phát khi nằm trong màn hình; tôn trọng người dùng muốn giảm chuyển động
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) $$('.hero__bg, .porthole__teaser').forEach(function (v) { v.removeAttribute('autoplay'); v.pause(); });
+  // Rê chuột vào khung cửa sổ: phát thử đoạn video ngắn trên nền thumbnail
+  var porthole = $('.porthole'); var pv = porthole && $('.porthole__teaser', porthole);
+  if (porthole && pv && !reduce && window.matchMedia('(hover: hover)').matches) {
+    porthole.addEventListener('mouseenter', function () { pv.preload = 'auto'; var p = pv.play(); if (p && p.catch) p.catch(function () {}); porthole.classList.add('is-previewing'); });
+    porthole.addEventListener('mouseleave', function () { porthole.classList.remove('is-previewing'); pv.pause(); });
+  }
   var lazyVideos = $$('video.js-inview');
   if (!reduce && lazyVideos.length && 'IntersectionObserver' in window) {
     var vio = new IntersectionObserver(function (entries) {

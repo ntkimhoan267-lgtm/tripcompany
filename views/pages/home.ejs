@@ -21,14 +21,22 @@
     </div>
 
     <div class="hero__visual">
+      <% if (video) { %>
+      <p class="hero__callout" aria-hidden="true">
+        <span>Click vào đây để biết thêm về TRIP!</span>
+        <svg class="hero__arrow" viewBox="0 0 160 120" fill="none"><path d="M8 14 C 60 4, 120 22, 132 80" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 0"/><path d="M116 70 L 133 92 L 147 66" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </p>
+      <% } %>
       <div class="porthole">
         <div class="porthole__glass">
+          <img class="porthole__thumb" src="/media/trip-thumb.jpg" alt="" width="720" height="960" fetchpriority="high">
           <% if (teaser) { %>
-            <video class="porthole__teaser" src="<%= teaser.src %>" poster="/media/trip-teaser.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+            <video class="porthole__teaser" src="<%= teaser.src %>" muted loop playsinline preload="none" aria-hidden="true"></video>
           <% } %>
           <% if (video) { %>
-            <button class="porthole__play<%= teaser ? ' porthole__play--corner' : '' %>" type="button" data-video-modal="<%= video.type === 'file' ? video.src : video.embed %>" data-video-type="<%= video.type %>" aria-label="Xem video giới thiệu TRIP">
-              <span><%- icon('play') %></span><span>Xem video về TRIP</span>
+            <button class="porthole__play" type="button" data-video-modal="<%= video.type === 'file' ? video.src : video.embed %>" data-video-type="<%= video.type %>" aria-label="Xem video giới thiệu về TRIP">
+              <span class="porthole__btn"><%- icon('play') %></span>
+              <span class="porthole__label"><small>Video giới thiệu · 4:14</small>Gặp gỡ đội ngũ <em>TRIP</em></span>
             </button>
           <% } %>
         </div>

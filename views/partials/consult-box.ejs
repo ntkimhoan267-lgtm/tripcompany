@@ -1,0 +1,20 @@
+<%
+  // Tham số: people (mảng tư vấn viên), presetService
+  const ppl = typeof people !== 'undefined' ? people : [];
+  const preset = typeof presetService !== 'undefined' ? presetService : '';
+%>
+<div class="card">
+  <h3>Đăng ký tư vấn miễn phí</h3>
+  <p class="muted" style="margin-bottom:16px">Để lại thông tin, TRIP gọi lại ngay trong giờ làm việc.</p>
+  <%- include('lead-form', { formId: 'side', layout: 'stack', presetService: preset, showNote: false, submitLabel: 'Gửi yêu cầu' }) %>
+</div>
+<% if (ppl.length) { %>
+<div class="card">
+  <h3>Gọi trực tiếp tư vấn viên</h3>
+  <ul class="consultants">
+    <% ppl.forEach(function (c) { %>
+      <li><a href="tel:<%= h.phoneTel(c.phone) %>"><%= c.name %> <span><%- icon('phone') %><%= h.phoneDisplay(c.phone) %></span></a></li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>

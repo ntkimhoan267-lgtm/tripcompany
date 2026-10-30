@@ -1,0 +1,33 @@
+<%
+  const grads = {
+    'quoc-te': 'linear-gradient(150deg,#3d8bbf 0%,#1f3a52 100%)',
+    'trong-nuoc': 'linear-gradient(150deg,#5bc0be 0%,#2f74a4 100%)',
+    'trong-ngay': 'linear-gradient(150deg,#f2a65a 0%,#e0602f 55%,#1f3a52 130%)',
+  };
+%>
+<a class="card tour-card reveal" href="/tour/<%= t.slug %>">
+  <div class="tour-card__media">
+    <span class="tour-card__badge"><%- icon('clock') %> <%= t.duration || 'Liên hệ' %></span>
+    <% if (t.image) { %>
+      <img src="<%= t.image %>" alt="<%= t.title %>" loading="lazy">
+    <% } else { %>
+      <div class="tour-art" style="--g:<%= grads[t.region] || grads['quoc-te'] %>">
+        <span><%= t.region === 'trong-ngay' ? 'Tour trong ngày' : t.region === 'trong-nuoc' ? 'Tour trong nước' : 'Tour nước ngoài' %></span>
+        <strong><%= t.destination %></strong>
+      </div>
+    <% } %>
+  </div>
+  <div class="tour-card__body">
+    <h3><%= t.title %></h3>
+    <div class="tour-card__meta">
+      <span><%- icon('pin') %> Khởi hành: <%= t.departure %></span>
+    </div>
+    <div class="tour-card__foot">
+      <div>
+        <small>Giá từ</small>
+        <strong><%= t.price ? h.vnd(t.price) : 'Liên hệ' %></strong><% if (t.price) { %><small>/khách</small><% } %>
+      </div>
+      <span class="btn btn--ghost btn--sm">Chi tiết</span>
+    </div>
+  </div>
+</a>

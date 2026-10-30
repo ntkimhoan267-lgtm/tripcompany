@@ -1,0 +1,51 @@
+<%- include('_head') %>
+<% const max = Math.max(1, ...chart.map(c => c.n)); const maxSvc = Math.max(1, ...topServices.map(s => s.n)); %>
+<div class="topline">
+  <h1>Tổng quan</h1>
+  <div class="actions">
+    <% if (googleReady && stats.unsynced) { %>
+      <form method="post" action="/admin/sync"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Đồng bộ <%= stats.unsynced %> bản ghi lên Google Sheet</button></form>
+    <% } %>
+    <a class="btn" href="/admin/posts/new">+ Viết bài</a>
+  </div>
+</div>
+
+<div class="grid grid--4">
+  <div class="card stat stat--accent"><span class="stat__label">Khách mới chưa xử lý</span><span class="stat__value"><%= stats.leadsNew %></span><span class="stat__sub"><a href="/admin/leads?status=new">Xem ngay →</a></span></div>
+  <div class="card stat"><span class="stat__label">Khách tư vấn hôm nay</span><span class="stat__value"><%= stats.leadsToday %></span><span class="stat__sub">7 ngày: <%= stats.leads7 %> · 30 ngày: <%= stats.leads30 %></span></div>
+  <div class="card stat"><span class="stat__label">Đang nhận bản tin</span><span class="stat__value"><%= stats.subscribers %></span><span class="stat__sub">+<%= stats.subs30 %> trong 30 ngày</span></div>
+  <div class="card stat"><span class="stat__label">Bài viết đã đăng</span><span class="stat__value"><%= stats.posts %></span><span class="stat__sub"><a href="/admin/posts">Quản lý bài viết →</a></span></div>
+</div>
+
+<div class="grid grid--2" style="margin-top:16px">
+  <div class="card">
+    <h2>Khách tư vấn 30 ngày qua</h2>
+    <div class="chart" role="img" aria-label="Biểu đồ số khách tư vấn theo ngày">
+      <% chart.forEach(function (c) { %><div class="chart__bar" style="height:<%= (c.n / max * 100).toFixed(1) %>%" data-tip="<%= c.d.slice(8,10) %>/<%= c.d.slice(5,7) %>: <%= c.n %> khách"></div><% }) %>
+    </div>
+    <div class="chart__axis"><span><%= chart[0].d.slice(8,10) %>/<%= chart[0].d.slice(5,7) %></span><span>Hôm nay</span></div>
+  </div>
+  <div class="card">
+    <h2>Dịch vụ được hỏi nhiều (30 ngày)</h2>
+    <% if (topServices.length) { %>
+      <div class="bars">
+        <% topServices.forEach(function (s) { %>
+          <div class="bars__row"><span><%= s.service %></span><strong><%= s.n %></strong><div class="bars__track"><div class="bars__fill" style="width:<%= (s.n / maxSvc * 100).toFixed(0) %>%"></div></div></div>
+        <% }) %>
+      </div>
+    <% } else { %><p class="muted">Chưa có dữ liệu.</p><% } %>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="topline" style="margin-bottom:8px"><h2 style="margin:0">Khách tư vấn mới nhất</h2><a href="/admin/leads">Xem tất cả →</a></div>
+  <% if (recent.length) { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thời gian</th><th>Họ tên</th><th>SĐT</th><th>Dịch vụ</th><th>Trạng thái</th></tr></thead>
+    <tbody><% recent.forEach(function (l) { %>
+      <tr><td class="nowrap small"><%= h.fmtDate(l.created_at, true) %></td><td><strong><%= l.name %></strong></td><td class="nowrap"><a href="tel:<%= l.phone %>"><%= h.phoneDisplay(l.phone) %></a></td><td><%= l.service %></td><td><span class="badge badge--<%= l.status %>"><%= LEAD_STATUSES[l.status] %></span></td></tr>
+    <% }) %></tbody>
+  </table></div>
+  <% } else { %><div class="empty">Chưa có khách đăng ký tư vấn.</div><% } %>
+</div>
+<%- include('_foot') %>

@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Liên hệ' }],
+  heading: 'Liên hệ TRIP',
+  sub: 'Gọi hotline, nhắn Zalo, hoặc ghé văn phòng. TRIP luôn sẵn sàng hỗ trợ bạn.',
+  actions: null,
+}) %>
+
+<section class="section">
+  <div class="container">
+    <div class="grid grid--3">
+      <a class="card card--link" href="tel:<%= h.phoneTel(settings.hotline) %>"><div class="card__icon"><%- icon('passport') %></div><h3>Visa & Tour</h3><p><strong style="color:var(--navy);font-size:1.2rem"><%= h.phoneDisplay(settings.hotline) %></strong></p></a>
+      <a class="card card--link" href="tel:<%= h.phoneTel(settings.hotline_translation) %>"><div class="card__icon"><%- icon('lang') %></div><h3>Dịch thuật</h3><p><strong style="color:var(--navy);font-size:1.2rem"><%= h.phoneDisplay(settings.hotline_translation) %></strong></p></a>
+      <a class="card card--link" href="mailto:<%= settings.email %>"><div class="card__icon"><%- icon('mail') %></div><h3>Email</h3><p><%= settings.email %></p></a>
+    </div>
+
+    <div class="grid grid--2 mt-4" style="align-items:stretch">
+      <div class="card">
+        <h2 style="font-size:1.5rem">Gửi yêu cầu tư vấn</h2>
+        <%- include('../partials/lead-form', { formId: 'contact', layout: 'stack' }) %>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <h3>Văn phòng TRIP</h3>
+          <ul class="checklist">
+            <li><%- icon('pin') %><span><%= company.address %></span></li>
+            <% company.hours.forEach(function (hr) { %><li><%- icon('clock') %><span><strong><%= hr.label %>:</strong> <%= hr.value %></span></li><% }) %>
+            <li><%- icon('facebook') %><a href="<%= settings.facebook %>" target="_blank" rel="noopener">Fanpage TRIP</a></li>
+          </ul>
+        </div>
+        <iframe class="map" title="Bản đồ văn phòng TRIP" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://maps.google.com/maps?q=<%= encodeURIComponent(company.mapQuery) %>&z=16&output=embed"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

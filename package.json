@@ -1,0 +1,26 @@
+{
+  "name": "trip-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Website Công ty TNHH Dịch thuật và Dịch vụ Du lịch TRIP - tripdn.com",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server.js",
+    "dev": "node --no-warnings=ExperimentalWarning --watch server.js",
+    "test": "node --no-warnings=ExperimentalWarning --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cookie-session": "^2.1.1",
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.2",
+    "helmet": "^8.3.0",
+    "marked": "^18.1.2",
+    "multer": "^2.5.0",
+    "sanitize-html": "^2.18.1"
+  }
+}

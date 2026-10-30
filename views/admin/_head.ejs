@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>Quản trị TRIP</title>
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css?v=1">
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+</head>
+<body>
+<%- include('../partials/icons') %>
+<% if (typeof adminUser !== 'undefined' && adminUser) {
+  const nav = [
+    ['/admin', 'Tổng quan', 'target'],
+    ['/admin/leads', 'Khách tư vấn', 'users'],
+    ['/admin/subscribers', 'Đăng ký nhận tin', 'mail'],
+    ['/admin/newsletter', 'Gửi bản tin', 'send'],
+    ['/admin/posts', 'Bài viết', 'book'],
+    ['/admin/tours', 'Tour', 'map'],
+    ['/admin/settings', 'Cài đặt', 'info'],
+    ['/admin/account', 'Tài khoản', 'shield'],
+  ];
+  const cur = path.replace(/\/$/, '') || '/admin';
+%>
+<div class="layout">
+  <aside class="side" id="side">
+    <div class="side__brand"><img src="/img/logo-icon.png" alt=""><div>TRIP<small>Bảng quản trị</small></div></div>
+    <nav>
+      <% nav.forEach(function ([href, label, ic]) { const active = href === '/admin' ? cur === '/admin' : cur.startsWith(href); %>
+        <a href="<%= href %>" class="<%= active ? 'is-active' : '' %>"><%- icon(ic) %> <%= label %></a>
+      <% }) %>
+    </nav>
+    <div class="side__foot">
+      <a href="/" target="_blank"><%- icon('globe') %> Xem website</a>
+      <form action="/admin/logout" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit"><%- icon('x') %> Đăng xuất (<%= adminUser %>)</button></form>
+    </div>
+  </aside>
+  <main class="main">
+    <button class="btn btn--ghost burger" type="button" data-side-toggle style="margin-bottom:14px"><%- icon('menu') %> Menu</button>
+    <% if (flash) { %><div class="flash flash--<%= flash.type %>"><%= flash.msg %></div><% } %>
+    <% if (!googleReady) { %><div class="alert"><%- icon('info') %><div>Chưa kết nối Google Sheet & Gmail. Dữ liệu vẫn được lưu trên website. Xem hướng dẫn trong <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> để bật đồng bộ và nhận email thông báo.</div></div><% } %>
+<% } %>

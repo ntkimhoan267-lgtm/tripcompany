@@ -1,0 +1,81 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: 'Dịch thuật' }],
+  heading: 'Dịch thuật công chứng tại Đà Nẵng',
+  sub: 'Dịch thuật Anh – Trung – Hàn – Nhật – Thái – Lào, công chứng dấu công ty hoặc dấu tư pháp, hợp pháp hoá và chứng nhận lãnh sự. Nhận hồ sơ online, trả bản dịch nhanh.',
+  actions: { service: 'Dịch thuật công chứng', phone: settings.hotline_translation },
+}) %>
+<% const tr = services.translation; %>
+
+<section class="section">
+  <div class="container layout-side">
+    <div class="stack">
+      <div class="grid grid--3">
+        <div class="card"><div class="card__icon"><%- icon('lang') %></div><h3>Đa ngôn ngữ</h3><p>Anh, Trung, Hàn, Nhật, Thái, Lào và các ngôn ngữ khác theo yêu cầu.</p></div>
+        <div class="card"><div class="card__icon"><%- icon('stamp') %></div><h3>Công chứng hợp lệ</h3><p>Dấu công ty hoặc dấu tư pháp, đúng yêu cầu nơi nhận hồ sơ.</p></div>
+        <div class="card"><div class="card__icon"><%- icon('zap') %></div><h3>Hoả tốc</h3><p>Có gói dịch hoả tốc, không theo form cho hồ sơ gấp.</p></div>
+      </div>
+
+      <div>
+        <h2 class="mt-4">Tài liệu TRIP thường dịch</h2>
+        <ul class="chips"><% tr.documents.forEach(function (d) { %><li><%= d %></li><% }) %></ul>
+      </div>
+
+      <div id="bang-gia">
+        <h2 class="mt-4">Bảng giá dịch thuật</h2>
+        <p class="muted">Đơn vị tính: trang. Áp dụng cho tài liệu phổ thông.</p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Ngôn ngữ</th><th>Cấp độ dịch thuật</th><th class="num">Giá / trang</th></tr></thead>
+            <tbody>
+              <% tr.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %>
+                <tr>
+                  <td><% if (i === 0) { %><strong><%= l.pair %></strong><% } %></td>
+                  <td><%= r.level %></td>
+                  <td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td>
+                </tr>
+              <% }) }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="mt-3">Phụ phí</h3>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Dịch vụ</th><th>Đơn vị</th><th class="num">Giá</th></tr></thead>
+            <tbody><% tr.surcharges.forEach(function (s) { %><tr><td><%= s.name %></td><td class="muted"><%= s.unit %></td><td class="num"><%= h.vnd(s.price) %></td></tr><% }) %></tbody>
+          </table>
+        </div>
+        <div class="notice mt-2"><%- icon('info') %><div><% tr.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
+      </div>
+
+      <div id="hop-phap-hoa">
+        <h2 class="mt-4">Hợp pháp hoá & Chứng nhận lãnh sự</h2>
+        <p>Giấy tờ Việt Nam khi sử dụng ở nước ngoài (và ngược lại) thường phải được chứng nhận hoặc hợp pháp hoá lãnh sự. TRIP nhận làm trọn gói cho giấy tờ dân sự (độc thân, khai sinh, kết hôn…), giấy tờ học thuật (bằng cấp, bảng điểm, học bạ) và giấy tờ kinh tế (hợp đồng lao động, thương mại).</p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Dịch vụ</th><th>Giấy tờ</th><th class="num">Giá trọn gói</th></tr></thead>
+            <tbody><% tr.legalization.forEach(function (x) { %><tr><td><strong><%= x.name %></strong></td><td class="muted"><%= x.detail %></td><td class="num"><%= h.vnd(x.price) %></td></tr><% }) %></tbody>
+          </table>
+        </div>
+        <p class="table-note">Hợp pháp hoá lãnh sự cho các nước khác: vui lòng liên hệ để được báo giá theo loại giấy tờ và quốc gia sử dụng.</p>
+      </div>
+
+      <div>
+        <h2 class="mt-4">Quy trình dịch thuật</h2>
+        <ol class="steps steps--2">
+          <li class="step"><div class="card__icon"><%- icon('send') %></div><h3>Gửi tài liệu</h3><p>Chụp ảnh / scan gửi qua Zalo, email hoặc mang đến văn phòng.</p></li>
+          <li class="step"><div class="card__icon"><%- icon('wallet') %></div><h3>Nhận báo giá</h3><p>TRIP báo giá, hình thức công chứng và thời gian trả bản dịch.</p></li>
+          <li class="step"><div class="card__icon"><%- icon('file') %></div><h3>Dịch & hiệu đính</h3><p>Biên dịch viên dịch, hiệu đính, đối chiếu với bản gốc.</p></li>
+          <li class="step"><div class="card__icon"><%- icon('check-circle') %></div><h3>Công chứng & bàn giao</h3><p>Đóng dấu theo yêu cầu, nhận tại văn phòng hoặc gửi chuyển phát.</p></li>
+        </ol>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <%- include('../partials/consult-box', { people: company.consultants.translation, presetService: 'Dịch thuật công chứng' }) %>
+    </aside>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

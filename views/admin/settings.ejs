@@ -1,0 +1,54 @@
+<%- include('_head') %>
+<% const v = parseVideo(s.hero_video); %>
+<div class="topline"><h1>Cài đặt website</h1></div>
+<div class="grid grid--2">
+  <form class="card form" method="post" action="/admin/settings">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <h2>Liên hệ</h2>
+    <div class="form-row">
+      <div><label for="hotline">Hotline Visa & Tour</label><input type="text" id="hotline" name="hotline" value="<%= s.hotline %>"></div>
+      <div><label for="hotline_translation">Hotline Dịch thuật</label><input type="text" id="hotline_translation" name="hotline_translation" value="<%= s.hotline_translation %>"></div>
+    </div>
+    <div class="form-row">
+      <div><label for="zalo">Số Zalo (nút chat nổi)</label><input type="text" id="zalo" name="zalo" value="<%= s.zalo %>"></div>
+      <div><label for="email">Email hiển thị</label><input type="email" id="email" name="email" value="<%= s.email %>"></div>
+    </div>
+    <div class="form-row">
+      <div><label for="facebook">Link Fanpage</label><input type="url" id="facebook" name="facebook" value="<%= s.facebook %>"></div>
+      <div><label for="messenger">Link Messenger</label><input type="url" id="messenger" name="messenger" value="<%= s.messenger %>"><p class="hint">VD: https://m.me/triptranslate. Để trống để ẩn nút.</p></div>
+    </div>
+
+    <h2 style="margin-top:10px">Video trang chủ</h2>
+    <div>
+      <label for="hero_video">Link video</label>
+      <input type="text" id="hero_video" name="hero_video" value="<%= s.hero_video %>">
+      <p class="hint">Hỗ trợ: file MP4 trên website (VD <code>/media/trip-intro.mp4</code>, tự chạy), link YouTube, hoặc link Google Drive (file phải để chế độ "Bất kỳ ai có đường liên kết").
+        Hiện tại: <strong><%= v ? ({ file: 'File MP4', youtube: 'YouTube', drive: 'Google Drive' })[v.type] : 'Không hợp lệ' %></strong></p>
+    </div>
+
+    <h2 style="margin-top:10px">Popup nhận tin</h2>
+    <div class="form-row">
+      <label class="check"><input type="checkbox" name="popup_newsletter_enabled" value="1"<%= s.popup_newsletter_enabled === '1' ? ' checked' : '' %>> Tự động hiện popup đăng ký nhận tin</label>
+      <div><label for="popup_newsletter_delay">Hiện sau (giây)</label><input type="number" id="popup_newsletter_delay" name="popup_newsletter_delay" min="3" max="120" value="<%= s.popup_newsletter_delay %>"></div>
+    </div>
+
+    <h2 style="margin-top:10px">Email nhận thông báo</h2>
+    <div>
+      <label for="notify_emails">Danh sách Gmail nhận thông báo & quyền truy cập Google Sheet</label>
+      <input type="text" id="notify_emails" name="notify_emails" value="<%= s.notify_emails %>">
+      <p class="hint">Phân cách bằng dấu phẩy. Mỗi khi có khách đăng ký, các email này nhận thông báo ngay.</p>
+    </div>
+    <div class="actions"><button class="btn">Lưu cài đặt</button></div>
+  </form>
+
+  <div class="card">
+    <h2>Kết nối Google Sheet & Gmail</h2>
+    <% if (googleReady) { %>
+      <p>Đã cấu hình <code>GOOGLE_SCRIPT_URL</code>. Bấm nút dưới để kiểm tra kết nối và lấy link Google Sheet.</p>
+      <form method="post" action="/admin/test-google"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Kiểm tra kết nối</button></form>
+    <% } else { %>
+      <p class="muted">Chưa cấu hình. Làm theo hướng dẫn trong file <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> (khoảng 5 phút), sau đó đặt biến môi trường <code>GOOGLE_SCRIPT_URL</code> và <code>GOOGLE_SCRIPT_SECRET</code> trên hosting.</p>
+    <% } %>
+  </div>
+</div>
+<%- include('_foot') %>

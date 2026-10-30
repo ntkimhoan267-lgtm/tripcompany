@@ -1,0 +1,40 @@
+<%
+  // Tham số: formId, layout ('stack' | 'inline'), presetService, showNote, submitLabel
+  const fid = typeof formId !== 'undefined' ? formId : 'lead';
+  const lay = typeof layout !== 'undefined' ? layout : 'stack';
+  const preset = typeof presetService !== 'undefined' ? presetService : '';
+  const note = typeof showNote !== 'undefined' ? showNote : lay === 'stack';
+  const label = typeof submitLabel !== 'undefined' ? submitLabel : 'Gửi yêu cầu tư vấn';
+%>
+<form class="js-lead-form <%= lay === 'stack' ? 'form-grid' : '' %>" action="/api/leads" method="post" novalidate>
+  <div class="field">
+    <label for="<%= fid %>-name">Họ và tên <span class="req">*</span></label>
+    <input class="input" id="<%= fid %>-name" name="name" autocomplete="name" placeholder="Nguyễn Văn A" required maxlength="100">
+    <span class="field__error" data-error="name"></span>
+  </div>
+  <div class="field">
+    <label for="<%= fid %>-phone">Số điện thoại <span class="req">*</span></label>
+    <input class="input" id="<%= fid %>-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09xx xxx xxx" required maxlength="20">
+    <span class="field__error" data-error="phone"></span>
+  </div>
+  <div class="field">
+    <label for="<%= fid %>-service">Dịch vụ cần tư vấn <span class="req">*</span></label>
+    <select class="select" id="<%= fid %>-service" name="service" required>
+      <option value="">— Chọn dịch vụ —</option>
+      <% leadServiceOptions.forEach(function (o) { %><option<%= o === preset ? ' selected' : '' %>><%= o %></option><% }) %>
+    </select>
+    <span class="field__error" data-error="service"></span>
+  </div>
+  <% if (note) { %>
+  <div class="field">
+    <label for="<%= fid %>-note">Ghi chú <span class="muted">(không bắt buộc)</span></label>
+    <textarea class="textarea" id="<%= fid %>-note" name="note" maxlength="1000" placeholder="VD: Đi Trung Quốc tháng 12, 2 người…"></textarea>
+  </div>
+  <% } %>
+  <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="field">
+    <% if (lay === 'inline') { %><label aria-hidden="true">&nbsp;</label><% } %>
+    <button class="btn btn--accent btn--block" type="submit"><%- icon('send') %> <%= label %></button>
+  </div>
+  <div class="form-msg" role="status" aria-live="polite" style="grid-column:1/-1"></div>
+</form>

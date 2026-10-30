@@ -1,0 +1,83 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Bảng giá' }],
+  heading: 'Bảng giá dịch vụ',
+  sub: 'Giá công khai, minh bạch. Phí visa có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ.',
+  actions: {},
+}) %>
+
+<section class="section">
+  <div class="container">
+    <ul class="chips mb-3">
+      <li><a href="#visa-trung-quoc">Visa Trung Quốc</a></li>
+      <li><a href="#visa-cac-nuoc">Visa các nước</a></li>
+      <li><a href="#e-visa">E-visa Việt Nam</a></li>
+      <li><a href="#dich-thuat">Dịch thuật</a></li>
+      <li><a href="#ho-chieu">Hộ chiếu</a></li>
+      <li><a href="#xe">Xe đưa đón</a></li>
+    </ul>
+
+    <div class="stack">
+      <div id="visa-trung-quoc">
+        <h2>Visa Trung Quốc <span class="muted" style="font-size:1rem;font-weight:500">(VNĐ, quốc tịch Việt Nam)</span></h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Loại visa</th><th>Thời gian</th><th>Lưu trú / nhập cảnh</th><th class="num">Giá</th></tr></thead>
+          <tbody><% services.chinaVisa.rows.forEach(function (r) { %><tr><td><strong><%= r.type %></strong></td><td><%= r.time %></td><td class="muted"><%= r.detail %></td><td class="num"><%= h.vnd(r.price) %></td></tr><% }) %></tbody>
+        </table></div>
+        <p class="table-note"><%= services.chinaVisa.note %></p>
+      </div>
+
+      <div id="visa-cac-nuoc">
+        <h2>Visa các nước</h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá</th></tr></thead>
+          <tbody><% services.worldVisa.forEach(function (v) { %>
+            <tr><td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td><td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td><td><%= v.time %></td><td class="num"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></td></tr>
+          <% }) %></tbody>
+        </table></div>
+        <p class="table-note">Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản, khai form, đặt lịch. Chưa gồm VAT, phí VIP tại trung tâm tiếp nhận, bảo hiểm, vé máy bay và khách sạn.</p>
+      </div>
+
+      <div id="e-visa">
+        <h2>E-visa Việt Nam (người nước ngoài)</h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Thời gian xử lý</th><th class="num">Single</th><th class="num">Multiple</th></tr></thead>
+          <tbody><% services.evisa.rows.forEach(function (r) { %><tr><td><%= r.speed %></td><td class="num"><%= h.usd(r.single) %></td><td class="num"><%= h.usd(r.multiple) %></td></tr><% }) %></tbody>
+        </table></div>
+      </div>
+
+      <div id="dich-thuat">
+        <h2>Dịch thuật <span class="muted" style="font-size:1rem;font-weight:500">(VNĐ / trang)</span></h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Ngôn ngữ</th><th>Cấp độ</th><th class="num">Giá</th></tr></thead>
+          <tbody><% services.translation.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %><tr><td><% if (i === 0) { %><strong><%= l.pair %></strong><% } %></td><td><%= r.level %></td><td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td></tr><% }) }) %></tbody>
+        </table></div>
+        <p class="table-note"><a href="/dich-vu/dich-thuat#bang-gia">Xem phụ phí công chứng, in ấn, hiệu đính →</a></p>
+      </div>
+
+      <div id="ho-chieu">
+        <h2>Hộ chiếu</h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Loại</th><th>Thời gian</th><th class="num">Giá</th></tr></thead>
+          <tbody><% services.passport.rows.forEach(function (r) { %><tr><td><%= r.type %></td><td><%= r.time %></td><td class="num"><%= h.vnd(r.price) %></td></tr><% }) %></tbody>
+        </table></div>
+      </div>
+
+      <div id="xe">
+        <h2>Xe đưa đón <span class="muted" style="font-size:1rem;font-weight:500">(<%= services.carTransfer.area %>)</span></h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Lịch trình</th><th>Chiều</th><th class="num">4 chỗ</th><th class="num">7 chỗ</th><th class="num">16 chỗ</th></tr></thead>
+          <tbody><% services.carTransfer.rows.forEach(function (r) { %><tr><td><%= r.route %></td><td class="muted"><%= r.way %></td><td class="num"><%= h.vnd(r.p4) %></td><td class="num"><%= h.vnd(r.p7) %></td><td class="num"><%= h.vnd(r.p16) %></td></tr><% }) %></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card mt-4 text-center" style="background:var(--sky-50);border:0">
+      <h3>Cần báo giá cho trường hợp cụ thể?</h3>
+      <p>TRIP kiểm tra hồ sơ và báo giá chính xác miễn phí.</p>
+      <button class="btn btn--accent mt-2" data-open-lead>Nhận báo giá miễn phí</button>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

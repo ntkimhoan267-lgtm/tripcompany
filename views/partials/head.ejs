@@ -1,0 +1,114 @@
+<%
+  const m = typeof meta !== 'undefined' ? meta : {};
+  const fullTitle = m.title && !/TRIP/.test(m.title) ? `${m.title} | TRIP Đà Nẵng` : (m.title || 'TRIP Đà Nẵng');
+  const desc = m.description || 'TRIP – Dịch vụ Visa, Dịch thuật công chứng và Du lịch trọn gói tại Đà Nẵng.';
+  const canonical = siteUrl + path;
+  const ogImage = m.image ? (m.image.startsWith('http') ? m.image : siteUrl + m.image) : siteUrl + '/img/og-image.jpg';
+  const s = settings;
+  const isActive = (p) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'is-active' : '';
+%><!doctype html>
+<html lang="vi" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title><%= fullTitle %></title>
+  <meta name="description" content="<%= desc %>">
+  <% if (m.robots) { %><meta name="robots" content="<%= m.robots %>"><% } %>
+  <link rel="canonical" href="<%= canonical %>">
+  <meta property="og:type" content="<%= m.type || 'website' %>">
+  <meta property="og:site_name" content="TRIP Đà Nẵng">
+  <meta property="og:title" content="<%= fullTitle %>">
+  <meta property="og:description" content="<%= desc %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:image" content="<%= ogImage %>">
+  <meta property="og:locale" content="vi_VN">
+  <meta name="theme-color" content="#1f3a52">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css?v=1">
+  <script type="application/ld+json"><%- JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'TravelAgency',
+    name: company.legalName,
+    alternateName: 'TRIP',
+    url: siteUrl,
+    logo: siteUrl + '/img/logo-icon.png',
+    image: siteUrl + '/img/og-image.jpg',
+    telephone: s.hotline,
+    email: s.email,
+    taxID: company.taxCode,
+    address: { '@type': 'PostalAddress', streetAddress: 'Phòng 406, Tầng 4, 35 Cao Thắng', addressLocality: 'Hải Châu', addressRegion: 'Đà Nẵng', addressCountry: 'VN' },
+    openingHours: ['Mo-Fr 08:00-17:00', 'Sa 08:00-12:00'],
+    sameAs: [s.facebook].filter(Boolean),
+  }).replace(/</g, '\\u003c') %></script>
+</head>
+<body>
+<%- include('icons') %>
+<a class="sr-only" href="#main">Bỏ qua đến nội dung chính</a>
+
+<div class="topbar">
+  <div class="container">
+    <div class="topbar__info">
+      <span class="topbar__hide-sm"><%- icon('pin') %> <%= company.address %></span>
+      <span><%- icon('clock') %> T2–T6 8:00–17:00 · T7 8:00–12:00</span>
+    </div>
+    <div class="topbar__info">
+      <a href="tel:<%= h.phoneTel(s.hotline) %>"><%- icon('phone') %> <%= h.phoneDisplay(s.hotline) %></a>
+      <% if (s.facebook) { %><a class="topbar__hide-sm" href="<%= s.facebook %>" target="_blank" rel="noopener"><%- icon('facebook') %> Fanpage</a><% } %>
+    </div>
+  </div>
+</div>
+
+<header class="header" id="header">
+  <div class="container">
+    <a class="header__logo" href="/" aria-label="TRIP – Trang chủ"><img src="/img/logo-horizontal.png" alt="TRIP – Let Your Adventures Begin With Us" width="160" height="46"></a>
+
+    <nav class="nav" id="nav" aria-label="Menu chính">
+      <ul>
+        <li class="nav__item">
+          <button class="nav__toggle <%= isActive('/dich-vu/visa') %>" aria-expanded="false">Visa <%- icon('chevron') %></button>
+          <ul class="nav__sub">
+            <li><a href="/dich-vu/visa#trung-quoc">Visa Trung Quốc <small>Du lịch, thăm thân, thương mại, du học</small></a></li>
+            <li><a href="/dich-vu/visa#chau-a">Visa Nhật · Hàn · Châu Á</a></li>
+            <li><a href="/dich-vu/visa#chau-au">Visa Mỹ · Châu Âu · Úc · Canada</a></li>
+            <li><a href="/dich-vu/visa#e-visa">E-visa Việt Nam <small>Cho người nước ngoài</small></a></li>
+            <li><a href="/dich-vu/visa">Tất cả dịch vụ visa</a></li>
+          </ul>
+        </li>
+        <li class="nav__item">
+          <button class="nav__toggle <%= isActive('/dich-vu/dich-thuat') %>" aria-expanded="false">Dịch thuật <%- icon('chevron') %></button>
+          <ul class="nav__sub">
+            <li><a href="/dich-vu/dich-thuat">Dịch thuật công chứng <small>Anh, Trung, Hàn, Nhật, Thái, Lào…</small></a></li>
+            <li><a href="/dich-vu/dich-thuat#hop-phap-hoa">Hợp pháp hoá · Chứng nhận lãnh sự</a></li>
+            <li><a href="/dich-vu/dich-thuat#bang-gia">Bảng giá dịch thuật</a></li>
+          </ul>
+        </li>
+        <li class="nav__item">
+          <button class="nav__toggle" aria-expanded="false">Dịch vụ khác <%- icon('chevron') %></button>
+          <ul class="nav__sub">
+            <li><a href="/dich-vu/ho-chieu">Làm hộ chiếu</a></li>
+            <li><a href="/dich-vu/ve-may-bay">Vé máy bay · Vé tàu</a></li>
+            <li><a href="/dich-vu/thue-xe">Xe đưa đón · Thuê xe tự lái</a></li>
+            <li><a href="/dich-vu/bao-hiem-esim">Bảo hiểm du lịch · eSIM</a></li>
+            <li><a href="/dich-vu">Tất cả dịch vụ</a></li>
+          </ul>
+        </li>
+        <li><a class="<%= isActive('/tour') %>" href="/tour">Tour</a></li>
+        <li><a class="<%= isActive('/bang-gia') %>" href="/bang-gia">Bảng giá</a></li>
+        <li><a class="<%= isActive('/blog') %>" href="/blog">Cẩm nang</a></li>
+        <li><a class="<%= isActive('/gioi-thieu') %>" href="/gioi-thieu">Giới thiệu</a></li>
+        <li><a class="<%= isActive('/lien-he') %>" href="/lien-he">Liên hệ</a></li>
+        <li class="nav__cta"><button class="btn btn--accent" data-open-lead>Tư vấn miễn phí</button></li>
+      </ul>
+    </nav>
+
+    <div class="header__cta">
+      <button class="btn btn--accent btn--sm" data-open-lead><%- icon('chat') %> Tư vấn miễn phí</button>
+    </div>
+    <button class="burger" id="burger" aria-label="Mở menu" aria-controls="nav" aria-expanded="false"><%- icon('menu') %></button>
+  </div>
+</header>
+<main id="main">

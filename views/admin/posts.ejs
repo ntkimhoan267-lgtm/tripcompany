@@ -1,0 +1,23 @@
+<%- include('_head') %>
+<div class="topline"><h1>Bài viết</h1><a class="btn" href="/admin/posts/new">+ Viết bài mới</a></div>
+<div class="card">
+  <% if (posts.length) { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tiêu đề</th><th>Chủ đề</th><th>Trạng thái</th><th>Ngày đăng</th><th></th></tr></thead>
+    <tbody><% posts.forEach(function (p) { %>
+      <tr>
+        <td><a href="/admin/posts/<%= p.id %>"><strong><%= p.title %></strong></a><br><span class="muted small">/blog/<%= p.slug %></span></td>
+        <td><%= p.category %></td>
+        <td><span class="badge badge--<%= p.status %>"><%= p.status === 'published' ? 'Đã đăng' : 'Nháp' %></span></td>
+        <td class="small nowrap"><%= h.fmtDate(p.published_at) %></td>
+        <td class="actions">
+          <a class="btn btn--sm btn--ghost" href="/admin/posts/<%= p.id %>">Sửa</a>
+          <% if (p.status === 'published') { %><a class="btn btn--sm btn--ghost" href="/blog/<%= p.slug %>" target="_blank">Xem</a><% } %>
+          <form method="post" action="/admin/posts/<%= p.id %>/delete" data-confirm="Xoá bài viết này?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">Xoá</button></form>
+        </td>
+      </tr>
+    <% }) %></tbody>
+  </table></div>
+  <% } else { %><div class="empty">Chưa có bài viết. <a href="/admin/posts/new">Viết bài đầu tiên</a></div><% } %>
+</div>
+<%- include('_foot') %>

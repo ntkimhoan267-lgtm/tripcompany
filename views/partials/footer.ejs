@@ -1,0 +1,137 @@
+<% const s = settings; %>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <div class="footer__brand">
+          <img src="/img/logo-icon.png" alt="" width="52" height="52">
+          <div><strong>TRIP</strong><small><%= company.slogan %></small></div>
+        </div>
+        <p><%= company.legalName %><br>MST: <%= company.taxCode %></p>
+        <p class="mb-0">Chuyên dịch vụ Visa, Dịch thuật công chứng và giải pháp du lịch trọn gói tại Đà Nẵng.</p>
+        <div class="footer__social">
+          <% if (s.facebook) { %><a href="<%= s.facebook %>" target="_blank" rel="noopener" aria-label="Facebook TRIP"><%- icon('facebook') %></a><% } %>
+          <% if (s.zalo) { %><a href="https://zalo.me/<%= h.phoneTel(s.zalo) %>" target="_blank" rel="noopener" aria-label="Zalo TRIP" style="font-weight:800;font-size:.75rem">Zalo</a><% } %>
+          <a href="mailto:<%= s.email %>" aria-label="Email TRIP"><%- icon('mail') %></a>
+        </div>
+      </div>
+      <div>
+        <h4>Dịch vụ</h4>
+        <ul>
+          <li><a href="/dich-vu/visa">Dịch vụ Visa</a></li>
+          <li><a href="/dich-vu/dich-thuat">Dịch thuật công chứng</a></li>
+          <li><a href="/dich-vu/ho-chieu">Làm hộ chiếu</a></li>
+          <li><a href="/dich-vu/ve-may-bay">Vé máy bay</a></li>
+          <li><a href="/dich-vu/thue-xe">Thuê xe</a></li>
+          <li><a href="/tour">Tour du lịch</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Về TRIP</h4>
+        <ul>
+          <li><a href="/gioi-thieu">Giới thiệu</a></li>
+          <li><a href="/bang-gia">Bảng giá</a></li>
+          <li><a href="/blog">Cẩm nang</a></li>
+          <li><a href="/lien-he">Liên hệ</a></li>
+          <li><button class="btn btn--sm btn--outline-white mt-2" data-open-news><%- icon('mail') %> Nhận tin tour hàng tháng</button></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Liên hệ</h4>
+        <ul class="footer__contact">
+          <li><%- icon('pin') %><span><%= company.address %></span></li>
+          <li><%- icon('phone') %><span>Visa & Tour: <a href="tel:<%= h.phoneTel(s.hotline) %>"><%= h.phoneDisplay(s.hotline) %></a></span></li>
+          <% if (s.hotline_translation) { %><li><%- icon('phone') %><span>Dịch thuật: <a href="tel:<%= h.phoneTel(s.hotline_translation) %>"><%= h.phoneDisplay(s.hotline_translation) %></a></span></li><% } %>
+          <li><%- icon('mail') %><a href="mailto:<%= s.email %>"><%= s.email %></a></li>
+          <li><%- icon('clock') %><span>T2–T6: 8:00–17:00 · T7: 8:00–12:00</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <%= new Date().getFullYear() %> TRIP · tripdn.com</span>
+      <p class="footer__disclaimer mb-0">TRIP là doanh nghiệp tư nhân cung cấp dịch vụ tư vấn và hỗ trợ thủ tục, không phải cơ quan nhà nước hay Đại sứ quán. Kết quả cấp visa do cơ quan có thẩm quyền quyết định.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Liên hệ nổi -->
+<div class="fab" aria-label="Liên hệ nhanh">
+  <% if (s.zalo) { %><a class="fab__zalo" href="https://zalo.me/<%= h.phoneTel(s.zalo) %>" target="_blank" rel="noopener" aria-label="Chat Zalo">Zalo<span class="fab__label">Chat Zalo</span></a><% } %>
+  <% if (s.messenger) { %><a class="fab__mess" href="<%= s.messenger %>" target="_blank" rel="noopener" aria-label="Chat Messenger"><%- icon('messenger') %><span class="fab__label">Messenger</span></a><% } %>
+  <a class="fab__call" href="tel:<%= h.phoneTel(s.hotline) %>" aria-label="Gọi hotline"><%- icon('phone') %><span class="fab__label"><%= h.phoneDisplay(s.hotline) %></span></a>
+</div>
+<div class="mobile-bar">
+  <a class="btn btn--navy" href="tel:<%= h.phoneTel(s.hotline) %>"><%- icon('phone') %> Gọi ngay</a>
+  <button class="btn btn--accent" data-open-lead><%- icon('chat') %> Tư vấn</button>
+</div>
+
+<!-- Popup tư vấn -->
+<div class="modal" id="lead-modal" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title" hidden>
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog">
+    <button class="modal__close" data-close aria-label="Đóng"><%- icon('x') %></button>
+    <div class="modal__head">
+      <h3 id="lead-modal-title">Đăng ký tư vấn miễn phí</h3>
+      <p>Để lại thông tin, tư vấn viên TRIP sẽ gọi lại cho bạn trong giờ làm việc.</p>
+    </div>
+    <div class="modal__body">
+      <%- include('lead-form', { formId: 'modal', layout: 'stack' }) %>
+      <p class="form-note">Hoặc gọi ngay <a href="tel:<%= h.phoneTel(s.hotline) %>"><strong><%= h.phoneDisplay(s.hotline) %></strong></a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Popup nhận tin tour hàng tháng -->
+<div class="modal modal--news" id="news-modal" role="dialog" aria-modal="true" aria-labelledby="news-modal-title" hidden
+     data-auto="<%= s.popup_newsletter_enabled === '1' ? '1' : '0' %>" data-delay="<%= Number(s.popup_newsletter_delay) || 15 %>">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog">
+    <button class="modal__close" data-close aria-label="Đóng"><%- icon('x') %></button>
+    <div class="modal__art">
+      <img src="/img/logo-icon.png" alt="" width="74" height="74">
+      <strong>Lịch tour & ưu đãi mới nhất mỗi tháng</strong>
+      <ul>
+        <li><%- icon('check') %> Tour mới khởi hành từ Đà Nẵng</li>
+        <li><%- icon('check') %> Ưu đãi visa & vé máy bay</li>
+        <li><%- icon('check') %> Cập nhật chính sách visa mới</li>
+      </ul>
+    </div>
+    <div>
+      <div class="modal__head">
+        <h3 id="news-modal-title">Đăng ký nhận bản tin TRIP</h3>
+        <p>Mỗi tháng 1 email, không spam. Huỷ đăng ký bất cứ lúc nào.</p>
+      </div>
+      <div class="modal__body">
+        <form class="js-sub-form form-grid" action="/api/subscribe" method="post" novalidate>
+          <div class="field">
+            <label for="sub-email">Email <span class="req">*</span></label>
+            <input class="input" id="sub-email" name="email" type="email" autocomplete="email" placeholder="ban@gmail.com" required maxlength="200">
+            <span class="field__error" data-error="email"></span>
+          </div>
+          <div class="field">
+            <label for="sub-name">Tên của bạn <span class="muted">(không bắt buộc)</span></label>
+            <input class="input" id="sub-name" name="name" autocomplete="name" maxlength="100">
+          </div>
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button class="btn btn--accent btn--block" type="submit"><%- icon('mail') %> Đăng ký nhận tin</button>
+          <div class="form-msg" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup video -->
+<div class="modal modal--video" id="video-modal" role="dialog" aria-modal="true" aria-label="Video giới thiệu TRIP" hidden>
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog">
+    <button class="modal__close" data-close aria-label="Đóng"><%- icon('x') %></button>
+    <div class="video-frame" id="video-modal-frame"></div>
+  </div>
+</div>
+
+<script src="/js/site.js?v=1" defer></script>
+</body>
+</html>

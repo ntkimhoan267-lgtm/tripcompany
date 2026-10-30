@@ -1,0 +1,27 @@
+<%- include('_head') %>
+<div class="topline">
+  <h1>Đăng ký nhận tin <span class="muted" style="font-size:1rem">(<%= subscribers.filter(s => s.status === 'active').length %> đang nhận)</span></h1>
+  <div class="actions"><a class="btn btn--ghost" href="/admin/subscribers.csv">⬇ Xuất CSV</a><a class="btn" href="/admin/newsletter">Gửi bản tin</a></div>
+</div>
+<form class="card filters" method="get">
+  <div style="flex:1"><label>Tìm email / tên</label><input type="search" name="q" value="<%= q %>"></div>
+  <div class="actions"><button class="btn">Tìm</button></div>
+</form>
+<div class="card" style="margin-top:16px">
+  <% if (subscribers.length) { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thời gian</th><th>Email</th><th>Tên</th><th>Trạng thái</th><th>Trang đăng ký</th><th></th></tr></thead>
+    <tbody><% subscribers.forEach(function (s) { %>
+      <tr>
+        <td class="nowrap small"><%= h.fmtDate(s.created_at, true) %></td>
+        <td><a href="mailto:<%= s.email %>"><%= s.email %></a></td>
+        <td><%= s.name %></td>
+        <td><span class="badge badge--<%= s.status %>"><%= s.status === 'active' ? 'Đang nhận' : 'Đã huỷ' %></span></td>
+        <td class="small muted"><%= s.source_page %></td>
+        <td><form method="post" action="/admin/subscribers/<%= s.id %>/delete" data-confirm="Xoá <%= s.email %> khỏi danh sách?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">✕</button></form></td>
+      </tr>
+    <% }) %></tbody>
+  </table></div>
+  <% } else { %><div class="empty">Chưa có ai đăng ký nhận tin.</div><% } %>
+</div>
+<%- include('_foot') %>

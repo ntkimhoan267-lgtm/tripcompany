@@ -1,0 +1,37 @@
+<%- include('_head') %>
+<div class="topline"><h1><%= title %></h1><a href="/admin/tours">← Danh sách tour</a></div>
+<form class="form" method="post" enctype="multipart/form-data" action="<%= tour.id ? '/admin/tours/' + tour.id : '/admin/tours/new' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="grid grid--2">
+    <div class="card form">
+      <div><label for="title">Tên tour *</label><input type="text" id="title" name="title" value="<%= tour.title || '' %>" required></div>
+      <div class="form-row">
+        <div><label for="destination">Điểm đến</label><input type="text" id="destination" name="destination" value="<%= tour.destination || '' %>" placeholder="Trung Quốc"></div>
+        <div><label for="region">Loại tour</label><select id="region" name="region"><% Object.entries(TOUR_REGIONS).forEach(function ([k, v]) { %><option value="<%= k %>"<%= tour.region === k ? ' selected' : '' %>><%= v %></option><% }) %></select></div>
+      </div>
+      <div class="form-row--3 form-row">
+        <div><label for="duration">Thời gian</label><input type="text" id="duration" name="duration" value="<%= tour.duration || '' %>" placeholder="7 ngày 6 đêm"></div>
+        <div><label for="departure">Khởi hành từ</label><input type="text" id="departure" name="departure" value="<%= tour.departure || '' %>"></div>
+        <div><label for="price">Giá từ (VNĐ/khách)</label><input type="text" id="price" name="price" inputmode="numeric" value="<%= tour.price || '' %>" placeholder="Để trống = Liên hệ"></div>
+      </div>
+      <div><label for="highlights">Điểm nổi bật <span class="hint">(mỗi dòng một ý)</span></label><textarea id="highlights" name="highlights"><%= tour.highlights || '' %></textarea></div>
+      <div><label for="itinerary">Lịch trình chi tiết <span class="hint">(Markdown, VD: ## Ngày 1: Đà Nẵng – Bắc Kinh)</span></label><textarea class="editor" id="itinerary" name="itinerary" style="min-height:280px"><%= tour.itinerary || '' %></textarea></div>
+    </div>
+    <div>
+      <div class="card form">
+        <div><label for="status">Hiển thị</label><select id="status" name="status"><option value="published"<%= tour.status !== 'hidden' ? ' selected' : '' %>>Hiện trên website</option><option value="hidden"<%= tour.status === 'hidden' ? ' selected' : '' %>>Ẩn</option></select></div>
+        <label class="check"><input type="checkbox" name="featured" value="1"<%= tour.featured ? ' checked' : '' %>> Nổi bật trên trang chủ (tối đa 4)</label>
+        <div><label for="sort">Thứ tự</label><input type="number" id="sort" name="sort" value="<%= tour.sort || 0 %>"><p class="hint">Số nhỏ hiển thị trước.</p></div>
+        <div><label for="slug">Đường dẫn (slug)</label><input type="text" id="slug" name="slug" value="<%= tour.slug || '' %>" placeholder="tự tạo từ tên tour"></div>
+        <div>
+          <label for="image_file">Ảnh tour</label>
+          <% if (tour.image) { %><img class="cover-preview" src="<%= tour.image %>" alt=""><label class="check small"><input type="checkbox" name="remove_image" value="1"> Xoá ảnh</label><input type="hidden" name="image" value="<%= tour.image %>"><% } %>
+          <input type="file" id="image_file" name="image_file" accept="image/*">
+          <p class="hint">Không có ảnh, website sẽ hiển thị thẻ màu thương hiệu.</p>
+        </div>
+        <div class="actions"><button class="btn" type="submit">Lưu tour</button><% if (tour.id) { %><a class="btn btn--ghost" href="/tour/<%= tour.slug %>" target="_blank">Xem</a><% } %></div>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('_foot') %>

@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Cẩm nang', href: '/blog' }, { label: post.category || 'Bài viết' }],
+  heading: post.title,
+  sub: h.fmtDate(post.published_at) + (post.category ? ' · ' + post.category : ''),
+  actions: null,
+}) %>
+
+<section class="section">
+  <div class="container layout-side">
+    <article>
+      <% if (post.cover) { %><img src="<%= post.cover %>" alt="<%= post.title %>" style="width:100%;border-radius:var(--radius);margin-bottom:28px;aspect-ratio:16/9;object-fit:cover"><% } %>
+      <% if (post.excerpt) { %><p class="lead"><%= post.excerpt %></p><% } %>
+      <div class="prose"><%- html %></div>
+
+      <div class="card mt-4" style="background:var(--sky-50);border:0">
+        <h3>Cần TRIP hỗ trợ hồ sơ của bạn?</h3>
+        <p>Tư vấn miễn phí, kiểm tra hồ sơ và báo giá trọn gói.</p>
+        <div class="flex mt-2"><button class="btn btn--accent" data-open-lead>Tư vấn miễn phí</button><a class="btn btn--ghost" href="tel:<%= h.phoneTel(settings.hotline) %>"><%= h.phoneDisplay(settings.hotline) %></a></div>
+      </div>
+
+      <% if (related.length) { %>
+        <h2 class="mt-4">Bài viết khác</h2>
+        <div class="grid grid--2"><% related.slice(0, 2).forEach(function (p) { %><%- include('../partials/post-card', { p }) %><% }) %></div>
+      <% } %>
+    </article>
+    <aside class="sidebar">
+      <%- include('../partials/consult-box', { people: [] }) %>
+      <div class="card">
+        <h3>Nhận tin mỗi tháng</h3>
+        <p class="muted">Lịch tour, ưu đãi và cập nhật chính sách visa mới.</p>
+        <button class="btn btn--navy btn--block mt-2" data-open-news><%- icon('mail') %> Đăng ký nhận tin</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

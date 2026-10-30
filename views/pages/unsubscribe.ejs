@@ -1,0 +1,14 @@
+<%- include('../partials/head') %>
+<section class="section">
+  <div class="container text-center" style="max-width:640px">
+    <% if (ok) { %>
+      <h1 style="font-size:2rem">Đã huỷ nhận bản tin</h1>
+      <p class="lead">Bạn sẽ không nhận email bản tin từ TRIP nữa. Có thể đăng ký lại bất cứ lúc nào.</p>
+    <% } else { %>
+      <h1 style="font-size:2rem">Liên kết không hợp lệ</h1>
+      <p class="lead">Liên kết huỷ đăng ký không đúng hoặc đã hết hạn. Vui lòng liên hệ <%= settings.email %>.</p>
+    <% } %>
+    <a class="btn btn--navy mt-3" href="/">Về trang chủ</a>
+  </div>
+</section>
+<%- include('../partials/footer') %>

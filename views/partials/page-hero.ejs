@@ -1,0 +1,16 @@
+<section class="page-hero">
+  <div class="container">
+    <ol class="breadcrumb" aria-label="Breadcrumb">
+      <li><a href="/">Trang chủ</a></li>
+      <% (crumbs || []).forEach(function (c) { %><li><% if (c.href) { %><a href="<%= c.href %>"><%= c.label %></a><% } else { %><%= c.label %><% } %></li><% }) %>
+    </ol>
+    <h1><%= heading %></h1>
+    <% if (typeof sub !== 'undefined' && sub) { %><p><%= sub %></p><% } %>
+    <% if (typeof actions !== 'undefined' && actions) { %>
+      <div class="hero__actions">
+        <button class="btn btn--accent" data-open-lead<% if (actions.service) { %> data-service="<%= actions.service %>"<% } %>><%- icon('chat') %> Tư vấn miễn phí</button>
+        <a class="btn btn--outline-white" href="tel:<%= h.phoneTel(actions.phone || settings.hotline) %>"><%- icon('phone') %> <%= h.phoneDisplay(actions.phone || settings.hotline) %></a>
+      </div>
+    <% } %>
+  </div>
+</section>

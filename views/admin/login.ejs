@@ -1,0 +1,15 @@
+<%- include('_head', { title: 'Đăng nhập' }) %>
+<div class="login">
+  <form class="login__card form" method="post" action="/admin/login">
+    <img src="/img/logo-horizontal.png" alt="TRIP">
+    <h1>Đăng nhập quản trị</h1>
+    <% if (error) { %><div class="flash flash--error"><%= error %></div><% } %>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="hidden" name="next" value="<%= next %>">
+    <div><label for="u">Tên đăng nhập</label><input type="text" id="u" name="username" autocomplete="username" required autofocus></div>
+    <div><label for="p">Mật khẩu</label><input type="password" id="p" name="password" autocomplete="current-password" required></div>
+    <button class="btn" type="submit" style="justify-content:center;padding:12px">Đăng nhập</button>
+    <a class="small" href="/" style="text-align:center">← Về website</a>
+  </form>
+</div>
+<%- include('_foot') %>

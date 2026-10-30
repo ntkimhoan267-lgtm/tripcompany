@@ -1,0 +1,23 @@
+<%- include('_head') %>
+<div class="topline"><h1>Tour</h1><a class="btn" href="/admin/tours/new">+ Thêm tour</a></div>
+<div class="card">
+  <% if (tours.length) { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tour</th><th>Loại</th><th>Thời gian</th><th>Giá từ</th><th>Hiển thị</th><th></th></tr></thead>
+    <tbody><% tours.forEach(function (t) { %>
+      <tr>
+        <td><a href="/admin/tours/<%= t.id %>"><strong><%= t.title %></strong></a><br><span class="muted small"><%= t.destination %></span></td>
+        <td><%= TOUR_REGIONS[t.region] %></td>
+        <td class="nowrap"><%= t.duration %></td>
+        <td class="nowrap"><%= t.price ? h.vnd(t.price) : 'Liên hệ' %></td>
+        <td><span class="badge badge--<%= t.status %>"><%= t.status === 'published' ? 'Hiện' : 'Ẩn' %></span> <% if (t.featured) { %><span class="badge">★ Trang chủ</span><% } %></td>
+        <td class="actions">
+          <a class="btn btn--sm btn--ghost" href="/admin/tours/<%= t.id %>">Sửa</a>
+          <form method="post" action="/admin/tours/<%= t.id %>/delete" data-confirm="Xoá tour này?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">Xoá</button></form>
+        </td>
+      </tr>
+    <% }) %></tbody>
+  </table></div>
+  <% } else { %><div class="empty">Chưa có tour.</div><% } %>
+</div>
+<%- include('_foot') %>

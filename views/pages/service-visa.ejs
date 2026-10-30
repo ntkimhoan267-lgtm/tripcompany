@@ -1,0 +1,133 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: 'Visa' }],
+  heading: 'Dịch vụ Visa trọn gói',
+  sub: 'Visa Trung Quốc, Nhật, Hàn, Mỹ, Châu Âu, Úc, Canada và hơn 25 quốc gia. Tư vấn đúng loại visa, chuẩn bị hồ sơ, đặt lịch, luyện phỏng vấn và theo dõi đến khi có kết quả.',
+  actions: { service: 'Visa Trung Quốc' },
+}) %>
+<% const worldA = services.worldVisa.filter(v => v.region === 'chau-a'); const worldW = services.worldVisa.filter(v => v.region !== 'chau-a'); %>
+
+<section class="section">
+  <div class="container layout-side">
+    <div class="stack">
+      <div>
+        <span class="eyebrow">Visa phổ biến</span>
+        <div class="grid grid--3">
+          <% services.featuredVisas.forEach(function (v) { %>
+            <div class="card visa-card">
+              <% if (v.tag) { %><span class="visa-card__tag"><%= v.tag %></span><% } %>
+              <img class="visa-card__flag" src="<%= flag(v.code) %>" alt="" width="52" height="36" loading="lazy">
+              <h3><%= v.country %></h3>
+              <span class="visa-card__time"><%- icon('clock') %> <%= v.time %></span>
+              <div class="visa-card__price"><small>Từ</small><strong><%= h.money(v.from) %></strong></div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div id="trung-quoc">
+        <h2 class="mt-4">Visa Trung Quốc <img src="<%= flag('cn') %>" alt="" width="36" height="24" style="display:inline;border-radius:4px;vertical-align:middle"></h2>
+        <p class="muted">Thế mạnh của TRIP, có chuyên viên riêng phụ trách. Giá trọn gói cho quốc tịch Việt Nam, đơn vị VNĐ.</p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Loại visa</th><th>Thời gian xét duyệt</th><th>Lưu trú / nhập cảnh</th><th class="num">Giá trọn gói</th></tr></thead>
+            <tbody>
+              <% services.chinaVisa.rows.forEach(function (r) { %>
+                <tr><td><strong><%= r.type %></strong></td><td><%= r.time %></td><td class="muted"><%= r.detail %></td><td class="num"><%= h.vnd(r.price) %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note"><%= services.chinaVisa.note %></p>
+      </div>
+
+      <div id="chau-a">
+        <h2 class="mt-4">Visa Nhật · Hàn · Châu Á</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá trọn gói</th></tr></thead>
+            <tbody>
+              <% worldA.forEach(function (v) { %>
+                <tr>
+                  <td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td>
+                  <td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td>
+                  <td><%= v.time %></td>
+                  <td class="num"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="chau-au">
+        <h2 class="mt-4">Visa Mỹ · Châu Âu · Úc · Canada</h2>
+        <p class="muted">Giá tính bằng USD để ổn định theo tỷ giá. Bao gồm luyện phỏng vấn 1 kèm 1 với visa Mỹ và Schengen.</p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá trọn gói</th></tr></thead>
+            <tbody>
+              <% worldW.forEach(function (v) { %>
+                <tr>
+                  <td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td>
+                  <td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td>
+                  <td><%= v.time %></td>
+                  <td class="num"><%= h.usd(v.usd) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Phí có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ. Không thấy quốc gia bạn cần? <a href="#" data-open-lead data-service="Visa nước khác">Liên hệ TRIP</a>.</p>
+      </div>
+
+      <div class="grid grid--2 mt-4">
+        <div class="card">
+          <h3>Giá trọn gói đã bao gồm</h3>
+          <ul class="checklist"><% services.visaIncluded.forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul>
+        </div>
+        <div class="card">
+          <h3>Chưa bao gồm</h3>
+          <ul class="checklist checklist--x"><% services.visaExcluded.forEach(function (x) { %><li><%- icon('minus') %><%= x %></li><% }) %></ul>
+        </div>
+      </div>
+
+      <div id="e-visa">
+        <h2 class="mt-4">E-visa Việt Nam cho người nước ngoài</h2>
+        <p class="muted"><%= services.evisa.note %></p>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Thời gian xử lý</th><th class="num">1 lần (Single)</th><th class="num">Nhiều lần (Multiple)</th></tr></thead>
+            <tbody>
+              <% services.evisa.rows.forEach(function (r) { %><tr><td><%= r.speed %></td><td class="num"><%= h.usd(r.single) %></td><td class="num"><%= h.usd(r.multiple) %></td></tr><% }) %>
+            </tbody>
+          </table>
+        </div>
+        <h3 class="mt-3">Hỗ trợ tại sân bay (Fast Track)</h3>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Dịch vụ</th><th class="num">Nhóm 1–5 khách</th><th class="num">Nhóm từ 6 khách</th></tr></thead>
+            <tbody><% services.evisa.fastTrack.forEach(function (r) { %><tr><td><%= r.name %></td><td class="num"><%= r.small %></td><td class="num"><%= r.large %></td></tr><% }) %></tbody>
+          </table>
+        </div>
+        <p class="table-note"><%= services.evisa.fastTrackNote %></p>
+      </div>
+
+      <div>
+        <h2 class="mt-4">Câu hỏi thường gặp</h2>
+        <div class="faq">
+          <details class="card"><summary><strong>Tôi chưa biết nên xin loại visa nào?</strong></summary><p class="mt-2">Hãy cho TRIP biết mục đích chuyến đi, thời gian dự kiến và nghề nghiệp. Tư vấn viên sẽ đề xuất loại visa phù hợp và danh sách giấy tờ cụ thể cho trường hợp của bạn.</p></details>
+          <details class="card"><summary><strong>Giấy tờ tiếng Việt có cần dịch không?</strong></summary><p class="mt-2">Phần lớn hồ sơ visa yêu cầu bản dịch công chứng. Với gói visa trọn gói, TRIP đã bao gồm dịch thuật công chứng các giấy tờ cơ bản.</p></details>
+          <details class="card"><summary><strong>Tôi ở ngoài Đà Nẵng có làm được không?</strong></summary><p class="mt-2">Được. Bạn có thể gửi hồ sơ qua Zalo, email hoặc chuyển phát. TRIP sẽ hướng dẫn chi tiết từng bước.</p></details>
+          <details class="card"><summary><strong>TRIP có cam kết đậu visa không?</strong></summary><p class="mt-2">Quyết định cấp visa thuộc về cơ quan lãnh sự. TRIP cam kết tư vấn đúng, chuẩn bị hồ sơ đầy đủ và trung thực để tăng tối đa khả năng được duyệt.</p></details>
+        </div>
+      </div>
+    </div>
+
+    <aside class="sidebar">
+      <%- include('../partials/consult-box', { people: company.consultants.visa, presetService: 'Visa Trung Quốc' }) %>
+    </aside>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

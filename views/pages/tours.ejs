@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Tour du lịch' }],
+  heading: 'Tour du lịch khởi hành từ Đà Nẵng',
+  sub: 'Tour nước ngoài kèm hỗ trợ visa trọn gói, tour trong nước và tour trong ngày Đà Nẵng – Hội An – Huế.',
+  actions: { service: 'Tour du lịch' },
+}) %>
+
+<section class="section">
+  <div class="container">
+    <div class="flex mb-3" style="justify-content:space-between">
+      <nav class="flex" aria-label="Lọc tour">
+        <a class="chip <%= !region ? 'is-active' : '' %>" href="/tour">Tất cả</a>
+        <% Object.entries(regions).forEach(function ([k, v]) { %><a class="chip <%= region === k ? 'is-active' : '' %>" href="/tour?loai=<%= k %>"><%= v %></a><% }) %>
+      </nav>
+      <span class="muted">Tìm thấy <strong><%= tours.length %></strong> tour</span>
+    </div>
+    <% if (tours.length) { %>
+      <div class="grid grid--3"><% tours.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %></div>
+    <% } else { %>
+      <p class="text-center muted">Chưa có tour trong mục này. Vui lòng liên hệ TRIP để được tư vấn lịch trình riêng.</p>
+    <% } %>
+
+    <div class="card mt-4" style="background:linear-gradient(135deg,var(--sky-50),#fff)">
+      <div class="flex" style="justify-content:space-between">
+        <div><h3 class="mb-0">Nhận lịch tour & ưu đãi mới mỗi tháng</h3><p>Đăng ký email để nhận tour mới khởi hành từ Đà Nẵng.</p></div>
+        <button class="btn btn--accent" data-open-news><%- icon('mail') %> Đăng ký nhận tin</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

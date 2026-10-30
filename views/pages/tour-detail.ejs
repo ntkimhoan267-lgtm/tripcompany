@@ -1,0 +1,47 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Tour', href: '/tour' }, { label: tour.title }],
+  heading: tour.title,
+  sub: [tour.duration, tour.departure && ('Khởi hành từ ' + tour.departure), tour.destination].filter(Boolean).join(' · '),
+  actions: { service: 'Tour du lịch' },
+}) %>
+<% const highlights = String(tour.highlights || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean); %>
+
+<section class="section">
+  <div class="container layout-side">
+    <div class="stack">
+      <% if (tour.image) { %><img src="<%= tour.image %>" alt="<%= tour.title %>" style="width:100%;border-radius:var(--radius);aspect-ratio:16/9;object-fit:cover"><% } %>
+
+      <div class="grid grid--3">
+        <div class="card"><div class="card__icon"><%- icon('clock') %></div><h3>Thời gian</h3><p><%= tour.duration || 'Liên hệ' %></p></div>
+        <div class="card"><div class="card__icon"><%- icon('pin') %></div><h3>Khởi hành</h3><p><%= tour.departure || 'Đà Nẵng' %></p></div>
+        <div class="card"><div class="card__icon"><%- icon('wallet') %></div><h3>Giá từ</h3><p><strong style="color:var(--accent-600);font-size:1.2rem"><%= tour.price ? h.vnd(tour.price) : 'Liên hệ' %></strong><%= tour.price ? ' /khách' : '' %></p></div>
+      </div>
+
+      <% if (highlights.length) { %>
+        <div>
+          <h2>Điểm nổi bật</h2>
+          <ul class="checklist"><% highlights.forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul>
+        </div>
+      <% } %>
+
+      <% if (itineraryHtml) { %>
+        <div class="prose"><h2>Lịch trình</h2><%- itineraryHtml %></div>
+      <% } else { %>
+        <div class="notice"><%- icon('info') %><div>Lịch trình chi tiết, ngày khởi hành và giá theo từng đợt sẽ được tư vấn viên gửi cho bạn. Để lại thông tin để nhận lịch trình đầy đủ.</div></div>
+      <% } %>
+
+      <% if (related.length) { %>
+        <div>
+          <h2 class="mt-4">Tour khác</h2>
+          <div class="grid grid--3"><% related.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %></div>
+        </div>
+      <% } %>
+    </div>
+    <aside class="sidebar">
+      <%- include('../partials/consult-box', { people: company.consultants.tour, presetService: 'Tour du lịch' }) %>
+    </aside>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

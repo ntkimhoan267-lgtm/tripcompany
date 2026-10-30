@@ -1,0 +1,41 @@
+<%- include('_head') %>
+<div class="topline"><h1><%= title %></h1><a href="/admin/posts">← Danh sách bài viết</a></div>
+<form class="form" method="post" enctype="multipart/form-data" action="<%= post.id ? '/admin/posts/' + post.id : '/admin/posts/new' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="grid grid--2">
+    <div class="card form">
+      <div><label for="title">Tiêu đề *</label><input type="text" id="title" name="title" value="<%= post.title || '' %>" required maxlength="200"></div>
+      <div><label for="excerpt">Mô tả ngắn <span class="hint">(hiển thị ở danh sách & Google, ~160 ký tự)</span></label><textarea id="excerpt" name="excerpt" maxlength="400" style="min-height:70px"><%= post.excerpt || '' %></textarea></div>
+      <div>
+        <label for="content">Nội dung</label>
+        <div class="actions" style="margin-bottom:8px">
+          <button type="button" class="btn btn--sm btn--ghost" data-md="## " title="Tiêu đề lớn">H2</button>
+          <button type="button" class="btn btn--sm btn--ghost" data-md="### " title="Tiêu đề nhỏ">H3</button>
+          <button type="button" class="btn btn--sm btn--ghost" data-md-wrap="**" title="In đậm"><b>B</b></button>
+          <button type="button" class="btn btn--sm btn--ghost" data-md="- " title="Danh sách">• Danh sách</button>
+          <button type="button" class="btn btn--sm btn--ghost" data-md="> " title="Trích dẫn">❝ Trích dẫn</button>
+          <button type="button" class="btn btn--sm btn--ghost" data-md-link>🔗 Link</button>
+          <label class="btn btn--sm btn--ghost" style="margin:0">🖼 Chèn ảnh<input type="file" accept="image/*" data-md-image hidden></label>
+        </div>
+        <textarea class="editor" id="content" name="content"><%= post.content || '' %></textarea>
+        <p class="hint">Định dạng Markdown: <code>## Tiêu đề</code>, <code>**đậm**</code>, <code>- danh sách</code>, <code>[chữ](https://link)</code>.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card form">
+        <div><label for="status">Trạng thái</label>
+          <select id="status" name="status"><option value="draft"<%= post.status !== 'published' ? ' selected' : '' %>>Bản nháp</option><option value="published"<%= post.status === 'published' ? ' selected' : '' %>>Xuất bản</option></select></div>
+        <div><label for="category">Chủ đề</label><input type="text" id="category" name="category" value="<%= post.category || '' %>" list="cats" placeholder="Visa, Dịch thuật, Du lịch…"><datalist id="cats"><option>Visa</option><option>Dịch thuật</option><option>Du lịch</option><option>Tin tức</option></datalist></div>
+        <div><label for="slug">Đường dẫn (slug)</label><input type="text" id="slug" name="slug" value="<%= post.slug || '' %>" placeholder="tự tạo từ tiêu đề"></div>
+        <div>
+          <label for="cover_file">Ảnh bìa</label>
+          <% if (post.cover) { %><img class="cover-preview" src="<%= post.cover %>" alt=""><label class="check small"><input type="checkbox" name="remove_cover" value="1"> Xoá ảnh bìa</label><input type="hidden" name="cover" value="<%= post.cover %>"><% } %>
+          <input type="file" id="cover_file" name="cover_file" accept="image/*">
+          <p class="hint">JPG/PNG/WEBP tối đa 5MB, tỉ lệ 16:9 đẹp nhất.</p>
+        </div>
+        <div class="actions"><button class="btn" type="submit">Lưu bài viết</button><% if (post.id && post.status === 'published') { %><a class="btn btn--ghost" href="/blog/<%= post.slug %>" target="_blank">Xem</a><% } %></div>
+      </div>
+    </div>
+  </div>
+</form>
+<%- include('_foot') %>

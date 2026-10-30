@@ -1,0 +1,12 @@
+<a class="card post-card reveal" href="/blog/<%= p.slug %>">
+  <div class="post-card__media">
+    <% if (p.cover) { %><img src="<%= p.cover %>" alt="<%= p.title %>" loading="lazy">
+    <% } else { %><div class="ph"><%- icon(p.category === 'Dịch thuật' ? 'lang' : p.category === 'Visa' ? 'passport' : 'plane') %></div><% } %>
+  </div>
+  <div class="post-card__body">
+    <% if (p.category) { %><span class="post-card__cat"><%= p.category %></span><% } %>
+    <h3><%= p.title %></h3>
+    <p><%= p.excerpt %></p>
+    <span class="post-card__date"><%= h.fmtDate(p.published_at) %></span>
+  </div>
+</a>

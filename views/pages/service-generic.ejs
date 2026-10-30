@@ -1,0 +1,76 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: svc.title }],
+  heading: svc.title,
+  sub: svc.intro,
+  actions: { service: svc.leadService },
+}) %>
+
+<section class="section">
+  <div class="container layout-side">
+    <div class="stack">
+      <% if (svc.slug === 'ho-chieu') { %>
+        <div class="grid grid--3">
+          <div class="card"><div class="card__icon"><%- icon('file') %></div><h3>Tư vấn giấy tờ</h3><p>Hướng dẫn chuẩn bị đúng giấy tờ, tránh đi lại nhiều lần.</p></div>
+          <div class="card"><div class="card__icon"><%- icon('send') %></div><h3>Nộp hồ sơ hộ</h3><p>TRIP khai tờ khai và nộp hồ sơ thay bạn.</p></div>
+          <div class="card"><div class="card__icon"><%- icon('passport') %></div><h3>Nhận tận nơi</h3><p>Hỗ trợ chuyển phát hộ chiếu khi có kết quả.</p></div>
+        </div>
+        <h2 class="mt-4">Bảng giá</h2>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Loại hộ chiếu</th><th>Thời gian xử lý</th><th class="num">Giá dịch vụ</th></tr></thead>
+          <tbody><% services.passport.rows.forEach(function (r) { %><tr><td><strong><%= r.type %></strong></td><td><%= r.time %></td><td class="num"><%= h.vnd(r.price) %></td></tr><% }) %></tbody>
+        </table></div>
+        <div class="notice mt-2"><%- icon('info') %><div><% services.passport.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
+
+      <% } else if (svc.slug === 've-may-bay') { %>
+        <div class="grid grid--3">
+          <div class="card"><div class="card__icon"><%- icon('plane') %></div><h3>Nội địa & quốc tế</h3><p>Tìm chuyến bay phù hợp lịch trình và ngân sách.</p></div>
+          <div class="card"><div class="card__icon"><%- icon('ticket') %></div><h3>Vé tàu</h3><p>Đặt vé tàu Bắc – Nam và các tuyến du lịch.</p></div>
+          <div class="card"><div class="card__icon"><%- icon('chat') %></div><h3>Hỗ trợ đổi – hoàn</h3><p>Hỗ trợ đổi ngày, hoàn vé theo điều kiện từng hãng.</p></div>
+        </div>
+        <h2 class="mt-4">Hãng bay TRIP hỗ trợ đặt vé</h2>
+        <ul class="chips"><% services.airlines.forEach(function (a) { %><li><%= a %></li><% }) %></ul>
+        <div class="notice mt-3"><%- icon('info') %><div>Giá vé thay đổi theo thời điểm đặt và hạng ghế. Gửi yêu cầu để TRIP báo giá chính xác nhất cho hành trình của bạn.</div></div>
+
+      <% } else if (svc.slug === 'tour') { %>
+        <% if (tours.length) { %>
+          <div class="grid grid--3"><% tours.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %></div>
+          <p class="mt-3"><a class="btn btn--navy" href="/tour">Xem tất cả tour <%- icon('arrow') %></a></p>
+        <% } %>
+        <h2 class="mt-4">Vé vui chơi Đà Nẵng – Hội An</h2>
+        <ul class="chips"><% services.attractions.forEach(function (a) { %><li><%= a %></li><% }) %></ul>
+        <p class="table-note">Liên hệ để nhận giá vé tốt và combo vé + xe đưa đón.</p>
+
+      <% } else if (svc.slug === 'thue-xe') { %>
+        <h2>Xe đưa đón</h2>
+        <p class="muted"><%= services.carTransfer.area %></p>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Lịch trình</th><th>Chiều</th><th class="num">4 chỗ</th><th class="num">7 chỗ</th><th class="num">16 chỗ</th></tr></thead>
+          <tbody><% services.carTransfer.rows.forEach(function (r) { %><tr><td><%= r.route %></td><td class="muted"><%= r.way %></td><td class="num"><%= h.vnd(r.p4) %></td><td class="num"><%= h.vnd(r.p7) %></td><td class="num"><%= h.vnd(r.p16) %></td></tr><% }) %></tbody>
+        </table></div>
+        <h2 class="mt-4">Thuê xe tự lái</h2>
+        <div class="grid grid--3">
+          <% services.carTransfer.selfDrive.forEach(function (c) { %>
+            <div class="card"><div class="card__icon"><%- icon('car') %></div><h3><%= c.car %></h3><p><%= c.seats %></p><p class="mt-2"><strong style="color:var(--navy);font-size:1.2rem"><%= h.vnd(c.price) %></strong> <span class="muted">/ngày</span></p></div>
+          <% }) %>
+        </div>
+        <div class="notice mt-2"><%- icon('info') %><div><% services.carTransfer.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
+
+      <% } else if (svc.slug === 'bao-hiem-esim') { %>
+        <div class="grid grid--2">
+          <div class="card"><div class="card__icon"><%- icon('shield') %></div><h3>Bảo hiểm du lịch quốc tế</h3>
+            <p>Bảo hiểm du lịch của Liberty, đáp ứng yêu cầu hồ sơ visa Schengen. Chi trả chi phí y tế, tai nạn, hành lý và hoãn chuyến (theo quyền lợi từng gói).</p></div>
+          <div class="card"><div class="card__icon"><%- icon('sim') %></div><h3>eSIM du lịch</h3>
+            <p>eSIM data cho nhiều quốc gia: cài đặt qua mã QR trước khi bay, có internet ngay khi hạ cánh, giữ nguyên số điện thoại Việt Nam.</p></div>
+        </div>
+        <div class="notice mt-3"><%- icon('info') %><div>Phí bảo hiểm và gói eSIM phụ thuộc điểm đến và số ngày. Liên hệ TRIP để được tư vấn gói phù hợp.</div></div>
+      <% } %>
+    </div>
+
+    <aside class="sidebar">
+      <%- include('../partials/consult-box', { people: company.consultants[svc.consultants] || [], presetService: svc.leadService }) %>
+    </aside>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

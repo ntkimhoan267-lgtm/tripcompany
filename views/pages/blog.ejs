@@ -1,0 +1,32 @@
+<%- include('../partials/head') %>
+<%- include('../partials/page-hero', {
+  crumbs: [{ label: 'Cẩm nang' }],
+  heading: 'Cẩm nang Visa, Dịch thuật & Du lịch',
+  sub: 'Kinh nghiệm thực tế từ đội ngũ TRIP giúp bạn chuẩn bị hồ sơ và chuyến đi tốt hơn.',
+  actions: null,
+}) %>
+
+<section class="section">
+  <div class="container">
+    <% if (categories.length) { %>
+      <nav class="flex mb-3" aria-label="Chủ đề">
+        <a class="chip <%= !category ? 'is-active' : '' %>" href="/blog">Tất cả</a>
+        <% categories.forEach(function (c) { %><a class="chip <%= category === c.category ? 'is-active' : '' %>" href="/blog?chu_de=<%= encodeURIComponent(c.category) %>"><%= c.category %> (<%= c.n %>)</a><% }) %>
+      </nav>
+    <% } %>
+    <% if (posts.length) { %>
+      <div class="grid grid--3"><% posts.forEach(function (p) { %><%- include('../partials/post-card', { p }) %><% }) %></div>
+    <% } else { %>
+      <p class="text-center muted">Chưa có bài viết.</p>
+    <% } %>
+    <% if (pages > 1) { %>
+      <nav class="pagination" aria-label="Phân trang">
+        <% for (let i = 1; i <= pages; i++) { %>
+          <% if (i === page) { %><span class="is-active"><%= i %></span><% } else { %><a href="/blog?page=<%= i %><%= category ? '&chu_de=' + encodeURIComponent(category) : '' %>"><%= i %></a><% } %>
+        <% } %>
+      </nav>
+    <% } %>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

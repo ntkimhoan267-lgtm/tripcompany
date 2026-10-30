@@ -1,0 +1,50 @@
+<%- include('_head') %>
+<% const qs = new URLSearchParams(Object.entries(q).filter(([, v]) => v)).toString(); %>
+<div class="topline">
+  <h1>Khách tư vấn <span class="muted" style="font-size:1rem">(<%= total %>)</span></h1>
+  <a class="btn btn--ghost" href="/admin/leads.csv<%= qs ? '?' + qs : '' %>">⬇ Xuất CSV (Excel)</a>
+</div>
+
+<form class="card filters" method="get">
+  <div style="flex:1;min-width:200px"><label>Tìm kiếm</label><input type="search" name="q" value="<%= q.q %>" placeholder="Tên, SĐT, ghi chú…"></div>
+  <div><label>Trạng thái</label><select name="status"><option value="">Tất cả</option><% Object.entries(LEAD_STATUSES).forEach(function ([k, v]) { %><option value="<%= k %>"<%= q.status === k ? ' selected' : '' %>><%= v %></option><% }) %></select></div>
+  <div><label>Dịch vụ</label><select name="service"><option value="">Tất cả</option><% leadServiceOptions.forEach(function (o) { %><option<%= q.service === o ? ' selected' : '' %>><%= o %></option><% }) %></select></div>
+  <div><label>Từ ngày</label><input type="date" name="from" value="<%= q.from %>"></div>
+  <div><label>Đến ngày</label><input type="date" name="to" value="<%= q.to %>"></div>
+  <div class="actions"><button class="btn">Lọc</button><a class="btn btn--ghost" href="/admin/leads">Xoá lọc</a></div>
+</form>
+
+<div class="card" style="margin-top:16px">
+  <% if (leads.length) { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thời gian</th><th>Khách hàng</th><th>Dịch vụ</th><th>Ghi chú khách</th><th>Xử lý</th><th></th></tr></thead>
+    <tbody>
+      <% leads.forEach(function (l) { %>
+      <tr>
+        <td class="nowrap small"><%= h.fmtDate(l.created_at, true) %><br><span class="muted" title="Đồng bộ Google Sheet"><%= l.sheet_synced ? '✓ Sheet' : '• chưa sync' %></span></td>
+        <td><strong><%= l.name %></strong><br><a class="nowrap" href="tel:<%= l.phone %>"><%= h.phoneDisplay(l.phone) %></a> · <a href="https://zalo.me/<%= l.phone %>" target="_blank" rel="noopener">Zalo</a></td>
+        <td><%= l.service %><% if (l.source_page) { %><br><span class="muted small">từ <%= l.source_page %></span><% } %></td>
+        <td class="small" style="max-width:240px"><%= l.note %></td>
+        <td>
+          <form class="inline-form js-lead-update" method="post" action="/admin/leads/<%= l.id %>">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <select name="status" aria-label="Trạng thái"><% Object.entries(LEAD_STATUSES).forEach(function ([k, v]) { %><option value="<%= k %>"<%= l.status === k ? ' selected' : '' %>><%= v %></option><% }) %></select>
+            <textarea name="admin_note" placeholder="Ghi chú nội bộ…" aria-label="Ghi chú nội bộ"><%= l.admin_note || '' %></textarea>
+            <button class="btn btn--sm">Lưu</button>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/admin/leads/<%= l.id %>/delete" data-confirm="Xoá khách hàng <%= l.name %>?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger" title="Xoá">✕</button>
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table></div>
+  <% if (pages > 1) { %>
+    <nav class="pagination"><% for (let i = 1; i <= pages; i++) { %><% if (i === page) { %><span class="is-active"><%= i %></span><% } else { %><a href="?<%= qs ? qs + '&' : '' %>page=<%= i %>"><%= i %></a><% } %><% } %></nav>
+  <% } %>
+  <% } else { %><div class="empty">Không có khách hàng phù hợp.</div><% } %>
+</div>
+<%- include('_foot') %>

@@ -20,8 +20,8 @@ const latestPosts = (n) =>
 router.get('/', (req, res) => {
   res.render('pages/home', {
     meta: {
-      title: 'TRIP – Dịch vụ Visa & Dịch thuật công chứng tại Đà Nẵng',
-      description: 'TRIP Đà Nẵng: làm visa Trung Quốc, Nhật, Hàn, Mỹ, Châu Âu, Úc; dịch thuật công chứng Anh – Trung – Hàn – Nhật; vé máy bay, tour, thuê xe. Tư vấn miễn phí.',
+      title: 'TRIP – Visa Trung Quốc, Hàn Quốc, Nhật Bản, Châu Âu & Dịch thuật công chứng tại Đà Nẵng',
+      description: 'TRIP Đà Nẵng chuyên visa Trung Quốc, Hàn Quốc, Nhật Bản và Châu Âu (Schengen, Anh); cùng Mỹ, Úc, Canada; dịch thuật công chứng Anh – Trung – Hàn – Nhật; vé máy bay, tour, thuê xe. Tư vấn miễn phí.',
     },
     services,
     tours: publishedTours('AND featured = 1').slice(0, 4),
@@ -44,7 +44,7 @@ router.get('/dich-vu', (req, res) => {
 
 router.get('/dich-vu/visa', (req, res) => {
   res.render('pages/service-visa', {
-    meta: { title: 'Dịch vụ Visa trọn gói – Trung Quốc, Nhật, Hàn, Mỹ, Châu Âu, Úc', description: 'Bảng giá dịch vụ visa trọn gói tại TRIP Đà Nẵng: visa Trung Quốc từ 2.800.000đ, visa Nhật, Hàn, Mỹ, Schengen, Úc, Canada. Luyện phỏng vấn 1 kèm 1.' },
+    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: 'Bảng giá visa trọn gói tại TRIP Đà Nẵng: Trung Quốc từ 2.800.000đ, Hàn Quốc từ 120 USD, Nhật Bản từ 3.800.000đ, Schengen từ 220 USD. Luyện phỏng vấn 1 kèm 1.' },
     services,
   });
 });

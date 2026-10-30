@@ -2,84 +2,81 @@
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: 'Visa' }],
   heading: 'Dịch vụ Visa trọn gói',
-  sub: 'Visa Trung Quốc, Nhật, Hàn, Mỹ, Châu Âu, Úc, Canada và hơn 25 quốc gia. Tư vấn đúng loại visa, chuẩn bị hồ sơ, đặt lịch, luyện phỏng vấn và theo dõi đến khi có kết quả.',
+  sub: 'Thế mạnh Trung Quốc, Hàn Quốc, Nhật Bản và Châu Âu, cùng Mỹ, Úc, Canada và nhiều quốc gia khác. Tư vấn đúng loại visa, chuẩn bị hồ sơ, đặt lịch, luyện phỏng vấn và theo dõi đến khi có kết quả.',
   actions: { service: 'Visa Trung Quốc' },
 }) %>
-<% const worldA = services.worldVisa.filter(v => v.region === 'chau-a'); const worldW = services.worldVisa.filter(v => v.region !== 'chau-a'); %>
+<%
+  const M = Object.fromEntries(services.markets.map(m => [m.id, m]));
+  const rowsBy = (fn) => services.worldVisa.filter(fn);
+  const kr = rowsBy(v => v.code === 'kr');
+  const jp = rowsBy(v => v.code === 'jp');
+  const eu = rowsBy(v => v.region === 'chau-au');
+  const others = rowsBy(v => !['kr', 'jp'].includes(v.code) && v.region !== 'chau-au');
+  const priceOf = (v) => v.vnd ? h.vnd(v.vnd) : h.usd(v.usd);
+%>
 
 <section class="section">
   <div class="container layout-side">
-    <div class="stack">
-      <div>
-        <span class="eyebrow">Visa phổ biến</span>
-        <div class="grid grid--3">
-          <% services.featuredVisas.forEach(function (v) { %>
-            <div class="card visa-card">
-              <% if (v.tag) { %><span class="visa-card__tag"><%= v.tag %></span><% } %>
-              <img class="visa-card__flag" src="<%= flag(v.code) %>" alt="" width="52" height="36" loading="lazy">
-              <h3><%= v.country %></h3>
-              <span class="visa-card__time"><%- icon('clock') %> <%= v.time %></span>
-              <div class="visa-card__price"><small>Từ</small><strong><%= h.money(v.from) %></strong></div>
-            </div>
-          <% }) %>
-        </div>
-      </div>
+    <div>
+      <nav class="jump" aria-label="Chọn thị trường">
+        <% services.markets.forEach(function (m) { %><a href="#<%= m.id %>"><img src="<%= flag(m.code) %>" alt="" width="26" height="26"><%= m.country %></a><% }) %>
+        <a href="#cac-nuoc-khac"><img src="<%= flag('us') %>" alt="" width="26" height="26">Mỹ · Úc · nước khác</a>
+        <a href="#e-visa"><img src="<%= flag('vn') %>" alt="" width="26" height="26">E-visa Việt Nam</a>
+      </nav>
 
-      <div id="trung-quoc">
-        <h2 class="mt-4">Visa Trung Quốc <img src="<%= flag('cn') %>" alt="" width="36" height="24" style="display:inline;border-radius:4px;vertical-align:middle"></h2>
-        <p class="muted">Thế mạnh của TRIP, có chuyên viên riêng phụ trách. Giá trọn gói cho quốc tịch Việt Nam, đơn vị VNĐ.</p>
+      <% function head(m, strong) { %>
+        <div class="market-head market--<%= m.art %>" id="<%= m.id %>">
+          <div class="market-head__art"><%- include('../partials/art', { kind: m.art }) %></div>
+          <div>
+            <h2>Visa <%= m.country %> <span class="serif" style="font-weight:600;color:var(--muted);font-size:.7em"><%= m.native %></span><% if (strong) { %><span class="badge-strong">Thế mạnh</span><% } %></h2>
+            <p><%= m.blurb %></p>
+          </div>
+        </div>
+      <% } %>
+
+      <% head(M['trung-quoc'], true) %>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Loại visa</th><th>Thời gian xét duyệt</th><th>Lưu trú / nhập cảnh</th><th class="num">Giá trọn gói</th></tr></thead>
+          <tbody><% services.chinaVisa.rows.forEach(function (r) { %><tr><td><strong><%= r.type %></strong></td><td><%= r.time %></td><td class="muted"><%= r.detail %></td><td class="num"><%= h.vnd(r.price) %></td></tr><% }) %></tbody>
+        </table>
+      </div>
+      <p class="table-note"><%= services.chinaVisa.note %> Cần chứng nhận lãnh sự giấy tờ dùng tại Trung Quốc? Xem <a href="/dich-vu/dich-thuat#hop-phap-hoa">tại đây</a>.</p>
+
+      <% [['han-quoc', kr], ['nhat-ban', jp]].forEach(function ([id, rows]) { head(M[id], true) %>
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Loại visa</th><th>Thời gian xét duyệt</th><th>Lưu trú / nhập cảnh</th><th class="num">Giá trọn gói</th></tr></thead>
-            <tbody>
-              <% services.chinaVisa.rows.forEach(function (r) { %>
-                <tr><td><strong><%= r.type %></strong></td><td><%= r.time %></td><td class="muted"><%= r.detail %></td><td class="num"><%= h.vnd(r.price) %></td></tr>
-              <% }) %>
-            </tbody>
+            <thead><tr><th>Loại visa</th><th>Thời gian xét duyệt</th><th>Ghi chú</th><th class="num">Giá trọn gói</th></tr></thead>
+            <tbody><% rows.forEach(function (v) { %><tr><td><strong><%= v.type %></strong></td><td><%= v.time %></td><td class="muted"><%= v.note || '' %></td><td class="num"><%= priceOf(v) %></td></tr><% }) %></tbody>
           </table>
         </div>
-        <p class="table-note"><%= services.chinaVisa.note %></p>
-      </div>
+        <div class="flex mt-2"><button class="btn btn--sm btn--accent" data-open-lead data-service="<%= M[id].leadService %>">Tư vấn visa <%= M[id].country %></button></div>
+      <% }) %>
 
-      <div id="chau-a">
-        <h2 class="mt-4">Visa Nhật · Hàn · Châu Á</h2>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá trọn gói</th></tr></thead>
-            <tbody>
-              <% worldA.forEach(function (v) { %>
-                <tr>
-                  <td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td>
-                  <td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td>
-                  <td><%= v.time %></td>
-                  <td class="num"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
+      <% head(M['chau-au'], false) %>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá trọn gói</th></tr></thead>
+          <tbody><% eu.forEach(function (v) { %>
+            <tr><td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td><td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td><td><%= v.time %></td><td class="num"><%= priceOf(v) %></td></tr>
+          <% }) %></tbody>
+        </table>
       </div>
+      <p class="table-note">Đã gồm luyện phỏng vấn 1 kèm 1. Bảo hiểm du lịch bắt buộc với khối Schengen, TRIP có sẵn gói của Liberty.</p>
 
-      <div id="chau-au">
-        <h2 class="mt-4">Visa Mỹ · Châu Âu · Úc · Canada</h2>
-        <p class="muted">Giá tính bằng USD để ổn định theo tỷ giá. Bao gồm luyện phỏng vấn 1 kèm 1 với visa Mỹ và Schengen.</p>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá trọn gói</th></tr></thead>
-            <tbody>
-              <% worldW.forEach(function (v) { %>
-                <tr>
-                  <td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td>
-                  <td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td>
-                  <td><%= v.time %></td>
-                  <td class="num"><%= h.usd(v.usd) %></td>
-                </tr>
-              <% }) %>
-            </tbody>
-          </table>
-        </div>
-        <p class="table-note">Phí có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ. Không thấy quốc gia bạn cần? <a href="#" data-open-lead data-service="Visa nước khác">Liên hệ TRIP</a>.</p>
+      <div class="market-head" id="cac-nuoc-khac">
+        <div class="market-head__art" style="background:linear-gradient(180deg,#eef6fb,#cfe3f2);display:grid;place-items:center;color:var(--navy)"><%- icon('globe') %></div>
+        <div><h2>Mỹ · Úc · Canada & nước khác</h2><p>Hoa Kỳ, Canada, Úc, New Zealand, Đài Loan, Hồng Kông, Macau, Ấn Độ, Dubai…</p></div>
       </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá trọn gói</th></tr></thead>
+          <tbody><% others.forEach(function (v) { %>
+            <tr><td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td><td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td><td><%= v.time %></td><td class="num"><%= priceOf(v) %></td></tr>
+          <% }) %></tbody>
+        </table>
+      </div>
+      <p class="table-note">Phí có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ. Không thấy quốc gia bạn cần? <a href="#" data-open-lead data-service="Visa nước khác">Liên hệ TRIP</a>.</p>
 
       <div class="grid grid--2 mt-4">
         <div class="card">
@@ -98,9 +95,7 @@
         <div class="table-wrap">
           <table class="table">
             <thead><tr><th>Thời gian xử lý</th><th class="num">1 lần (Single)</th><th class="num">Nhiều lần (Multiple)</th></tr></thead>
-            <tbody>
-              <% services.evisa.rows.forEach(function (r) { %><tr><td><%= r.speed %></td><td class="num"><%= h.usd(r.single) %></td><td class="num"><%= h.usd(r.multiple) %></td></tr><% }) %>
-            </tbody>
+            <tbody><% services.evisa.rows.forEach(function (r) { %><tr><td><%= r.speed %></td><td class="num"><%= h.usd(r.single) %></td><td class="num"><%= h.usd(r.multiple) %></td></tr><% }) %></tbody>
           </table>
         </div>
         <h3 class="mt-3">Hỗ trợ tại sân bay (Fast Track)</h3>

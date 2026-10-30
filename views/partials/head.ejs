@@ -27,7 +27,7 @@
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css?v=1">
   <script type="application/ld+json"><%- JSON.stringify({
     '@context': 'https://schema.org',
@@ -71,9 +71,11 @@
         <li class="nav__item">
           <button class="nav__toggle <%= isActive('/dich-vu/visa') %>" aria-expanded="false">Visa <%- icon('chevron') %></button>
           <ul class="nav__sub">
-            <li><a href="/dich-vu/visa#trung-quoc">Visa Trung Quốc <small>Du lịch, thăm thân, thương mại, du học</small></a></li>
-            <li><a href="/dich-vu/visa#chau-a">Visa Nhật · Hàn · Châu Á</a></li>
-            <li><a href="/dich-vu/visa#chau-au">Visa Mỹ · Châu Âu · Úc · Canada</a></li>
+            <li><a href="/dich-vu/visa#trung-quoc"><img class="nav__flag" src="<%= flag('cn') %>" alt="" width="22" height="22"> <span>Visa Trung Quốc <small>Thế mạnh · du lịch, thăm thân, thương mại</small></span></a></li>
+            <li><a href="/dich-vu/visa#han-quoc"><img class="nav__flag" src="<%= flag('kr') %>" alt="" width="22" height="22"> <span>Visa Hàn Quốc <small>Thế mạnh · 3 tháng, 5 năm, 10 năm</small></span></a></li>
+            <li><a href="/dich-vu/visa#nhat-ban"><img class="nav__flag" src="<%= flag('jp') %>" alt="" width="22" height="22"> <span>Visa Nhật Bản <small>Thế mạnh · single & multiple</small></span></a></li>
+            <li><a href="/dich-vu/visa#chau-au"><img class="nav__flag" src="<%= flag('eu') %>" alt="" width="22" height="22"> <span>Visa Châu Âu <small>Schengen & Vương quốc Anh</small></span></a></li>
+            <li><a href="/dich-vu/visa#cac-nuoc-khac">Mỹ · Úc · Canada & nước khác</a></li>
             <li><a href="/dich-vu/visa#e-visa">E-visa Việt Nam <small>Cho người nước ngoài</small></a></li>
             <li><a href="/dich-vu/visa">Tất cả dịch vụ visa</a></li>
           </ul>

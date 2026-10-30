@@ -156,6 +156,13 @@
 
   // ---------- Video ----------
   document.addEventListener('click', function (e) {
+    var vm = e.target.closest('[data-video-modal]');
+    if (vm) {
+      $('#video-modal-frame').innerHTML = '<iframe src="' + vm.getAttribute('data-video-modal') + '" title="Video giới thiệu TRIP" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>';
+      openModal($('#video-modal'));
+    }
+  });
+  document.addEventListener('click', function (e) {
     var p = e.target.closest('[data-video-embed]');
     if (!p) return;
     var frame = p.parentElement;

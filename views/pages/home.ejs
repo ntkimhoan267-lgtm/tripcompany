@@ -1,51 +1,64 @@
 <%- include('../partials/head') %>
 <% const video = h.parseVideo(settings.hero_video); %>
 
-<section class="hero">
-  <div class="hero__stars"></div>
+<section class="hero hero--art">
+  <div class="sparkles"><i style="top:12%;left:8%;--s:12px"></i><i style="top:22%;left:44%;--s:9px;--d:-1s"></i><i style="top:8%;left:62%;--s:16px;--d:-2s"></i><i style="top:40%;left:3%;--s:8px;--d:-.5s"></i><i style="top:30%;right:4%;--s:12px;--d:-2.5s"></i><i style="top:62%;left:48%;--s:10px;--d:-1.6s"></i></div>
   <div class="container">
     <div>
       <span class="eyebrow" style="color:#9fd3f5">TRIP Đà Nẵng · <%= company.slogan %></span>
-      <h1>Visa & Dịch thuật <span class="hl">trọn gói</span>, nhanh gọn ngay tại Đà Nẵng</h1>
-      <p class="hero__lead">Từ hồ sơ visa Trung Quốc, Nhật, Hàn, Mỹ, Châu Âu đến bản dịch công chứng Anh – Trung – Hàn – Nhật. TRIP lo trọn thủ tục để bạn yên tâm lên đường.</p>
-      <ul class="hero__badges">
-        <li><%- icon('globe') %> Visa hơn 25 quốc gia</li>
-        <li><%- icon('lang') %> Dịch 6+ ngôn ngữ</li>
-        <li><%- icon('users') %> Luyện phỏng vấn 1 kèm 1</li>
+      <h1>Chuyên visa <em>Trung · Hàn · Nhật</em> & Châu Âu</h1>
+      <p class="hero__lead">Kèm dịch thuật công chứng Anh – Trung – Hàn – Nhật ngay tại văn phòng. TRIP lo trọn hồ sơ, bạn chỉ việc xếp vali.</p>
+      <ul class="hero__markets">
+        <% services.markets.forEach(function (m, i) { %>
+          <li><a class="<%= i < 3 ? 'is-strong' : '' %>" href="/dich-vu/visa#<%= m.id %>"><img src="<%= flag(m.code) %>" alt="" width="28" height="28"><%= m.country %></a></li>
+        <% }) %>
       </ul>
       <div class="hero__actions">
-        <button class="btn btn--accent" data-open-lead data-service="Visa Trung Quốc"><%- icon('passport') %> Tư vấn visa</button>
+        <button class="btn btn--accent" data-open-lead data-service="Visa Trung Quốc"><%- icon('passport') %> Tư vấn visa miễn phí</button>
         <button class="btn btn--outline-white" data-open-lead data-service="Dịch thuật công chứng"><%- icon('lang') %> Báo giá dịch thuật</button>
       </div>
     </div>
 
-    <div class="hero__media">
-      <div class="video-frame">
-        <% if (video && video.type === 'file') { %>
-          <video id="hero-video" src="<%= video.src %>" poster="/img/og-image.jpg" autoplay muted loop playsinline preload="metadata"></video>
-          <button class="btn btn--sm btn--white video-frame__sound" id="hero-sound" type="button"><%- icon('volume') %> Bật tiếng</button>
-        <% } else if (video) { %>
-          <button class="video-frame__poster" type="button" data-video-embed="<%= video.embed %>" aria-label="Xem video giới thiệu TRIP">
-            <img src="/img/og-image.jpg" alt="" width="1200" height="630">
-            <span class="video-frame__play"><span><%- icon('play') %></span><span>Xem video giới thiệu TRIP</span></span>
-          </button>
-        <% } else { %>
-          <img src="/img/og-image.jpg" alt="Dịch vụ của TRIP" width="1200" height="630" style="width:100%;height:100%;object-fit:cover">
-        <% } %>
-      </div>
-      <div class="hero__float">
-        <span class="dot"><%- icon('clock') %></span>
-        <div><strong>Phản hồi nhanh trong giờ làm việc</strong>T2–T6 8:00–17:00 · T7 8:00–12:00</div>
+    <div class="hero__visual">
+      <svg class="flight-path" viewBox="0 0 500 560" aria-hidden="true"><path id="fp" d="M30 470 C 60 300, 160 360, 220 250 S 400 80, 480 60"/><path class="plane" d="M0 0l-12 5 3-5-3-5z" transform="translate(470 64) rotate(-18)"/></svg>
+      <%- include('../partials/stamp', { top: 'VISA · CHINA · TRUNG QUỐC · ', mid: '中国', sub: 'APPROVED', cls: 'stamp--cn' }) %>
+      <%- include('../partials/stamp', { top: 'VISA · KOREA · HÀN QUỐC · ', mid: '한국', sub: 'APPROVED', cls: 'stamp--kr' }) %>
+      <%- include('../partials/stamp', { top: 'VISA · JAPAN · NHẬT BẢN · ', mid: '日本', sub: 'APPROVED', cls: 'stamp--jp' }) %>
+      <%- include('../partials/stamp', { top: 'SCHENGEN · EUROPE · ', mid: 'EU', sub: 'APPROVED', cls: 'stamp--eu' }) %>
+      <div class="porthole">
+        <div class="porthole__glass">
+          <% if (video && video.type === 'file') { %>
+            <video id="hero-video" src="<%= video.src %>" autoplay muted loop playsinline preload="metadata"></video>
+            <button class="btn btn--sm btn--white porthole__sound" id="hero-sound" type="button"><%- icon('volume') %> Bật tiếng</button>
+          <% } else { %>
+            <div class="porthole__sky">
+              <span class="sun"></span>
+              <svg viewBox="0 0 400 200" preserveAspectRatio="none"><path class="p1" d="M0 90c30-30 80-30 110 0 30-36 90-36 120 0 30-30 80-30 110 0 20-16 46-16 60 0V200H0z"/><path class="p2" d="M0 130c30-26 76-26 104 0 34-32 92-32 124 0 30-24 76-24 104 0 26-20 52-20 68 0V200H0z"/><path class="p3" d="M0 168c34-22 80-22 112 0 34-26 90-26 122 0 32-20 76-20 104 0 24-16 48-16 62 0V200H0z"/></svg>
+            </div>
+            <% if (video) { %>
+              <button class="porthole__play" type="button" data-video-modal="<%= video.embed %>" aria-label="Xem video giới thiệu TRIP">
+                <span><%- icon('play') %></span><span>Xem video về TRIP</span>
+              </button>
+            <% } %>
+          <% } %>
+        </div>
       </div>
     </div>
   </div>
+  <%- include('../partials/clouds', { end: '#ffffff' }) %>
 </section>
 
 <div class="quick-lead">
   <div class="container">
-    <div class="quick-lead__card">
-      <div class="quick-lead__title"><strong>Tư vấn miễn phí</strong><span>Để lại số điện thoại, TRIP gọi lại ngay.</span></div>
-      <%- include('../partials/lead-form', { formId: 'quick', layout: 'inline', showNote: false, submitLabel: 'Gửi' }) %>
+    <div class="bpass">
+      <div class="bpass__stub">
+        <span class="bpass__label">Boarding pass · Miễn phí</span>
+        <div class="bpass__route"><div><b>DAD</b><small>Đà Nẵng</small></div><%- icon('plane') %><div><b>✦</b><small>Thế giới</small></div></div>
+        <span class="bpass__title">Tư vấn visa & dịch thuật</span>
+      </div>
+      <div class="bpass__form">
+        <%- include('../partials/lead-form', { formId: 'quick', layout: 'inline', showNote: false, submitLabel: 'Gửi' }) %>
+      </div>
     </div>
   </div>
 </div>
@@ -55,19 +68,20 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Dịch vụ trọng tâm</span>
-      <h2>Hai thế mạnh làm nên TRIP</h2>
+      <h2>Hai thế mạnh làm nên <em>TRIP</em></h2>
       <p>Visa và Dịch thuật luôn đi cùng nhau. Làm cả hai tại một nơi giúp bạn tiết kiệm thời gian, chi phí và không lo sai lệch giấy tờ.</p>
     </div>
     <div class="pillars">
       <article class="pillar pillar--visa reveal">
         <span class="pillar__tag">Dịch vụ Visa</span>
-        <h3>Visa trọn gói hơn 25 quốc gia</h3>
+        <%- include('../partials/stamp', { top: 'VISA · APPROVED · VISA · APPROVED · ', mid: 'TRIP', sub: '', cls: '' }) %>
+        <h3>Visa <em style="color:#bfe3fa">Trung · Hàn · Nhật</em> & Châu Âu</h3>
         <p>Tư vấn đúng loại visa, chuẩn bị hồ sơ, đặt lịch hẹn và theo dõi đến khi có kết quả.</p>
         <ul>
-          <li><%- icon('check') %> Visa Trung Quốc: du lịch, thăm thân, thương mại, du học, kết hôn</li>
-          <li><%- icon('check') %> Nhật, Hàn, Đài Loan, Hồng Kông, Dubai, Ấn Độ…</li>
-          <li><%- icon('check') %> Mỹ, Anh, Schengen, Úc, New Zealand, Canada. Luyện phỏng vấn 1 kèm 1</li>
-          <li><%- icon('check') %> E-visa Việt Nam & Fast Track cho khách nước ngoài</li>
+          <li><%- icon('check') %> Trung Quốc: du lịch, thăm thân, thương mại, du học, kết hôn</li>
+          <li><%- icon('check') %> Hàn Quốc 3 tháng, 5 năm, 10 năm · Nhật Bản single & multiple</li>
+          <li><%- icon('check') %> Schengen & Anh, luyện phỏng vấn 1 kèm 1</li>
+          <li><%- icon('check') %> Cùng Mỹ, Úc, Canada, Đài Loan, Hồng Kông, Dubai…</li>
         </ul>
         <div class="pillar__price">
           <div><small>Visa Trung Quốc chỉ từ</small><strong><%= h.vnd(services.chinaVisa.rows[0].price) %></strong></div>
@@ -76,7 +90,8 @@
       </article>
       <article class="pillar pillar--trans reveal">
         <span class="pillar__tag">Dịch thuật công chứng</span>
-        <h3>Bản dịch chuẩn, có dấu, lấy nhanh</h3>
+        <%- include('../partials/stamp', { top: 'CÔNG CHỨNG · CERTIFIED · ', mid: '译', sub: '', cls: '' }) %>
+        <h3>Bản dịch <em style="color:#fff3d6">chuẩn</em>, có dấu, lấy nhanh</h3>
         <p>Dịch thuật công chứng dấu công ty và dấu tư pháp, hợp pháp hoá và chứng nhận lãnh sự cho mọi loại giấy tờ.</p>
         <ul>
           <li><%- icon('check') %> Anh, Trung, Hàn, Nhật, Thái, Lào và nhiều ngôn ngữ khác</li>
@@ -93,26 +108,56 @@
   </div>
 </section>
 
-<!-- Visa nổi bật -->
+<!-- Thị trường visa thế mạnh -->
 <section class="section section--soft" id="visa">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">Visa phổ biến</span>
-      <h2>Bạn muốn đi đâu?</h2>
-      <p>Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản và phí dịch vụ.</p>
+      <span class="eyebrow">Thị trường thế mạnh</span>
+      <h2>Ba cửa ngõ <em>Á Đông</em>, một hành trình <em>trời Âu</em></h2>
+      <p>Mỗi thị trường có chuyên viên phụ trách riêng. Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản và phí dịch vụ.</p>
     </div>
-    <div class="grid grid--3">
-      <% services.featuredVisas.forEach(function (v) { %>
-        <a class="card card--link visa-card reveal" href="/dich-vu/visa#<%= v.code === 'cn' ? 'trung-quoc' : (['us','eu','au'].includes(v.code) ? 'chau-au' : 'chau-a') %>">
-          <% if (v.tag) { %><span class="visa-card__tag"><%= v.tag %></span><% } %>
-          <img class="visa-card__flag" src="<%= flag(v.code) %>" alt="Cờ <%= v.country %>" width="52" height="36" loading="lazy">
-          <h3>Visa <%= v.country %></h3>
-          <span class="visa-card__time"><%- icon('clock') %> <%= v.time %></span>
-          <div class="visa-card__price"><small>Trọn gói từ</small><strong><%= h.money(v.from) %></strong></div>
+    <div class="markets">
+      <% services.markets.slice(0, 3).forEach(function (m) { %>
+        <a class="market market--<%= m.art %> reveal" href="/dich-vu/visa#<%= m.id %>">
+          <div class="market__art">
+            <span class="market__native"><%= m.native %></span>
+            <%- include('../partials/art', { kind: m.art }) %>
+          </div>
+          <div class="market__body">
+            <%- include('../partials/stamp', { top: 'TRIP · THẾ MẠNH · TRIP · THẾ MẠNH · ', mid: '✦', sub: '', cls: 'market__stamp' }) %>
+            <span class="market__en">Visa <%= m.en %></span>
+            <h3><%= m.country %></h3>
+            <p><%= m.blurb %></p>
+            <ul class="market__types"><% m.types.forEach(function (t) { %><li><%= t %></li><% }) %></ul>
+            <div class="market__foot">
+              <div><small>Trọn gói từ</small><strong><%= h.money(m.from) %></strong><span class="time"><%- icon('clock') %> <%= m.time %></span></div>
+              <span class="market__go"><%- icon('arrow') %></span>
+            </div>
+          </div>
         </a>
       <% }) %>
     </div>
-    <p class="text-center mt-4"><a class="btn btn--navy" href="/dich-vu/visa">Xem visa tất cả quốc gia <%- icon('arrow') %></a></p>
+    <% const eu = services.markets[3]; %>
+    <a class="market market--eu market--wide reveal" href="/dich-vu/visa#<%= eu.id %>">
+      <div class="market__art">
+        <span class="market__native"><%= eu.native %></span>
+        <%- include('../partials/art', { kind: 'eu' }) %>
+      </div>
+      <div class="market__body">
+        <span class="market__en">Visa <%= eu.en %></span>
+        <h3>Visa <em class="serif" style="color:var(--sky-600)">Châu Âu</em></h3>
+        <p><%= eu.blurb %></p>
+        <ul class="market__types"><% eu.types.forEach(function (t) { %><li><%= t %></li><% }) %></ul>
+        <div class="market__foot">
+          <div><small>Trọn gói từ</small><strong><%= h.money(eu.from) %></strong><span class="time"><%- icon('clock') %> <%= eu.time %></span></div>
+          <span class="market__go"><%- icon('arrow') %></span>
+        </div>
+      </div>
+    </a>
+    <div class="markets-note">
+      <a class="btn btn--navy" href="/dich-vu/visa">Bảng giá visa đầy đủ <%- icon('arrow') %></a>
+      <a class="btn btn--ghost" href="/dich-vu/visa#cac-nuoc-khac">Mỹ, Úc, Canada & nước khác</a>
+    </div>
   </div>
 </section>
 
@@ -122,7 +167,7 @@
     <div class="why">
       <div class="reveal">
         <span class="eyebrow">Bảng giá dịch thuật</span>
-        <h2>Giá rõ ràng theo từng trang</h2>
+        <h2>Giá rõ ràng <em>theo từng trang</em></h2>
         <p class="lead">Chọn ngôn ngữ để xem giá. Văn bản chuyên ngành sâu được báo giá riêng sau khi TRIP nhận tài liệu.</p>
         <ul class="checklist mt-3">
           <li><%- icon('check-circle') %> Nhận tài liệu qua Zalo, email hoặc tại văn phòng</li>
@@ -159,7 +204,7 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Quy trình làm việc</span>
-      <h2>4 bước đơn giản cùng TRIP</h2>
+      <h2>4 bước, từ <em>hồ sơ</em> đến <em>cửa máy bay</em></h2>
     </div>
     <ol class="steps">
       <li class="step reveal"><div class="card__icon"><%- icon('chat') %></div><h3>Tư vấn miễn phí</h3><p>Gọi hotline, nhắn Zalo hoặc để lại thông tin. TRIP tư vấn loại visa và giấy tờ cần thiết.</p></li>
@@ -175,7 +220,7 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Hệ sinh thái du lịch</span>
-      <h2>Một đầu mối cho cả chuyến đi</h2>
+      <h2>Một đầu mối cho <em>cả chuyến đi</em></h2>
       <p>Ngoài visa và dịch thuật, TRIP hỗ trợ trọn gói mọi dịch vụ bạn cần.</p>
     </div>
     <div class="grid grid--3">
@@ -199,7 +244,7 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Tour nổi bật</span>
-      <h2>Khởi hành từ Đà Nẵng</h2>
+      <h2>Khởi hành từ <em>Đà Nẵng</em></h2>
       <p>Tour trọn gói kèm hỗ trợ visa. Đăng ký nhận tin để không bỏ lỡ lịch khởi hành mới mỗi tháng.</p>
     </div>
     <div class="grid grid--4">
@@ -219,7 +264,7 @@
     <div class="why__visual reveal"><img src="/img/logo-vertical.png" alt="Logo TRIP" width="400" height="400"></div>
     <div class="reveal">
       <span class="eyebrow">Vì sao chọn TRIP</span>
-      <h2>Tận tâm trên từng hồ sơ của bạn</h2>
+      <h2>Tận tâm trên <em>từng hồ sơ</em> của bạn</h2>
       <div class="why__list mt-3">
         <div class="why__item"><div class="card__icon"><%- icon('target') %></div><div><h3>Trọn gói, một đầu mối</h3><p>Visa, dịch thuật, vé máy bay, bảo hiểm, tour… tất cả tại một nơi, không phải chạy nhiều chỗ.</p></div></div>
         <div class="why__item"><div class="card__icon"><%- icon('wallet') %></div><div><h3>Giá cạnh tranh, minh bạch</h3><p>Bảng giá công khai, báo rõ những gì đã bao gồm và chưa bao gồm trước khi làm.</p></div></div>
@@ -236,7 +281,7 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Cẩm nang</span>
-      <h2>Kinh nghiệm visa & dịch thuật</h2>
+      <h2>Kinh nghiệm <em>visa & dịch thuật</em></h2>
     </div>
     <div class="grid grid--3">
       <% posts.forEach(function (p) { %><%- include('../partials/post-card', { p }) %><% }) %>
@@ -251,7 +296,7 @@
   <div class="container cta-band">
     <div class="reveal">
       <span class="eyebrow" style="color:#9fd3f5">Bắt đầu hành trình</span>
-      <h2>Sẵn sàng cho chuyến đi tiếp theo?</h2>
+      <h2>Sẵn sàng cho <em>chuyến đi tiếp theo</em>?</h2>
       <p>Để lại thông tin hoặc gọi trực tiếp. Tư vấn viên TRIP sẽ kiểm tra hồ sơ và báo giá miễn phí cho bạn.</p>
       <ul class="contact-lines">
         <li><div class="card__icon"><%- icon('passport') %></div><div><strong>Visa & Tour</strong><a href="tel:<%= h.phoneTel(settings.hotline) %>"><%= h.phoneDisplay(settings.hotline) %></a></div></li>

@@ -1,5 +1,6 @@
 <section class="page-hero">
-  <div class="container">
+  <div class="sparkles"><i style="top:18%;left:70%;--s:12px"></i><i style="top:40%;left:88%;--s:9px;--d:-1s"></i><i style="top:12%;left:52%;--s:7px;--d:-2s"></i></div>
+  <div class="container" style="position:relative;z-index:1">
     <ol class="breadcrumb" aria-label="Breadcrumb">
       <li><a href="/">Trang chủ</a></li>
       <% (crumbs || []).forEach(function (c) { %><li><% if (c.href) { %><a href="<%= c.href %>"><%= c.label %></a><% } else { %><%= c.label %><% } %></li><% }) %>
@@ -13,4 +14,5 @@
       </div>
     <% } %>
   </div>
+  <%- include('clouds', { end: '#ffffff' }) %>
 </section>

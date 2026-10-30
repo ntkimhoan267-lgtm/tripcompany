@@ -537,3 +537,196 @@ a.chip:hover, a.chip.is-active { background: var(--navy); color: #fff; }
 .faq details[open] summary::after { transform: rotate(45deg); }
 .chips a { color: inherit; }
 @media (max-width: 560px) { .topbar { display: none; } }
+
+/* ==========================================================================
+   ART DIRECTION — "Giấy cắt lớp" theo logo TRIP + tem visa + thẻ lên máy bay
+   ========================================================================== */
+:root { --serif: 'Playfair Display', Georgia, 'Times New Roman', serif; }
+h1, h2, .serif { font-family: var(--serif); font-weight: 700; letter-spacing: -.015em; }
+h1 em, h2 em, .serif em { font-style: italic; color: var(--sky-600); font-weight: 600; }
+.section--navy h2 em, .hero h1 em, .page-hero h1 em { color: #9fd3f5; }
+.eyebrow::before { content: '✦'; width: auto; height: auto; background: none; font-size: .9rem; }
+
+/* Mây giấy cắt lớp làm đường chia section */
+.clouds { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: clamp(70px, 9vw, 130px); display: block; pointer-events: none; }
+.clouds path { filter: drop-shadow(0 -6px 8px rgba(17, 34, 51, .18)); }
+.clouds .c1 { fill: #6fa9d3; } .clouds .c2 { fill: #a9cfe9; } .clouds .c3 { fill: var(--cloud-end, #fff); }
+
+/* Ngôi sao 4 cánh như logo */
+.sparkles { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
+.sparkles i { position: absolute; width: var(--s, 14px); height: var(--s, 14px); background: #fff; opacity: .85;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: twinkle 3.5s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes twinkle { 50% { opacity: .25; transform: scale(.7); } }
+
+/* ---------- Hero nghệ thuật ---------- */
+.hero--art { padding-bottom: clamp(150px, 16vw, 210px); background:
+  radial-gradient(900px 480px at 80% 10%, rgba(91,164,212,.45), transparent 60%),
+  radial-gradient(600px 400px at 0% 100%, rgba(242,120,75,.18), transparent 60%),
+  linear-gradient(165deg, #0d1c2b 0%, var(--navy) 50%, #2a5b82 100%); }
+.hero--art::after { display: none; }
+.hero--art h1 { font-size: clamp(2.3rem, 5.2vw, 4rem); line-height: 1.08; }
+.hero--art h1 em { display: inline-block; }
+.hero__markets { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 30px; padding: 0; list-style: none; }
+.hero__markets li a { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px 7px 7px; border-radius: 999px; color: #fff; font-weight: 600; font-size: .92rem;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); transition: .2s; }
+.hero__markets li a:hover { background: rgba(255,255,255,.18); color: #fff; }
+.hero__markets img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,.7); }
+.hero__markets .is-strong { background: rgba(242,120,75,.2); border-color: rgba(242,120,75,.5); }
+
+.hero__visual { position: relative; display: grid; place-items: center; min-height: 520px; }
+.porthole {
+  position: relative; width: min(340px, 78vw); aspect-ratio: 3 / 4; padding: 20px; border-radius: 170px;
+  background: linear-gradient(145deg, #f7fafc 0%, #cfdbe6 55%, #9fb3c6 100%);
+  box-shadow: 0 50px 90px -30px rgba(0,0,0,.65), inset 0 2px 0 #fff, inset 0 -6px 14px rgba(31,58,82,.25);
+  z-index: 2; transform: rotate(-3deg);
+}
+.porthole__glass { position: relative; width: 100%; height: 100%; border-radius: 150px; overflow: hidden; background: linear-gradient(180deg, #f6b38f 0%, #f4c9a8 30%, #a9cfe9 70%, #6fa9d3 100%);
+  box-shadow: inset 0 0 0 4px rgba(31,58,82,.25), inset 0 10px 30px rgba(0,0,0,.25); }
+.porthole__glass::before { /* rèm cửa sổ */ content: ''; position: absolute; left: 0; right: 0; top: 0; height: 14%; z-index: 3;
+  background: linear-gradient(180deg, #e9eff4, #cdd9e3); box-shadow: 0 4px 10px rgba(0,0,0,.2); border-radius: 0 0 6px 6px; }
+.porthole__glass::after { /* phản chiếu kính */ content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.28) 42%, transparent 52%); }
+.porthole video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.porthole__sky { position: absolute; inset: 0; }
+.porthole__sky .sun { position: absolute; width: 90px; height: 90px; border-radius: 50%; left: 50%; top: 32%; transform: translateX(-50%); background: radial-gradient(circle, #fff3d6 0%, #ffd27a 55%, rgba(255,210,122,0) 72%); }
+.porthole__sky svg { position: absolute; left: -10%; width: 120%; bottom: 0; height: 62%; }
+.porthole__sky .p1 { fill: #fff; opacity: .55; } .porthole__sky .p2 { fill: #fff; opacity: .8; } .porthole__sky .p3 { fill: #fff; }
+.porthole__sky path { filter: drop-shadow(0 -4px 6px rgba(31,58,82,.18)); }
+.porthole__play { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; align-content: center; gap: 14px; border: 0; background: none; color: var(--navy); font: inherit; font-weight: 700; cursor: pointer; padding-top: 10%; }
+.porthole__play span:first-child { width: 76px; height: 76px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 10px rgba(242,120,75,.25), 0 14px 30px -8px rgba(224,96,47,.7); transition: .25s; }
+.porthole__play:hover span:first-child { transform: scale(1.08); box-shadow: 0 0 0 16px rgba(242,120,75,.2), 0 14px 30px -8px rgba(224,96,47,.7); }
+.porthole__play .icon { width: 28px; height: 28px; fill: #fff; stroke: none; margin-left: 4px; }
+.porthole__play span:last-child { background: rgba(255,255,255,.85); padding: 6px 14px; border-radius: 999px; font-size: .88rem; }
+.porthole__sound { position: absolute; z-index: 4; bottom: 22px; left: 50%; transform: translateX(-50%); }
+
+.flight-path { position: absolute; inset: -6% -10%; width: 120%; height: 112%; z-index: 1; pointer-events: none; overflow: visible; }
+.flight-path path { fill: none; stroke: rgba(255,255,255,.45); stroke-width: 2; stroke-dasharray: 2 10; stroke-linecap: round; }
+.flight-path .plane { fill: #fff; }
+
+.stamp { position: absolute; width: 110px; height: 110px; z-index: 3; color: var(--c, #ff8a7a); opacity: .95; filter: drop-shadow(0 6px 10px rgba(0,0,0,.25)); }
+.stamp circle { stroke: currentColor; }
+.stamp text { fill: currentColor; font-family: var(--font); font-weight: 800; }
+.stamp__ring { font-size: 10.5px; letter-spacing: 2.6px; }
+.stamp__mid { font-family: var(--serif) !important; font-size: 22px; font-weight: 700; }
+.stamp__sub { font-size: 7.5px; letter-spacing: 1.5px; }
+.hero__visual .stamp { animation: floaty 6s ease-in-out infinite; }
+.stamp--cn { --c: #ff9b8a; top: 4%; left: 2%; transform: rotate(-14deg); }
+.stamp--kr { --c: #9fd3f5; top: 10%; right: 0; transform: rotate(12deg); animation-delay: -1.5s !important; }
+.stamp--jp { --c: #ffb3c6; bottom: 14%; left: 0; transform: rotate(8deg); animation-delay: -3s !important; }
+.stamp--eu { --c: #ffd27a; bottom: 6%; right: 4%; transform: rotate(-10deg); animation-delay: -4.5s !important; }
+@keyframes floaty { 50% { translate: 0 -10px; } }
+@media (max-width: 900px) {
+  .hero__visual { min-height: 460px; margin-top: 10px; }
+  .stamp { width: 88px; height: 88px; }
+}
+@media (max-width: 480px) { .stamp { width: 74px; height: 74px; } .hero__visual { min-height: 420px; } }
+
+/* ---------- Boarding pass (form tư vấn nhanh) ---------- */
+.bpass { display: grid; grid-template-columns: 250px 1fr; border-radius: 22px; overflow: hidden; box-shadow: var(--shadow-lg); background: #fff; position: relative; }
+.bpass__stub { position: relative; background: linear-gradient(160deg, var(--accent), #e0602f); color: #fff; padding: 22px 26px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
+.bpass__stub::after { /* đường xé vé */ content: ''; position: absolute; top: 0; bottom: 0; right: -1px; width: 2px;
+  background: repeating-linear-gradient(180deg, #fff 0 8px, transparent 8px 16px); opacity: .9; }
+.bpass::before, .bpass::after { content: ''; position: absolute; left: 238px; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); z-index: 2; }
+.bpass::before { top: -12px; } .bpass::after { bottom: -12px; }
+.bpass__label { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; opacity: .9; font-weight: 700; }
+.bpass__route { display: flex; align-items: center; gap: 12px; }
+.bpass__route b { display: block; font-size: 1.7rem; line-height: 1; letter-spacing: .04em; }
+.bpass__route small { font-size: .75rem; opacity: .9; }
+.bpass__route .icon { width: 26px; height: 26px; transform: rotate(45deg); }
+.bpass__title { font-family: var(--serif); font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+.bpass__form { padding: 22px 24px; }
+.bpass__form form { display: grid; grid-template-columns: 1fr 1fr 1.2fr auto; gap: 12px; align-items: start; }
+@media (max-width: 980px) {
+  .bpass { grid-template-columns: 1fr; }
+  .bpass__stub::after { top: auto; left: 0; right: 0; bottom: -1px; width: auto; height: 2px; background: repeating-linear-gradient(90deg, #fff 0 8px, transparent 8px 16px); }
+  .bpass::before, .bpass::after { display: none; }
+  .bpass__form form { grid-template-columns: 1fr 1fr; }
+  .bpass__form form .field:nth-last-of-type(1) { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) { .bpass__form form { grid-template-columns: 1fr; } }
+
+/* ---------- Thị trường visa (thẻ nghệ thuật) ---------- */
+.markets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+@media (max-width: 980px) { .markets { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .markets { grid-template-columns: 1fr; } }
+.market { position: relative; display: flex; flex-direction: column; background: #fff; border-radius: 28px; overflow: hidden; color: inherit;
+  box-shadow: 0 1px 0 var(--line), 0 20px 40px -24px rgba(17,34,51,.35); transition: transform .3s ease, box-shadow .3s ease; }
+a.market:hover { color: inherit; transform: translateY(-6px) rotate(-.4deg); box-shadow: 0 30px 60px -24px rgba(17,34,51,.45); }
+.market__art { position: relative; aspect-ratio: 10 / 7; background: linear-gradient(180deg, var(--s1), var(--s2)); overflow: hidden; }
+.market__art .art { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform .6s ease; }
+a.market:hover .market__art .art { transform: scale(1.04); }
+.market__native { position: absolute; left: 22px; top: 16px; z-index: 2; font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 700; color: var(--ink2); opacity: .85; line-height: 1; }
+.market .stamp { position: absolute; width: 92px; height: 92px; right: 14px; top: 12px; color: var(--ink2); opacity: .8; filter: none; transform: rotate(14deg); }
+.market__body { padding: 20px 24px 24px; display: flex; flex-direction: column; flex: 1; }
+.market__en { font-size: .72rem; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.market h3 { font-family: var(--serif); font-size: 1.85rem; margin: 2px 0 8px; }
+.market p { color: var(--muted); font-size: .95rem; }
+.market__types { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0 0 18px; }
+.market__types li { font-size: .8rem; font-weight: 600; padding: 5px 10px; border-radius: 999px; background: var(--tint); color: var(--ink2); }
+.market__foot { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1.5px dashed var(--line); }
+.market__foot small { display: block; color: var(--muted); font-size: .8rem; }
+.market__foot strong { font-family: var(--serif); font-size: 1.7rem; color: var(--ink2); line-height: 1.1; }
+.market__foot .time { display: inline-flex; gap: 5px; align-items: center; font-size: .82rem; color: var(--muted); margin-top: 4px; }
+.market__foot .time .icon { width: 14px; height: 14px; }
+.market__go { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--ink2); color: #fff; flex: none; transition: .25s; }
+a.market:hover .market__go { transform: rotate(-45deg); }
+
+.market--cn { --s1: #fde6d8; --s2: #f7c4ad; --ink2: #9b2d24; --tint: #fdeee8; }
+.market--kr { --s1: #e6f0fb; --s2: #c4d8f1; --ink2: #23395f; --tint: #e9f1fb; }
+.market--jp { --s1: #fdecf1; --s2: #f6cbd8; --ink2: #a3324f; --tint: #fdeef3; }
+.market--eu { --s1: #e8eff8; --s2: #c7d6ec; --ink2: #1f3a52; --tint: #eaf1f9; }
+
+/* Màu minh hoạ */
+.art .layer { filter: drop-shadow(0 -5px 6px rgba(0,0,0,.14)); }
+.art__stars path { fill: #fff; opacity: .9; }
+.art--cn .acc { fill: #e2493b; opacity: .85; } .art--cn .m1 { fill: #eaa48c; } .art--cn .m3 { fill: #c8553d; } .art--cn .m4 { fill: #8e2c27; }
+.art--cn .wall { stroke: #7a2620; } .art--cn .wall-t, .art--cn .pagoda { fill: #6b1f1b; }
+.art--kr .acc { fill: #e05a6d; opacity: .9; } .art--kr .m1 { fill: #a3bfe2; } .art--kr .m2 { fill: #6f93c4; } .art--kr .m3 { fill: #3d6aa8; } .art--kr .m4 { fill: #1f3a52; }
+.art--kr .tower { fill: #2c4a7a; } .art--kr .hanok { fill: #23395f; } .art--kr .hanok .col { fill: #c64a4a; }
+.art--jp .acc { fill: #e8475a; opacity: .9; } .art--jp .m1 { fill: #e9b5c6; } .art--jp .m2 { fill: #4b5f8f; } .art--jp .snow { fill: #fff; } .art--jp .m3 { fill: #c97a95; } .art--jp .m4 { fill: #7a3b56; }
+.art--jp .torii { fill: #d33a3a; } .art--jp .petal { fill: #fff; opacity: .9; }
+.art--eu .acc { fill: #f2b84b; opacity: .9; } .art--eu .m1 { fill: #abc1dd; } .art--eu .m3 { fill: #5e86b8; } .art--eu .m4 { fill: #1f3a52; }
+.art--eu .eiffel { fill: #1f3a52; } .art--eu .arch { fill: #2f5a85; }
+
+/* Thẻ Châu Âu dạng ngang */
+.market--wide { display: grid; grid-template-columns: 1.05fr 1fr; margin-top: 28px; }
+.market--wide .market__art { aspect-ratio: auto; min-height: 300px; }
+.market--wide .market__body { padding: clamp(24px, 3.5vw, 40px); }
+.market--wide h3 { font-size: 2.2rem; }
+@media (max-width: 860px) { .market--wide { grid-template-columns: 1fr; } .market--wide .market__art { min-height: 0; aspect-ratio: 10 / 6; } }
+
+.markets-note { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+
+/* ---------- Tinh chỉnh chung theo phong cách mới ---------- */
+.section-head h2 { font-size: clamp(1.9rem, 3.6vw, 2.8rem); }
+.page-hero { padding-bottom: clamp(90px, 10vw, 130px); }
+.page-hero h1 { font-size: clamp(2rem, 4.4vw, 3.2rem); }
+.page-hero::after { display: none; }
+.pillar h3 { font-family: var(--serif); font-size: 2rem; }
+.pillar__price strong { font-family: var(--serif); font-size: 1.9rem; }
+.pillar .stamp { position: absolute; width: 130px; height: 130px; right: 18px; top: 18px; color: rgba(255,255,255,.35); filter: none; transform: rotate(16deg); z-index: -1; }
+.steps { position: relative; }
+@media (min-width: 981px) { .steps:not(.steps--2)::before { content: ''; position: absolute; left: 6%; right: 6%; top: 52px; border-top: 2px dashed #bcd6ea; z-index: 0; } }
+.step { z-index: 1; }
+.step::before { font-family: var(--serif); font-style: italic; font-weight: 700; color: #cfe3f2; font-size: 3rem; }
+.why__visual { border-radius: 200px 200px 28px 28px; }
+.tour-card__foot strong, .visa-card__price strong { font-family: var(--serif); }
+.footer { position: relative; }
+
+/* Bảng thị trường trong trang Visa */
+.market-head { display: flex; align-items: center; gap: 18px; margin: 48px 0 18px; }
+.market-head__art { width: 120px; height: 84px; border-radius: 18px; overflow: hidden; position: relative; background: linear-gradient(180deg, var(--s1), var(--s2)); flex: none; }
+.market-head__art .art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.market-head h2 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.market-head p { margin: 4px 0 0; color: var(--muted); }
+.market-head .badge-strong { display: inline-block; font-family: var(--font); font-size: .72rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 999px; vertical-align: middle; margin-left: 8px; }
+.jump { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.jump a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px 8px 8px; border-radius: 999px; background: #fff; border: 1.5px solid var(--line); font-weight: 600; color: var(--navy); }
+.jump a:hover { border-color: var(--sky); background: var(--sky-50); }
+.jump img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+.page-hero { isolation: isolate; }
+.nav__sub a { align-items: flex-start; gap: 10px; }
+.nav__flag { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; margin-top: 2px; flex: none; }
+.market__body { position: relative; }
+.market .market__stamp { top: -54px; right: 16px; width: 96px; height: 96px; background: #fff; border-radius: 50%; padding: 4px; opacity: 1; color: var(--ink2); box-shadow: 0 8px 18px -10px rgba(0,0,0,.35); }
+.market__foot .time { display: flex; }

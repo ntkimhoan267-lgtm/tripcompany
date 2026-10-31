@@ -1282,78 +1282,22 @@ h1, h2, .serif, .pcard__price strong, .ccard__price, .plan__from strong, .fees b
   .ccard__list { padding: 2px 14px 6px; } .ccard__head { padding: 12px 14px; }
 }
 
-/* ==========================================================================
-   Tông màu tươi sáng: xanh biển sáng thay navy đậm ở các khối nền,
-   phần đầu trang con dùng nền trời sáng. Navy chỉ còn dùng cho chữ.
-   ========================================================================== */
-:root {
-  --blue: #1f78c1;
-  --grad-blue: linear-gradient(135deg, #1868ab 0%, #1f80c8 55%, #3aa3e0 100%);
-  --sun: #ffd27a;
-}
-.btn--navy { --b: var(--blue); }
-.btn--accent { background-image: linear-gradient(135deg, #ec6a2c, #c94f1c); border-color: transparent; }
-
-/* Thanh trên cùng & chân trang */
-.topbar { background: linear-gradient(90deg, #1868ab, #2a8fd6); color: #e3f2fc; }
-.footer { background: linear-gradient(180deg, #1a64a0 0%, #124d7e 100%); color: #d3e7f6; }
-.footer a { color: #fff; }
-.footer__brand small { color: #cfe9fb; }
-.footer__contact .icon { color: #bfe3fa; }
-.footer__social a { background: rgba(255,255,255,.14); }
-.footer__social a:hover { background: var(--accent); }
-.footer__bottom { border-top-color: rgba(255,255,255,.18); }
-
-/* Trang chủ: lớp phủ video xanh biển thay vì gần đen */
-.hero--video { background: #1868ab; }
-.hero__shade { background: linear-gradient(90deg, rgba(13,66,112,.86) 0%, rgba(20,92,150,.66) 40%, rgba(40,130,195,.12) 74%, rgba(40,130,195,.22) 100%),
-                           linear-gradient(0deg, rgba(13,66,112,.5), transparent 45%); }
-@media (max-width: 900px) { .hero__shade { background: linear-gradient(180deg, rgba(13,66,112,.74), rgba(13,66,112,.84)); } }
-.hero h1 em, .section--navy h2 em { color: var(--sun); }
-.hero--video .hero__lead { color: #eef7fd; }
-
-/* Khối nền xanh (kêu gọi tư vấn, dải dịch thuật, kiểm tra hồ sơ, báo giá) */
-.section--navy { background: var(--grad-blue); color: #eaf5fd; }
-.section--navy .section-head p { color: #dcedfa; }
-.section--navy .contact-lines .card__icon { background: rgba(255,255,255,.18); color: #fff; }
-.feature-band { background: var(--grad-blue); box-shadow: 0 24px 50px -28px rgba(24,104,171,.7); }
-.feature-band__icon { background: rgba(255,255,255,.18); color: #fff; }
-.check-band, .quote-band { background: var(--grad-blue); color: #eaf5fd; }
-.check-band::after { background: rgba(255,255,255,.12); }
-
-/* Phần đầu trang con: trời sáng, chữ navy */
-.page-hero { background: radial-gradient(circle at 88% 12%, rgba(255,210,122,.5), transparent 38%),
-                         radial-gradient(circle at 8% 90%, rgba(91,164,212,.22), transparent 40%),
-                         linear-gradient(165deg, #dcefff 0%, #eef8ff 55%, #fff5e8 100%); color: #3d5266; }
-.page-hero h1 { color: var(--navy); }
-.page-hero h1 em { color: var(--sky-600); }
-.page-hero p { color: #3d5266; }
-.breadcrumb { color: var(--muted); }
-.breadcrumb a { color: var(--sky-700); }
-.page-hero .btn--outline-white { color: var(--navy); border-color: rgba(31,58,82,.3); background: rgba(255,255,255,.6); }
-.page-hero .btn--outline-white:hover { background: #fff; color: var(--navy); }
-.page-hero .sparkles i { background: var(--sky); opacity: .55; }
-.page-hero__mark { opacity: .1; filter: brightness(0) saturate(100%) invert(48%) sepia(62%) saturate(520%) hue-rotate(170deg); }
-.hero-facts li { background: #fff; border-color: var(--line); box-shadow: 0 8px 20px -14px rgba(24,104,171,.45); }
-.hero-facts__icon { background: var(--sky-50); color: var(--sky-600); }
-.hero-facts small { color: var(--muted); }
-.hero-facts strong { color: var(--navy); }
-.page-hero__visual::before { background: linear-gradient(135deg, #7cc3ef, #2a8fd6); opacity: .45; }
-.clouds .c1 { fill: #9fd0f0; } .clouds .c2 { fill: #cbe6f8; }
-.clouds path { filter: drop-shadow(0 -6px 8px rgba(24,104,171,.14)); }
-
-/* Thành phần dùng màu nhấn: navy -> xanh biển sáng */
-.step .card__icon, .timeline li > span, .feature-trio__item > span, .ppanel__icon, .pcard__cta { background: var(--blue); }
-.feature-trio__item:nth-child(3n) > span { background: #2a9fd6; }
-.ptab[aria-selected="true"] { background: var(--blue); border-color: var(--blue); }
-.ptab[aria-selected="true"] .ptab__icon { background: rgba(255,255,255,.18); color: #fff; }
-.ptab[aria-selected="true"] small { color: #dcedfa; }
-.plan__head, .speed--std { background: linear-gradient(150deg, #2a8fd6, #1868ab); }
-.speed--std .speed__row small { color: #dcedfa; }
-.filter-chips button.is-on { background: var(--blue); border-color: var(--blue); }
-.pillar--visa { background: var(--grad-blue); }
-.pillar--photo { background: linear-gradient(165deg, rgba(20,92,150,.25), rgba(16,72,122,.92) 68%), var(--img) center / cover; }
-.pillar--photo.pillar--alt { background: linear-gradient(165deg, rgba(236,106,44,.25), rgba(170,66,22,.92) 68%), var(--img) center / cover; }
-.hero-photo { background: var(--sky-100); }
 /* Video giữ nguyên file, chỉ tăng độ tươi khi hiển thị */
 .hero__bg, .market__art video, .market__art img, .porthole__thumb, .porthole__teaser { filter: saturate(1.25) brightness(1.06) contrast(1.03); }
+/* Ảnh minh hoạ: tăng độ tươi (không áp dụng ảnh đội ngũ thật để giữ màu da tự nhiên) */
+.hero-photo img:not([src*="/team/"]), .tour-card img, .svc-card__img img, .route__img img, .post-card img, .photo-link img, .feature-price > img { filter: saturate(1.15) brightness(1.04); }
+
+/* ==========================================================================
+   Ảnh nền hoàng hôn (thay nền trắng). Đường dẫn tương đối để chạy cả bản tĩnh.
+   ========================================================================== */
+html { background: #f3d2b4; }
+body { background: transparent; }
+body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40)), url('../img/bg/hoang-hon.jpg') center / cover no-repeat; }
+.section--soft, .section--pricing { background: rgba(255,255,255,.28); }
+.ptabs { background: transparent; }
+.clouds .c3 { fill: rgba(255,255,255,0); }
+/* Khấc vé chỉ đẹp trên nền trắng: ẩn khi thẻ nằm trực tiếp trên ảnh nền */
+.pcard__bottom::before, .pcard__bottom::after, .bpass::before, .bpass::after { display: none; }
+.ppanel .pcard__bottom::before, .ppanel .pcard__bottom::after { display: block; }
+.section-head p, .ppanel__note, .table-note, .block-head + p { color: #34475a; }

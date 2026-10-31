@@ -44,7 +44,7 @@
           </div>
           <div class="field">
             <label for="rv-service">Dịch vụ đã dùng <span class="muted">(không bắt buộc)</span></label>
-            <select class="select" id="rv-service" name="service"><option value="">— Chọn dịch vụ —</option><% leadServiceOptions.forEach(function (o) { %><option><%= o %></option><% }) %></select>
+            <select class="select" id="rv-service" name="service"><option value="">— Chọn dịch vụ —</option><% leadServiceOptions.forEach(function (o) { %><option value="<%= o %>"><%= o %></option><% }) %></select>
             <span class="field__error" data-error="service"></span>
           </div>
           <div class="field">

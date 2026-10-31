@@ -64,6 +64,23 @@ app.use(cookieSession({
 // Phiên bản tài nguyên tĩnh: đổi mỗi lần khởi động để trình duyệt tải CSS/JS mới sau khi cập nhật
 const ASSET_VERSION = Date.now().toString(36);
 
+// Trang công khai: không ngắt dòng giữa từ ghép tiếng Việt ("chuyên nghiệp", "Đà Nẵng"…)
+const nowrap = require('./src/lib/nowrap');
+app.use((req, res, next) => {
+  if (req.path.startsWith('/admin')) return next();
+  const render = res.render.bind(res);
+  res.render = (view, opts, cb) => {
+    if (typeof opts === 'function') { cb = opts; opts = {}; }
+    render(view, opts, (err, html) => {
+      if (!err) html = nowrap(html);
+      if (cb) return cb(err, html);
+      if (err) return req.next(err);
+      res.send(html);
+    });
+  };
+  next();
+});
+
 // Biến dùng chung cho mọi view
 app.use((req, res, next) => {
   res.locals.assetV = ASSET_VERSION;

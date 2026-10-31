@@ -1339,3 +1339,21 @@ body.nav-open .fab { display: none; }
   .hero-facts__icon { width: 32px; height: 32px; }
   .page-hero__visual { max-width: 270px; }
 }
+
+/* ==========================================================================
+   Font chữ: Cormorant Garamond (serif mảnh, đủ dấu tiếng Việt) cho tiêu đề, giữ nguyên màu sắc
+   ========================================================================== */
+:root { --serif: 'Cormorant Garamond', 'Times New Roman', serif; }
+h1, h2, .serif { font-family: var(--serif); font-weight: 600; letter-spacing: -.005em; line-height: 1.1; }
+h1 { font-size: clamp(2.4rem, 5vw, 4rem); }
+h2 { font-size: clamp(2rem, 3.4vw, 2.9rem); }
+:is(h1, h2, .serif) em { font-weight: 500; }
+/* Chia dòng tiêu đề cân đối, đoạn văn tránh chữ mồ côi */
+h1, h2, h3 { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+/* Chữ viết tay cũ (Dancing Script) đã bỏ: dùng serif nghiêng */
+.hero__callout { font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 1.6rem; }
+@media (max-width: 900px) { .hero__callout { font-size: 1.5rem; } }
+/* Giá & số liệu dùng serif mới: in đậm hơn một chút cho dễ đọc */
+.pcard__price strong, .ccard__price, .plan__from strong, .fees b, .speed__row strong, .feature-price__num, .market__foot strong, .pillar__price strong, .feature-band__price strong { font-weight: 700; }
+

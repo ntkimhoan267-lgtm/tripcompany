@@ -21,7 +21,7 @@
     <label for="<%= fid %>-service">Dịch vụ cần tư vấn <span class="req">*</span></label>
     <select class="select" id="<%= fid %>-service" name="service" required>
       <option value="">— Chọn dịch vụ —</option>
-      <% leadServiceOptions.forEach(function (o) { %><option<%= o === preset ? ' selected' : '' %>><%= o %></option><% }) %>
+      <% leadServiceOptions.forEach(function (o) { %><option value="<%= o %>"<%= o === preset ? ' selected' : '' %>><%= o %></option><% }) %>
     </select>
     <span class="field__error" data-error="service"></span>
   </div>

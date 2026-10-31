@@ -314,3 +314,61 @@
     items.forEach(function (el) { io.observe(el); });
   } else items.forEach(function (el) { el.classList.add('is-in'); });
 })();
+
+// ---------- Bảng giá: tab theo nhóm dịch vụ (không có JS thì hiện tất cả) ----------
+(function () {
+  var nav = document.querySelector('[data-tabs]');
+  if (!nav) return;
+  var tabs = Array.prototype.slice.call(nav.querySelectorAll('[role="tab"]'));
+  var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+  function show(i, opts) {
+    opts = opts || {};
+    tabs.forEach(function (t, j) {
+      var on = j === i;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      if (panels[j]) panels[j].hidden = !on;
+    });
+    if (opts.focus) tabs[i].focus();
+    tabs[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (opts.push && history.replaceState) history.replaceState(null, '', '#' + tabs[i].getAttribute('aria-controls'));
+    if (opts.scroll) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function fromHash() {
+    var id = location.hash.slice(1);
+    var i = tabs.findIndex(function (t) { return t.getAttribute('aria-controls') === id; });
+    return i;
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function (e) {
+      e.preventDefault();
+      show(i, { push: true });
+      // Đang cuộn giữa nội dung tab cũ: đưa về đầu bảng giá mới
+      if (panels[i] && panels[i].getBoundingClientRect().top < nav.getBoundingClientRect().bottom) panels[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    t.addEventListener('keydown', function (e) {
+      var k = e.key, n = tabs.length, j = null;
+      if (k === 'ArrowRight' || k === 'ArrowDown') j = (i + 1) % n;
+      else if (k === 'ArrowLeft' || k === 'ArrowUp') j = (i - 1 + n) % n;
+      else if (k === 'Home') j = 0; else if (k === 'End') j = n - 1;
+      if (j !== null) { e.preventDefault(); show(j, { focus: true, push: true }); }
+    });
+  });
+  var start = fromHash();
+  show(start < 0 ? 0 : start, { scroll: start >= 0 });
+  window.addEventListener('hashchange', function () { var i = fromHash(); if (i >= 0) show(i, { scroll: true }); });
+})();
+
+// ---------- Lọc thẻ visa theo châu lục ----------
+(function () {
+  document.querySelectorAll('[data-filter-group]').forEach(function (group) {
+    var scope = group.parentElement;
+    group.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-filter]');
+      if (!btn) return;
+      var f = btn.getAttribute('data-filter');
+      group.querySelectorAll('[data-filter]').forEach(function (b) { b.classList.toggle('is-on', b === btn); b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
+      scope.querySelectorAll('[data-region]').forEach(function (c) { c.hidden = f !== 'all' && c.getAttribute('data-region') !== f; });
+    });
+  });
+})();

@@ -4,6 +4,8 @@
   heading: tour.title,
   sub: [tour.duration, tour.departure && ('Khởi hành từ ' + tour.departure), tour.destination].filter(Boolean).join(' · '),
   actions: { service: 'Tour du lịch' },
+  visual: tour.image || '/img/tours/ba-na.jpg',
+  stamp: { top: 'TRIP · TOUR · ĐÀ NẴNG · ', mid: 'TOUR', sub: 'TRIP', cls: 'stamp--hero stamp--eu' },
 }) %>
 <% const highlights = String(tour.highlights || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean); %>
 

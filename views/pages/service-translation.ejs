@@ -1,66 +1,61 @@
 <%- include('../partials/head') %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: 'Dịch thuật' }],
-  heading: 'Dịch thuật công chứng tại Đà Nẵng',
-  sub: 'Dịch thuật Anh – Trung – Hàn – Nhật – Thái – Lào, công chứng dấu công ty hoặc dấu tư pháp, hợp pháp hoá và chứng nhận lãnh sự. Nhận hồ sơ online, trả bản dịch nhanh.',
+  heading: 'Dịch thuật công chứng',
+  headingEm: 'tại Đà Nẵng',
+  sub: 'Anh – Trung – Hàn – Nhật – Thái – Lào. Công chứng dấu công ty hoặc dấu tư pháp, hợp pháp hoá lãnh sự. Nhận hồ sơ online, trả bản dịch nhanh.',
   actions: { service: 'Dịch thuật công chứng', phone: settings.hotline_translation },
+  visual: '/img/services/dich-thuat.jpg',
+  cloudEnd: '#f4f8fb',
+  stamp: { top: 'CERTIFIED · TRANSLATION · ', mid: '译', sub: 'TRIP', cls: 'stamp--hero stamp--cn' },
+  badge: { value: '6+', label: 'Ngôn ngữ' },
+  facts: [
+    { icon: 'wallet', label: 'Chỉ từ', value: h.vnd(services.translation.languages[0].rows[0].price) + '/trang' },
+    { icon: 'zap', label: 'Có gói', value: 'Hoả tốc' },
+  ],
 }) %>
-<% const tr = services.translation; %>
+<% const tr = services.translation; const docIcons = ['heart', 'book', 'passport', 'wallet', 'file', 'globe']; %>
+
+<section class="section section--pricing">
+  <div class="container">
+    <div class="feature-trio">
+      <div class="feature-trio__item"><span><%- icon('lang') %></span><h3>Đa ngôn ngữ</h3><p>Anh, Trung, Hàn, Nhật, Thái, Lào và các ngôn ngữ khác theo yêu cầu.</p></div>
+      <div class="feature-trio__item"><span><%- icon('stamp') %></span><h3>Công chứng hợp lệ</h3><p>Dấu công ty hoặc dấu tư pháp, đúng yêu cầu nơi nhận hồ sơ.</p></div>
+      <div class="feature-trio__item"><span><%- icon('zap') %></span><h3>Hoả tốc</h3><p>Gói dịch hoả tốc, không theo form cho hồ sơ gấp.</p></div>
+    </div>
+
+    <div class="ppanel mt-4" id="bang-gia">
+      <div class="block-head"><span class="eyebrow">Bảng giá</span><h2>Chọn <em>ngôn ngữ</em> cần dịch</h2></div>
+      <%- include('../partials/price/translation') %>
+      <h3 class="ppanel__sub">Phụ phí công chứng & in ấn</h3>
+      <%- include('../partials/price/fees') %>
+      <div class="notice mt-2"><%- icon('info') %><div><% tr.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
+    </div>
+  </div>
+</section>
 
 <section class="section">
   <div class="container layout-side">
-    <div class="stack">
-      <div class="grid grid--3">
-        <div class="card"><div class="card__icon"><%- icon('lang') %></div><h3>Đa ngôn ngữ</h3><p>Anh, Trung, Hàn, Nhật, Thái, Lào và các ngôn ngữ khác theo yêu cầu.</p></div>
-        <div class="card"><div class="card__icon"><%- icon('stamp') %></div><h3>Công chứng hợp lệ</h3><p>Dấu công ty hoặc dấu tư pháp, đúng yêu cầu nơi nhận hồ sơ.</p></div>
-        <div class="card"><div class="card__icon"><%- icon('zap') %></div><h3>Hoả tốc</h3><p>Có gói dịch hoả tốc, không theo form cho hồ sơ gấp.</p></div>
-      </div>
-
+    <div class="stack stack--lg">
       <div>
-        <h2 class="mt-4">Tài liệu TRIP thường dịch</h2>
-        <ul class="chips"><% tr.documents.forEach(function (d) { %><li><%= d %></li><% }) %></ul>
+        <div class="block-head"><span class="eyebrow">Tài liệu thường dịch</span><h2>TRIP dịch <em>những gì</em>?</h2></div>
+        <ul class="doc-tiles">
+          <% tr.documents.forEach(function (d, i) { %><li><span><%- icon(docIcons[i] || 'file') %></span><%= d %></li><% }) %>
+        </ul>
       </div>
 
-      <div id="bang-gia">
-        <h2>Bảng giá dịch thuật</h2>
-        <p class="muted">Đơn vị tính: trang. Áp dụng cho tài liệu phổ thông.</p>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Ngôn ngữ</th><th>Cấp độ dịch thuật</th><th class="num">Giá / trang</th></tr></thead>
-            <tbody>
-              <% tr.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %>
-                <tr>
-                  <td><% if (i === 0) { %><strong><%= l.pair %></strong><% } else { %><span class="only-mobile"><%= l.pair %></span><% } %></td>
-                  <td><%= r.level %></td>
-                  <td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td>
-                </tr>
-              <% }) }) %>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 class="mt-3">Phụ phí</h3>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Dịch vụ</th><th>Đơn vị</th><th class="num">Giá</th></tr></thead>
-            <tbody><% tr.surcharges.forEach(function (s) { %><tr><td><%= s.name %></td><td class="muted"><%= s.unit %></td><td class="num"><%= h.vnd(s.price) %></td></tr><% }) %></tbody>
-          </table>
-        </div>
-        <div class="notice mt-2"><%- icon('info') %><div><% tr.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
-      </div>
-
-      <a class="card card--link legal-link" href="/dich-vu/hop-phap-hoa-lanh-su">
-        <div class="card__icon"><%- icon('stamp') %></div>
-        <div><h3>Cần hợp pháp hoá / chứng nhận lãnh sự?</h3><p>Giấy tờ dùng ở nước ngoài thường phải hợp pháp hoá. Xem thủ tục và bảng giá trọn gói.</p><span class="more">Xem trang Hợp pháp hoá lãnh sự <%- icon('arrow') %></span></div>
+      <a class="photo-link" href="/dich-vu/hop-phap-hoa-lanh-su">
+        <img src="/img/services/hop-phap-hoa.jpg" alt="" width="1200" height="800" loading="lazy">
+        <div><span class="eyebrow">Giấy tờ dùng ở nước ngoài</span><h3>Cần hợp pháp hoá / chứng nhận lãnh sự?</h3><p>Xem thủ tục và bảng giá trọn gói, kèm dịch thuật công chứng.</p><span class="more">Xem trang Hợp pháp hoá lãnh sự <%- icon('arrow') %></span></div>
       </a>
 
       <div>
-        <h2 class="mt-4">Quy trình dịch thuật</h2>
-        <ol class="steps steps--2">
-          <li class="step"><div class="card__icon"><%- icon('send') %></div><h3>Gửi tài liệu</h3><p>Chụp ảnh / scan gửi qua Zalo, email hoặc mang đến văn phòng.</p></li>
-          <li class="step"><div class="card__icon"><%- icon('wallet') %></div><h3>Nhận báo giá</h3><p>TRIP báo giá, hình thức công chứng và thời gian trả bản dịch.</p></li>
-          <li class="step"><div class="card__icon"><%- icon('file') %></div><h3>Dịch & hiệu đính</h3><p>Biên dịch viên dịch, hiệu đính, đối chiếu với bản gốc.</p></li>
-          <li class="step"><div class="card__icon"><%- icon('check-circle') %></div><h3>Công chứng & bàn giao</h3><p>Đóng dấu theo yêu cầu, nhận tại văn phòng hoặc gửi chuyển phát.</p></li>
+        <div class="block-head"><span class="eyebrow">Quy trình</span><h2>4 bước <em>đơn giản</em></h2></div>
+        <ol class="timeline">
+          <li><span><%- icon('send') %></span><h3>Gửi tài liệu</h3><p>Chụp ảnh / scan gửi qua Zalo, email hoặc mang đến văn phòng.</p></li>
+          <li><span><%- icon('wallet') %></span><h3>Nhận báo giá</h3><p>TRIP báo giá, hình thức công chứng và thời gian trả bản dịch.</p></li>
+          <li><span><%- icon('file') %></span><h3>Dịch & hiệu đính</h3><p>Biên dịch viên dịch, hiệu đính, đối chiếu với bản gốc.</p></li>
+          <li><span><%- icon('check-circle') %></span><h3>Công chứng & bàn giao</h3><p>Đóng dấu theo yêu cầu, nhận tại văn phòng hoặc chuyển phát.</p></li>
         </ol>
       </div>
     </div>

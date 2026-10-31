@@ -1,0 +1,4 @@
+<% const docIcons = ['passport', 'users', 'file', 'target', 'wallet', 'calendar']; %>
+<ol class="docs-grid">
+  <% list.forEach(function (x, i) { %><li><span class="docs-grid__icon"><%- icon(docIcons[i] || 'file') %></span><span><%= x %></span></li><% }) %>
+</ol>

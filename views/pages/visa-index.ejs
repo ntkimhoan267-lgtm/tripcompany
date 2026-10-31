@@ -1,10 +1,14 @@
 <%- include('../partials/head') %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Visa' }],
-  heading: 'Visa du lịch nhanh gọn, trọn gói',
+  heading: 'Visa du lịch',
+  headingEm: 'nhanh gọn, trọn gói',
   sub: 'Thế mạnh Trung Quốc, Hàn Quốc, Nhật Bản và Châu Âu. Chọn quốc gia bạn muốn đến để xem bảng giá và thủ tục.',
   actions: { service: 'Visa Trung Quốc' },
-  bg: '/media/hero-montage.jpg',
+  visual: '/img/visa/jp.jpg',
+  badge: { value: company.stats[2].value + '%', label: 'Tỉ lệ đậu visa' },
+  stamp: { top: 'VISA · CHINA · TRUNG QUỐC · ', mid: '中国', sub: 'APPROVED', cls: 'stamp--hero stamp--cn' },
+  facts: [{ icon: 'globe', label: 'Quốc gia', value: '25+' }, { icon: 'award', label: 'Thế mạnh', value: 'Trung · Hàn · Nhật' }],
 }) %>
 
 <section class="section">

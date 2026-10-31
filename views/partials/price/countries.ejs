@@ -1,0 +1,28 @@
+<%
+  // Thẻ theo từng quốc gia: rows là danh sách worldVisa (cùng nước gộp vào 1 thẻ)
+  const groups = [];
+  rows.forEach(function (v) {
+    let g = groups.find(function (x) { return x.country === v.country; });
+    if (!g) { g = { country: v.country, code: v.code, region: v.region, items: [] }; groups.push(g); }
+    g.items.push(v);
+  });
+  const regionLabel = { 'chau-a': 'Châu Á', 'chau-au': 'Châu Âu', 'chau-my': 'Châu Mỹ', 'chau-uc': 'Úc & New Zealand' };
+%>
+<div class="ccards">
+  <% groups.forEach(function (g) { %>
+    <article class="ccard" data-region="<%= g.region %>">
+      <header class="ccard__head">
+        <img src="<%= flag(g.code) %>" alt="" width="48" height="48" loading="lazy">
+        <div><h3><%= g.country %></h3><small><%= regionLabel[g.region] || '' %></small></div>
+      </header>
+      <ul class="ccard__list">
+        <% g.items.forEach(function (v) { %>
+          <li>
+            <div><strong><%= v.type %></strong><span><%- icon('clock') %><%= v.time %></span><% if (v.note) { %><em><%= v.note %></em><% } %></div>
+            <b class="ccard__price"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></b>
+          </li>
+        <% }) %>
+      </ul>
+    </article>
+  <% }) %>
+</div>

@@ -1,81 +1,118 @@
 <%- include('../partials/head') %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Bảng giá' }],
-  heading: 'Bảng giá dịch vụ',
-  sub: 'Giá công khai, minh bạch. Phí visa có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ.',
+  heading: 'Bảng giá',
+  headingEm: 'minh bạch, trọn gói',
+  sub: 'Chọn nhóm dịch vụ để xem giá. Phí visa có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ.',
   actions: {},
+  visual: '/img/team/team.jpg',
+  cloudEnd: '#f4f8fb',
+  badge: { value: 'Miễn phí', label: 'Kiểm tra hồ sơ' },
+  stamp: { top: 'TRIP · ĐÀ NẴNG · TRỌN GÓI · ', mid: 'TRIP', sub: 'PRICE', cls: 'stamp--hero' },
 }) %>
+<%
+  const ORDER = { kr: 0, jp: 1 };
+  const rank = (v) => v.code in ORDER ? ORDER[v.code] : v.region === 'chau-au' ? 2 : 3;
+  const world = services.worldVisa.slice().sort((a, b) => rank(a) - rank(b));
+  const cnItems = services.chinaVisa.rows.map((r, i) => ({ title: r.type, tag: r.detail, time: r.time, price: h.vnd(r.price), popular: i === 0 }));
+  const tabs = [
+    { id: 'visa-trung-quoc', icon: 'passport', label: 'Visa Trung Quốc', sub: 'Quốc tịch Việt Nam · VNĐ' },
+    { id: 'visa-cac-nuoc', icon: 'globe', label: 'Visa các nước', sub: 'Hàn, Nhật, Châu Âu, Mỹ…' },
+    { id: 'dich-thuat', icon: 'lang', label: 'Dịch thuật', sub: 'Giá theo trang' },
+    { id: 'e-visa', icon: 'ticket', label: 'E-visa Việt Nam', sub: 'Cho người nước ngoài · USD' },
+    { id: 'ho-chieu', icon: 'file', label: 'Hộ chiếu', sub: 'Phổ thông' },
+    { id: 'xe', icon: 'car', label: 'Xe đưa đón', sub: services.carTransfer.area },
+  ];
+%>
 
-<section class="section">
+<section class="section section--pricing">
   <div class="container">
-    <ul class="chips mb-3 sticky-chips">
-      <li><a href="#visa-trung-quoc">Visa Trung Quốc</a></li>
-      <li><a href="#visa-cac-nuoc">Visa các nước</a></li>
-      <li><a href="#e-visa">E-visa Việt Nam</a></li>
-      <li><a href="#dich-thuat">Dịch thuật</a></li>
-      <li><a href="#ho-chieu">Hộ chiếu</a></li>
-      <li><a href="#xe">Xe đưa đón</a></li>
-    </ul>
+    <nav class="ptabs" role="tablist" aria-label="Nhóm dịch vụ" data-tabs>
+      <% tabs.forEach(function (t, i) { %>
+        <a class="ptab" href="#<%= t.id %>" role="tab" id="tab-<%= t.id %>" aria-controls="<%= t.id %>" aria-selected="<%= i === 0 %>">
+          <span class="ptab__icon"><%- icon(t.icon) %></span><span class="ptab__text"><strong><%= t.label %></strong><small><%= t.sub %></small></span>
+        </a>
+      <% }) %>
+    </nav>
 
-    <div class="stack">
-      <div id="visa-trung-quoc">
-        <h2>Visa Trung Quốc <span class="muted" style="font-size:1rem;font-weight:500">(VNĐ, quốc tịch Việt Nam)</span></h2>
-        <div class="table-wrap"><table class="table">
-          <thead><tr><th>Loại visa</th><th>Thời gian</th><th>Lưu trú / nhập cảnh</th><th class="num">Giá</th></tr></thead>
-          <tbody><% services.chinaVisa.rows.forEach(function (r) { %><tr><td><strong><%= r.type %></strong></td><td><%= r.time %></td><td class="muted"><%= r.detail %></td><td class="num"><%= h.vnd(r.price) %></td></tr><% }) %></tbody>
-        </table></div>
-        <p class="table-note"><%= services.chinaVisa.note %></p>
-      </div>
+    <div class="ppanels">
+      <section class="ppanel" id="visa-trung-quoc" role="tabpanel" aria-labelledby="tab-visa-trung-quoc">
+        <header class="ppanel__head">
+          <img src="<%= flag('cn') %>" alt="" width="56" height="56">
+          <div><h2>Visa <em>Trung Quốc</em></h2><p>Thị trường TRIP xử lý nhiều nhất. Giá trọn gói, xét duyệt thường 10–14 ngày làm việc.</p></div>
+          <a class="btn btn--ghost btn--sm" href="/visa/trung-quoc">Thủ tục chi tiết <%- icon('arrow') %></a>
+        </header>
+        <%- include('../partials/price/options', { items: cnItems, service: 'Visa Trung Quốc' }) %>
+        <p class="ppanel__note"><%- icon('info') %><%= services.chinaVisa.note %></p>
+      </section>
 
-      <div id="visa-cac-nuoc">
-        <h2>Visa các nước</h2>
-        <div class="table-wrap"><table class="table">
-          <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá</th></tr></thead>
-          <tbody><% const ORDER = { kr: 0, jp: 1 }; services.worldVisa.slice().sort(function (a, b) { const ra = a.code in ORDER ? ORDER[a.code] : a.region === 'chau-au' ? 2 : 3; const rb = b.code in ORDER ? ORDER[b.code] : b.region === 'chau-au' ? 2 : 3; return ra - rb; }).forEach(function (v) { %>
-            <tr><td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td><td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td><td><%= v.time %></td><td class="num"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></td></tr>
-          <% }) %></tbody>
-        </table></div>
-        <p class="table-note">Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản, khai form, đặt lịch. Chưa gồm VAT, phí VIP tại trung tâm tiếp nhận, bảo hiểm, vé máy bay và khách sạn.</p>
-      </div>
+      <section class="ppanel" id="visa-cac-nuoc" role="tabpanel" aria-labelledby="tab-visa-cac-nuoc">
+        <header class="ppanel__head">
+          <span class="ppanel__icon"><%- icon('globe') %></span>
+          <div><h2>Visa <em>các nước</em></h2><p>Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản, khai form, đặt lịch.</p></div>
+        </header>
+        <ul class="filter-chips" data-filter-group>
+          <li><button type="button" class="is-on" data-filter="all">Tất cả</button></li>
+          <% services.visaRegions.forEach(function (r) { %><li><button type="button" data-filter="<%= r.id %>"><%= r.label %></button></li><% }) %>
+        </ul>
+        <%- include('../partials/price/countries', { rows: world }) %>
+        <p class="ppanel__note"><%- icon('info') %>Chưa gồm VAT, phí VIP tại trung tâm tiếp nhận, bảo hiểm, vé máy bay và khách sạn.</p>
+      </section>
 
-      <div id="e-visa">
-        <h2>E-visa Việt Nam (người nước ngoài)</h2>
-        <div class="table-wrap"><table class="table">
-          <thead><tr><th>Thời gian xử lý</th><th class="num">Single</th><th class="num">Multiple</th></tr></thead>
-          <tbody><% services.evisa.rows.forEach(function (r) { %><tr><td><%= r.speed %></td><td class="num"><%= h.usd(r.single) %></td><td class="num"><%= h.usd(r.multiple) %></td></tr><% }) %></tbody>
-        </table></div>
-      </div>
+      <section class="ppanel" id="dich-thuat" role="tabpanel" aria-labelledby="tab-dich-thuat">
+        <header class="ppanel__head">
+          <span class="ppanel__icon"><%- icon('lang') %></span>
+          <div><h2>Dịch thuật <em>công chứng</em></h2><p>Đơn giá theo trang, áp dụng cho tài liệu phổ thông.</p></div>
+          <a class="btn btn--ghost btn--sm" href="/dich-vu/dich-thuat">Về dịch vụ dịch thuật <%- icon('arrow') %></a>
+        </header>
+        <%- include('../partials/price/translation') %>
+        <h3 class="ppanel__sub">Phụ phí công chứng & in ấn</h3>
+        <%- include('../partials/price/fees') %>
+      </section>
 
-      <div id="dich-thuat">
-        <h2>Dịch thuật <span class="muted" style="font-size:1rem;font-weight:500">(VNĐ / trang)</span></h2>
-        <div class="table-wrap"><table class="table">
-          <thead><tr><th>Ngôn ngữ</th><th>Cấp độ</th><th class="num">Giá</th></tr></thead>
-          <tbody><% services.translation.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %><tr><td><% if (i === 0) { %><strong><%= l.pair %></strong><% } else { %><span class="only-mobile"><%= l.pair %></span><% } %></td><td><%= r.level %></td><td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td></tr><% }) }) %></tbody>
-        </table></div>
-        <p class="table-note"><a href="/dich-vu/dich-thuat#bang-gia">Xem phụ phí công chứng, in ấn, hiệu đính →</a></p>
-      </div>
+      <section class="ppanel" id="e-visa" role="tabpanel" aria-labelledby="tab-e-visa">
+        <header class="ppanel__head">
+          <img src="<%= flag('vn') %>" alt="" width="56" height="56">
+          <div><h2>E-visa <em>Việt Nam</em></h2><p><%= services.evisa.note %></p></div>
+          <a class="btn btn--ghost btn--sm" href="/visa/e-visa">Chi tiết & Fast Track <%- icon('arrow') %></a>
+        </header>
+        <%- include('../partials/price/evisa') %>
+      </section>
 
-      <div id="ho-chieu">
-        <h2>Hộ chiếu</h2>
-        <div class="table-wrap"><table class="table">
-          <thead><tr><th>Loại</th><th>Thời gian</th><th class="num">Giá</th></tr></thead>
-          <tbody><% services.passport.rows.forEach(function (r) { %><tr><td><%= r.type %></td><td><%= r.time %></td><td class="num"><%= h.vnd(r.price) %></td></tr><% }) %></tbody>
-        </table></div>
-      </div>
+      <section class="ppanel" id="ho-chieu" role="tabpanel" aria-labelledby="tab-ho-chieu">
+        <header class="ppanel__head">
+          <span class="ppanel__icon"><%- icon('file') %></span>
+          <div><h2>Làm <em>hộ chiếu</em></h2><p>TRIP khai tờ khai, nộp hồ sơ và nhận hộ chiếu thay bạn.</p></div>
+          <a class="btn btn--ghost btn--sm" href="/dich-vu/ho-chieu">Thủ tục chi tiết <%- icon('arrow') %></a>
+        </header>
+        <div class="feature-price">
+          <img src="/img/services/ho-chieu.jpg" alt="" width="1200" height="800" loading="lazy">
+          <div>
+            <% services.passport.rows.forEach(function (r) { %>
+              <span class="pcard__tag"><%- icon('clock') %> <%= r.time %></span>
+              <h3><%= r.type %></h3>
+              <div class="feature-price__num"><%= h.vnd(r.price) %></div>
+            <% }) %>
+            <ul class="checklist"><% services.passport.notes.slice(0, 2).forEach(function (n) { %><li><%- icon('info') %><%= n %></li><% }) %></ul>
+            <button class="btn btn--accent mt-2" data-open-lead data-service="Hộ chiếu">Đăng ký làm hộ chiếu</button>
+          </div>
+        </div>
+      </section>
 
-      <div id="xe">
-        <h2>Xe đưa đón <span class="muted" style="font-size:1rem;font-weight:500">(<%= services.carTransfer.area %>)</span></h2>
-        <div class="table-wrap"><table class="table">
-          <thead><tr><th>Lịch trình</th><th>Chiều</th><th class="num">4 chỗ</th><th class="num">7 chỗ</th><th class="num">16 chỗ</th></tr></thead>
-          <tbody><% services.carTransfer.rows.forEach(function (r) { %><tr><td><%= r.route %></td><td class="muted"><%= r.way %></td><td class="num"><%= h.vnd(r.p4) %></td><td class="num"><%= h.vnd(r.p7) %></td><td class="num"><%= h.vnd(r.p16) %></td></tr><% }) %></tbody>
-        </table></div>
-      </div>
+      <section class="ppanel" id="xe" role="tabpanel" aria-labelledby="tab-xe">
+        <header class="ppanel__head">
+          <span class="ppanel__icon"><%- icon('car') %></span>
+          <div><h2>Xe <em>đưa đón</em></h2><p><%= services.carTransfer.area %>. Giá trọn chuyến theo loại xe.</p></div>
+          <a class="btn btn--ghost btn--sm" href="/dich-vu/thue-xe">Thuê xe tự lái <%- icon('arrow') %></a>
+        </header>
+        <%- include('../partials/price/cars') %>
+      </section>
     </div>
 
-    <div class="card mt-4 text-center" style="background:var(--sky-50);border:0">
-      <h3>Cần báo giá cho trường hợp cụ thể?</h3>
-      <p>TRIP kiểm tra hồ sơ và báo giá chính xác miễn phí.</p>
-      <button class="btn btn--accent mt-2" data-open-lead>Nhận báo giá miễn phí</button>
+    <div class="quote-band mt-4">
+      <img src="/img/logo-icon-sm.png" alt="" width="160" height="160">
+      <div><h3>Cần báo giá cho trường hợp cụ thể?</h3><p>Gửi giấy tờ qua Zalo, TRIP kiểm tra hồ sơ và báo giá chính xác miễn phí.</p></div>
+      <button class="btn btn--accent" data-open-lead>Nhận báo giá miễn phí</button>
     </div>
   </div>
 </section>

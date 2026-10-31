@@ -122,6 +122,21 @@ Video nền phần đầu trang chủ (`hero-montage.mp4`), video 4 thị trư�
 | Châu Âu | Tháp Eiffel 25220, 27046 |
 | Tour | Singapore 20177 · Bangkok 22171 |
 
+### Ảnh trang dịch vụ
+
+Ảnh trong `public/img/services/` là khung hình cắt từ video miễn phí của [Mixkit](https://mixkit.co) (Mixkit Free License, dùng thương mại được, không bắt buộc ghi nguồn), đã cắt 1200x800:
+
+| File | Mã video gốc |
+|---|---|
+| `ho-chieu.jpg` | 27691 |
+| `ve-may-bay.jpg` | 4368 |
+| `dich-thuat.jpg` | 34096 |
+| `hop-phap-hoa.jpg` | 22856 |
+| `bao-hiem.jpg` | 45509 |
+| `thue-xe.jpg` | 41389 |
+
+`public/img/logo-plane.png` là hình máy bay tách từ logo TRIP, dùng làm logo chìm ở đầu các trang con.
+
 ### Ảnh tour trong nước
 
 Ảnh 7 tour trong nước lấy từ [Wikimedia Commons](https://commons.wikimedia.org), chỉ chọn ảnh giấy phép CC0 hoặc Public domain (dùng thương mại tự do, không bắt buộc ghi nguồn). Đã cắt 800x600 và xoá metadata. Không dùng ảnh Pinterest vì không có quyền dùng thương mại.

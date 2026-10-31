@@ -1,18 +1,43 @@
-<section class="page-hero<%= typeof bg !== 'undefined' && bg ? ' page-hero--photo' : '' %>"<% if (typeof bg !== 'undefined' && bg) { %> style="--bg:url('<%= bg %>')"<% } %>>
+<%
+  // Tham số: crumbs, heading, headingEm (phần in nghiêng), sub, actions, bg (ảnh nền mờ),
+  // visual (ảnh khung bên phải), facts [{icon, label, value}], stamp {top, mid, sub, cls}, badge {value, label}
+  const vis = typeof visual !== 'undefined' && visual;
+  const hasBg = typeof bg !== 'undefined' && bg;
+  const fx = typeof facts !== 'undefined' && facts ? facts : [];
+  const st = typeof stamp !== 'undefined' && stamp ? stamp : null;
+  const bd = typeof badge !== 'undefined' && badge ? badge : null;
+%>
+<section class="page-hero<%= hasBg ? ' page-hero--photo' : '' %><%= vis ? ' page-hero--split' : '' %>"<% if (hasBg) { %> style="--bg:url('<%= bg %>')"<% } %>>
+  <img class="page-hero__mark" src="/img/logo-plane.png" alt="" width="398" height="385" aria-hidden="true">
   <div class="sparkles"><i style="top:18%;left:70%;--s:12px"></i><i style="top:40%;left:88%;--s:9px;--d:-1s"></i><i style="top:12%;left:52%;--s:7px;--d:-2s"></i></div>
-  <div class="container" style="position:relative;z-index:1">
-    <ol class="breadcrumb" aria-label="Breadcrumb">
-      <li><a href="/">Trang chủ</a></li>
-      <% (crumbs || []).forEach(function (c) { %><li><% if (c.href) { %><a href="<%= c.href %>"><%= c.label %></a><% } else { %><%= c.label %><% } %></li><% }) %>
-    </ol>
-    <h1><%= heading %></h1>
-    <% if (typeof sub !== 'undefined' && sub) { %><p><%= sub %></p><% } %>
-    <% if (typeof actions !== 'undefined' && actions) { %>
-      <div class="hero__actions">
-        <button class="btn btn--accent" data-open-lead<% if (actions.service) { %> data-service="<%= actions.service %>"<% } %>><%- icon('chat') %> Tư vấn miễn phí</button>
-        <a class="btn btn--outline-white" href="tel:<%= h.phoneTel(actions.phone || settings.hotline) %>"><%- icon('phone') %> <%= h.phoneDisplay(actions.phone || settings.hotline) %></a>
+  <div class="container page-hero__grid">
+    <div class="page-hero__text">
+      <ol class="breadcrumb" aria-label="Breadcrumb">
+        <li><a href="/">Trang chủ</a></li>
+        <% (crumbs || []).forEach(function (c) { %><li><% if (c.href) { %><a href="<%= c.href %>"><%= c.label %></a><% } else { %><%= c.label %><% } %></li><% }) %>
+      </ol>
+      <h1><%= heading %><% if (typeof headingEm !== 'undefined' && headingEm) { %> <em><%= headingEm %></em><% } %></h1>
+      <% if (typeof sub !== 'undefined' && sub) { %><p><%= sub %></p><% } %>
+      <% if (fx.length) { %>
+        <ul class="hero-facts">
+          <% fx.forEach(function (f) { %><li><span class="hero-facts__icon"><%- icon(f.icon) %></span><span><small><%= f.label %></small><strong><%= f.value %></strong></span></li><% }) %>
+        </ul>
+      <% } %>
+      <% if (typeof actions !== 'undefined' && actions) { %>
+        <div class="hero__actions">
+          <button class="btn btn--accent" data-open-lead<% if (actions.service) { %> data-service="<%= actions.service %>"<% } %>><%- icon('chat') %> Tư vấn miễn phí</button>
+          <a class="btn btn--outline-white" href="tel:<%= h.phoneTel(actions.phone || settings.hotline) %>"><%- icon('phone') %> <%= h.phoneDisplay(actions.phone || settings.hotline) %></a>
+        </div>
+      <% } %>
+    </div>
+    <% if (vis) { %>
+      <div class="page-hero__visual" aria-hidden="true">
+        <div class="hero-photo"><img src="<%= vis %>" alt="" width="1200" height="800" fetchpriority="high"></div>
+        <div class="hero-seal"><img src="/img/logo-icon-sm.png" alt="" width="160" height="160"><span><strong>TRIP</strong>Visa · Dịch thuật</span></div>
+        <% if (bd) { %><div class="hero-badge"><strong><%= bd.value %></strong><span><%= bd.label %></span></div><% } %>
+        <% if (st) { %><%- include('stamp', st) %><% } %>
       </div>
     <% } %>
   </div>
-  <%- include('clouds', { end: '#ffffff' }) %>
+  <%- include('clouds', { end: typeof cloudEnd !== 'undefined' ? cloudEnd : '#ffffff' }) %>
 </section>

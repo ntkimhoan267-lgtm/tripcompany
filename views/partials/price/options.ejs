@@ -1,0 +1,24 @@
+<%
+  // Thẻ giá dạng "vé": items [{ title, tag, time, price, note, flag, popular }], service (dịch vụ gửi kèm form tư vấn)
+  const svc = typeof service !== 'undefined' ? service : '';
+%>
+<div class="pcards">
+  <% items.forEach(function (it) { %>
+    <article class="pcard<%= it.popular ? ' pcard--hot' : '' %>">
+      <% if (it.popular) { %><span class="pcard__ribbon">Phổ biến</span><% } %>
+      <div class="pcard__top">
+        <% if (it.flag) { %><img class="pcard__flag" src="<%= flag(it.flag) %>" alt="" width="40" height="40" loading="lazy"><% } %>
+        <div>
+          <h3 class="pcard__title"><%= it.title %></h3>
+          <% if (it.tag) { %><span class="pcard__tag"><%= it.tag %></span><% } %>
+          <% if (it.time) { %><span class="pcard__time"><%- icon('clock') %><%= it.time %></span><% } %>
+        </div>
+      </div>
+      <% if (it.note) { %><p class="pcard__note"><%- icon('info') %><%= it.note %></p><% } %>
+      <div class="pcard__bottom">
+        <div class="pcard__price"><small>Trọn gói</small><strong><%= it.price %></strong></div>
+        <button class="pcard__cta" type="button" data-open-lead<% if (svc) { %> data-service="<%= svc %>"<% } %> aria-label="Tư vấn: <%= it.title %>"><%- icon('arrow') %></button>
+      </div>
+    </article>
+  <% }) %>
+</div>

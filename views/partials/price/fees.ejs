@@ -1,0 +1,5 @@
+<ul class="fees">
+  <% services.translation.surcharges.forEach(function (s) { %>
+    <li><span><%= s.name %></span><b><%= h.vnd(s.price) %></b><small>/<%= s.unit %></small></li>
+  <% }) %>
+</ul>

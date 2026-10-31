@@ -1,10 +1,13 @@
 <%- include('../partials/head') %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Giới thiệu' }],
-  heading: 'Về TRIP',
+  heading: 'Về',
+  headingEm: 'TRIP',
   sub: company.legalName + '. Chuyên dịch thuật và dịch vụ du lịch tại Đà Nẵng.',
   actions: null,
-  bg: '/img/team/team-banner.jpg',
+  visual: '/img/team/team.jpg',
+  badge: { value: company.stats[0].value + company.stats[0].suffix, label: 'Đồng hành cùng khách' },
+  stamp: { top: 'TRIP · ĐÀ NẴNG · VISA · DỊCH THUẬT · ', mid: 'TRIP', sub: 'TEAM', cls: 'stamp--hero stamp--kr' },
 }) %>
 
 <section class="section">

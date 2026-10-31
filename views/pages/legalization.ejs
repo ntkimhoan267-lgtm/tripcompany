@@ -1,39 +1,38 @@
 <%- include('../partials/head') %>
+<% const tr = services.translation; %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: 'Dịch thuật', href: '/dich-vu/dich-thuat' }, { label: 'Hợp pháp hoá lãnh sự' }],
-  heading: 'Hợp pháp hoá & Chứng nhận lãnh sự',
+  heading: 'Hợp pháp hoá &',
+  headingEm: 'Chứng nhận lãnh sự',
   sub: 'Giấy tờ Việt Nam dùng ở nước ngoài (và ngược lại) thường phải được chứng nhận hoặc hợp pháp hoá lãnh sự. TRIP làm trọn gói, kèm dịch thuật công chứng.',
   actions: { service: 'Hợp pháp hoá lãnh sự' },
+  visual: '/img/services/hop-phap-hoa.jpg',
+  stamp: { top: 'LEGALIZED · CONSULAR · ', mid: '✓', sub: 'TRIP', cls: 'stamp--hero stamp--eu' },
+  facts: [{ icon: 'wallet', label: 'Trọn gói từ', value: h.vnd(tr.legalization[0].price) }, { icon: 'stamp', label: 'Đã gồm', value: 'Tem đỏ (TQ)' }],
 }) %>
-<% const tr = services.translation; %>
 
 <section class="section">
   <div class="container layout-side">
-    <div class="stack">
-      <div class="grid grid--3">
-        <div class="card"><div class="card__icon"><%- icon('heart') %></div><h3>Giấy tờ dân sự</h3><p>Xác nhận độc thân, khai sinh, đăng ký kết hôn, lý lịch tư pháp…</p></div>
-        <div class="card"><div class="card__icon"><%- icon('book') %></div><h3>Giấy tờ học thuật</h3><p>Bằng cấp, bảng điểm, học bạ cho hồ sơ du học, xin việc.</p></div>
-        <div class="card"><div class="card__icon"><%- icon('file') %></div><h3>Giấy tờ kinh tế</h3><p>Hợp đồng lao động, hợp đồng thương mại, giấy tờ công ty.</p></div>
+    <div class="stack stack--lg">
+      <div class="feature-trio">
+        <div class="feature-trio__item"><span><%- icon('heart') %></span><h3>Giấy tờ dân sự</h3><p>Xác nhận độc thân, khai sinh, đăng ký kết hôn, lý lịch tư pháp…</p></div>
+        <div class="feature-trio__item"><span><%- icon('book') %></span><h3>Giấy tờ học thuật</h3><p>Bằng cấp, bảng điểm, học bạ cho hồ sơ du học, xin việc.</p></div>
+        <div class="feature-trio__item"><span><%- icon('file') %></span><h3>Giấy tờ kinh tế</h3><p>Hợp đồng lao động, hợp đồng thương mại, giấy tờ công ty.</p></div>
       </div>
 
       <div>
-        <h2>Bảng giá</h2>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Dịch vụ</th><th>Giấy tờ</th><th class="num">Giá trọn gói</th></tr></thead>
-            <tbody><% tr.legalization.forEach(function (x) { %><tr><td><strong><%= x.name %></strong></td><td class="muted"><%= x.detail %></td><td class="num"><%= h.vnd(x.price) %></td></tr><% }) %></tbody>
-          </table>
-        </div>
-        <p class="table-note">Chứng nhận lãnh sự Trung Quốc đã gồm phí tem đỏ. Hợp pháp hoá lãnh sự cho các nước khác: vui lòng liên hệ để được báo giá theo loại giấy tờ và quốc gia sử dụng.</p>
+        <div class="block-head"><span class="eyebrow">Bảng giá</span><h2>Chứng nhận lãnh sự <em>Trung Quốc</em></h2></div>
+        <%- include('../partials/price/options', { items: tr.legalization.map(function (x) { return { title: x.name, tag: x.detail, price: h.vnd(x.price), flag: 'cn' }; }), service: 'Hợp pháp hoá lãnh sự' }) %>
+        <p class="ppanel__note"><%- icon('info') %>Hợp pháp hoá lãnh sự cho các nước khác: vui lòng liên hệ để được báo giá theo loại giấy tờ và quốc gia sử dụng.</p>
       </div>
 
       <div>
-        <h2>Quy trình</h2>
-        <ol class="steps steps--2">
-          <li class="step"><div class="card__icon"><%- icon('send') %></div><h3>Gửi giấy tờ</h3><p>Gửi bản chụp để TRIP kiểm tra loại giấy tờ và nơi sử dụng.</p></li>
-          <li class="step"><div class="card__icon"><%- icon('lang') %></div><h3>Dịch thuật công chứng</h3><p>Dịch và công chứng theo yêu cầu của cơ quan nước ngoài.</p></li>
-          <li class="step"><div class="card__icon"><%- icon('stamp') %></div><h3>Nộp chứng nhận</h3><p>Nộp tại Cục Lãnh sự / Sở Ngoại vụ và Đại sứ quán liên quan.</p></li>
-          <li class="step"><div class="card__icon"><%- icon('check-circle') %></div><h3>Bàn giao</h3><p>Nhận tại văn phòng hoặc gửi chuyển phát tận nơi.</p></li>
+        <div class="block-head"><span class="eyebrow">Quy trình</span><h2>Từ giấy tờ đến <em>con dấu</em></h2></div>
+        <ol class="timeline">
+          <li><span><%- icon('send') %></span><h3>Gửi giấy tờ</h3><p>Gửi bản chụp để TRIP kiểm tra loại giấy tờ và nơi sử dụng.</p></li>
+          <li><span><%- icon('lang') %></span><h3>Dịch thuật công chứng</h3><p>Dịch và công chứng theo yêu cầu của cơ quan nước ngoài.</p></li>
+          <li><span><%- icon('stamp') %></span><h3>Nộp chứng nhận</h3><p>Nộp tại Cục Lãnh sự / Sở Ngoại vụ và Đại sứ quán liên quan.</p></li>
+          <li><span><%- icon('check-circle') %></span><h3>Bàn giao</h3><p>Nhận tại văn phòng hoặc gửi chuyển phát tận nơi.</p></li>
         </ol>
       </div>
     </div>

@@ -1,0 +1,9 @@
+<div class="speeds">
+  <% services.evisa.rows.forEach(function (r, i) { %>
+    <article class="speed<%= i === 0 ? ' speed--std' : '' %>">
+      <span class="speed__label"><%- icon(i === 0 ? 'calendar' : 'zap') %><%= r.speed %></span>
+      <div class="speed__row"><small>1 lần</small><strong><%= h.usd(r.single) %></strong></div>
+      <div class="speed__row"><small>Nhiều lần</small><strong><%= h.usd(r.multiple) %></strong></div>
+    </article>
+  <% }) %>
+</div>

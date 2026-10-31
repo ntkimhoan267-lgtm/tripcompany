@@ -1,43 +1,53 @@
 <%- include('../partials/head') %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Dịch vụ' }],
-  heading: 'Dịch vụ của TRIP',
-  sub: 'Từ giấy tờ đến chuyến đi: một đầu mối cho visa, dịch thuật, vé máy bay, tour, xe và bảo hiểm.',
+  heading: 'Một đầu mối cho',
+  headingEm: 'cả chuyến đi',
+  sub: 'Từ giấy tờ đến chuyến đi: visa, dịch thuật, vé máy bay, tour, xe và bảo hiểm. TRIP lo trọn gói để bạn yên tâm lên đường.',
   actions: {},
+  visual: '/img/team/team-banner.jpg',
+  badge: { value: company.stats[1].value.toLocaleString('vi-VN').replace(/,/g, '.') + company.stats[1].suffix, label: 'Hồ sơ đã thực hiện' },
+  stamp: { top: 'TRIP · ĐÀ NẴNG · VISA · DỊCH THUẬT · ', mid: 'TRIP', sub: 'SERVICE', cls: 'stamp--hero stamp--kr' },
 }) %>
+<%
+  const PIC = { 'ho-chieu': '/img/services/ho-chieu.jpg', 've-may-bay': '/img/services/ve-may-bay.jpg', tour: '/img/tours/ba-na.jpg', 'thue-xe': '/img/services/thue-xe.jpg', 'bao-hiem-esim': '/img/services/bao-hiem.jpg' };
+%>
 
 <section class="section">
   <div class="container">
+    <div class="section-head reveal"><span class="eyebrow">Dịch vụ trọng tâm</span><h2>Visa & <em>Dịch thuật</em></h2></div>
     <div class="pillars">
-      <article class="pillar pillar--visa reveal">
-        <span class="pillar__tag">Trọng tâm</span>
+      <a class="pillar pillar--photo reveal" href="/visa" style="--img:url('/media/hero-montage.jpg')">
+        <span class="pillar__tag">✦ Thế mạnh</span>
         <h3>Dịch vụ Visa</h3>
-        <p>Visa trọn gói hơn 25 quốc gia: Trung Quốc, Nhật, Hàn, Mỹ, Châu Âu, Úc, Canada và e-visa Việt Nam cho người nước ngoài.</p>
-        <div class="pillar__price"><div><small>Từ</small><strong><%= h.vnd(services.chinaVisa.rows[0].price) %></strong></div><a class="btn btn--white" href="/visa">Chi tiết <%- icon('arrow') %></a></div>
-      </article>
-      <article class="pillar pillar--trans reveal">
-        <span class="pillar__tag">Trọng tâm</span>
+        <p>Visa trọn gói hơn 25 quốc gia: Trung Quốc, Hàn, Nhật, Châu Âu, Mỹ, Úc, Canada và e-visa Việt Nam.</p>
+        <ul class="pillar__flags"><% ['cn', 'kr', 'jp', 'eu', 'us', 'au'].forEach(function (c) { %><li><img src="<%= flag(c) %>" alt="" width="36" height="36" loading="lazy"></li><% }) %></ul>
+        <div class="pillar__price"><div><small>Từ</small><strong><%= h.vnd(services.chinaVisa.rows[0].price) %></strong></div><span class="btn btn--white">Xem visa <%- icon('arrow') %></span></div>
+      </a>
+      <a class="pillar pillar--photo pillar--alt reveal" href="/dich-vu/dich-thuat" style="--img:url('/img/services/dich-thuat.jpg')">
+        <span class="pillar__tag">✦ Thế mạnh</span>
         <h3>Dịch thuật công chứng</h3>
-        <p>Dịch thuật Anh, Trung, Hàn, Nhật, Thái, Lào. Công chứng dấu công ty, dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự.</p>
-        <div class="pillar__price"><div><small>Từ</small><strong><%= h.vnd(services.translation.languages[0].rows[0].price) %>/trang</strong></div><a class="btn btn--white" href="/dich-vu/dich-thuat">Chi tiết <%- icon('arrow') %></a></div>
-      </article>
+        <p>Anh, Trung, Hàn, Nhật, Thái, Lào. Công chứng dấu công ty, dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự.</p>
+        <ul class="pillar__langs"><li>EN</li><li>中</li><li>한</li><li>日</li><li>ไทย</li><li>ລາວ</li></ul>
+        <div class="pillar__price"><div><small>Từ</small><strong><%= h.vnd(services.translation.languages[0].rows[0].price) %>/trang</strong></div><span class="btn btn--white">Xem dịch thuật <%- icon('arrow') %></span></div>
+      </a>
     </div>
+  </div>
+</section>
 
-    <h2 class="mt-4 text-center">Dịch vụ khác</h2>
-    <div class="grid grid--3 mt-3">
+<section class="section section--soft">
+  <div class="container">
+    <div class="section-head reveal"><span class="eyebrow">Dịch vụ khác</span><h2>Lo trọn <em>mọi chi tiết</em></h2></div>
+    <div class="svc-grid">
       <% Object.values(services.otherServices).forEach(function (s) { %>
-        <a class="card card--link reveal" href="/dich-vu/<%= s.slug %>">
-          <div class="card__icon"><%- icon(s.icon) %></div>
-          <h3><%= s.title %></h3>
-          <p><%= s.short %></p>
-          <span class="more">Xem chi tiết <%- icon('arrow') %></span>
+        <a class="svc-card reveal" href="/dich-vu/<%= s.slug %>">
+          <div class="svc-card__img"><img src="<%= PIC[s.slug] || '/img/services/thue-xe.jpg' %>" alt="" width="1200" height="800" loading="lazy"><span class="svc-card__icon"><%- icon(s.icon) %></span></div>
+          <div class="svc-card__body"><h3><%= s.title %></h3><p><%= s.short %></p><span class="more">Xem chi tiết <%- icon('arrow') %></span></div>
         </a>
       <% }) %>
-      <a class="card card--link reveal" href="/dich-vu/hop-phap-hoa-lanh-su">
-        <div class="card__icon"><%- icon('stamp') %></div>
-        <h3>Hợp pháp hoá lãnh sự</h3>
-        <p>Chứng nhận và hợp pháp hoá lãnh sự cho giấy tờ dân sự, học thuật, kinh tế.</p>
-        <span class="more">Xem chi tiết <%- icon('arrow') %></span>
+      <a class="svc-card reveal" href="/dich-vu/hop-phap-hoa-lanh-su">
+        <div class="svc-card__img"><img src="/img/services/hop-phap-hoa.jpg" alt="" width="1200" height="800" loading="lazy"><span class="svc-card__icon"><%- icon('stamp') %></span></div>
+        <div class="svc-card__body"><h3>Hợp pháp hoá lãnh sự</h3><p>Chứng nhận và hợp pháp hoá lãnh sự cho giấy tờ dân sự, học thuật, kinh tế.</p><span class="more">Xem chi tiết <%- icon('arrow') %></span></div>
       </a>
     </div>
   </div>

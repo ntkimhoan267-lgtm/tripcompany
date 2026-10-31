@@ -19,6 +19,7 @@
       var open = nav.classList.toggle('is-open');
       document.body.classList.toggle('nav-open', open);
       burger.setAttribute('aria-expanded', String(open));
+      if (open) { var firstLink = $('a, button', nav); firstLink && firstLink.focus(); }
     });
     nav.addEventListener('click', function (e) {
       if (e.target.closest('a') || e.target.closest('[data-open-lead]')) {
@@ -68,6 +69,18 @@
     if (e.key === 'Escape') {
       $$('.modal.is-open').forEach(closeModal);
       if (nav && nav.classList.contains('is-open')) { nav.classList.remove('is-open'); document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded', 'false'); burger.focus(); }
+      var openItem = $('.nav__item.is-open');
+      $$('.nav__item.is-open').forEach(function (i) { i.classList.remove('is-open'); $('.nav__caret', i).setAttribute('aria-expanded', 'false'); });
+      if (openItem && openItem.contains(document.activeElement)) $('.nav__caret', openItem).focus();
+      // Dropdown mở do rê chuột/focus: rời focus khỏi menu con để đóng lại
+      var sub = document.activeElement && document.activeElement.closest && document.activeElement.closest('.nav__sub');
+      if (sub) { var c = $('.nav__caret', sub.parentElement); c && c.focus(); }
+    }
+    if (e.key === 'Tab' && nav && nav.classList.contains('is-open') && !$('.modal.is-open')) {
+      var items = [burger].concat($$('a[href], button:not([disabled])', nav).filter(function (el) { return el.offsetParent !== null; }));
+      var i0 = items[0]; var iN = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === i0) { e.preventDefault(); iN.focus(); }
+      else if (!e.shiftKey && (document.activeElement === iN || items.indexOf(document.activeElement) === -1)) { e.preventDefault(); i0.focus(); }
     }
     // Giữ focus trong popup đang mở
     var open = $('.modal.is-open');
@@ -132,8 +145,10 @@
       var errs = {};
       var nameField = $('[name="name"]', form);
       if (nameField && nameField.required && String(data.name || '').trim().length < 2) errs.name = 'Vui lòng nhập họ tên.';
-      if ('phone' in data && !/^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(String(data.phone).replace(/[\s.\-()]/g, ''))) errs.phone = 'Số điện thoại chưa đúng (VD: 0935 191 394).';
-      if ('service' in data && !data.service) errs.service = 'Vui lòng chọn dịch vụ.';
+      var phoneField = $('[name="phone"]', form);
+      if (phoneField && (phoneField.required || data.phone) && !/^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(String(data.phone || '').replace(/[\s.\-()]/g, ''))) errs.phone = 'Số điện thoại chưa đúng (VD: 0935 191 394).';
+      var svcField = $('[name="service"]', form);
+      if (svcField && svcField.required && !data.service) errs.service = 'Vui lòng chọn dịch vụ.';
       if ('email' in data && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(data.email).trim())) errs.email = 'Email chưa đúng định dạng.';
       if (showErrors(form, errs)) return;
 
@@ -151,7 +166,7 @@
           if (res.ok) {
             form.reset();
             if (onOk) { msg.className = 'form-msg is-ok'; msg.textContent = res.message || 'Đã gửi thành công!'; onOk(); }
-            else showThanks(form, res.message);
+            else showThanks(form, res.message, data.service);
           } else if (res.errors) {
             showErrors(form, res.errors);
           } else {
@@ -163,18 +178,28 @@
     });
   }
   // Sau khi gửi form tư vấn: thay form bằng màn hình cảm ơn (tránh gửi trùng) + nút Zalo/Gọi
-  function showThanks(form, message) {
+  function showThanks(form, message, service) {
     store.set('trip_lead', String(Date.now()));
+    // Trong popup: ẩn tiêu đề + dòng "Hoặc gọi ngay" để không lặp với màn hình cảm ơn
+    var modal = form.closest('.modal');
+    var hiddenBits = modal ? $$('.modal__head, .form-note', modal) : [];
+    hiddenBits.forEach(function (el) { el.hidden = true; });
     var tpl = $('#lead-thanks');
     var box = document.createElement('div');
     box.className = 'form-done';
     box.setAttribute('role', 'status');
     box.innerHTML = tpl ? tpl.innerHTML : '';
     var p = $('[data-thanks-msg]', box); if (p && message) p.textContent = message;
+    // Khách hỏi dịch thuật / hợp pháp hoá: nút gọi trỏ tới hotline dịch thuật
+    var call = $('[data-thanks-call]', box);
+    if (call && /Dịch thuật|Hợp pháp/i.test(service || '')) {
+      call.href = 'tel:' + call.getAttribute('data-phone-trans');
+      $('span', call).textContent = call.getAttribute('data-phone-trans-label');
+    }
     form.replaceWith(box);
     box.tabIndex = -1; box.focus();
     var again = $('[data-thanks-again]', box);
-    if (again) again.addEventListener('click', function () { box.replaceWith(form); });
+    if (again) again.addEventListener('click', function () { box.replaceWith(form); hiddenBits.forEach(function (el) { el.hidden = false; }); });
   }
   function showErrors(form, errs) {
     var keys = Object.keys(errs);
@@ -194,6 +219,19 @@
   $$('.js-review-form').forEach(function (f) { bindForm(f, function () {}); });
   $$('.js-sub-form').forEach(function (f) {
     bindForm(f, function () { store.set('trip_subscribed', '1'); setTimeout(function () { closeModal($('#news-modal')); }, 2500); });
+  });
+
+  // ---------- Chấm sao (trang Đánh giá): tô sao 1..n theo lựa chọn ----------
+  $$('.star-input').forEach(function (box) {
+    var inputs = $$('input', box);
+    var paint = function (n) { $$('label', box).forEach(function (l, i) { l.classList.toggle('on', i < n); }); };
+    var current = function () { var c = $('input:checked', box); return c ? Number(c.value) : 0; };
+    inputs.forEach(function (inp) { inp.addEventListener('change', function () { paint(current()); }); });
+    $$('label', box).forEach(function (l, i) {
+      l.addEventListener('mouseenter', function () { paint(i + 1); });
+      l.addEventListener('mouseleave', function () { paint(current()); });
+    });
+    paint(current());
   });
 
   // ---------- Bảng trên điện thoại: gắn nhãn cột để hiển thị dạng thẻ ----------

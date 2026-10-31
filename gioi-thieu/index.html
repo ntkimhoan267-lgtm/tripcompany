@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/tripcompany/css/site.css?v=mvv9g2j6">
+  <link rel="stylesheet" href="/tripcompany/css/site.css?v=mvvsameq">
   
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TravelAgency","name":"Công ty TNHH Dịch thuật và Dịch vụ Du lịch TRIP","alternateName":"TRIP","url":"https://tripdn.com","logo":"https://tripdn.com/img/logo-icon.png","image":"https://tripdn.com/img/og-image.jpg","telephone":"0935191394","email":"triptranslate.com@gmail.com","taxID":"0402222965","address":{"@type":"PostalAddress","streetAddress":"Phòng 406, Tầng 4, 35 Cao Thắng","addressLocality":"Hải Châu","addressRegion":"Đà Nẵng","addressCountry":"VN"},"openingHours":["Mo-Fr 08:00-17:00","Sa 08:00-12:00"],"sameAs":["https://www.facebook.com/triptranslate/"]}</script>
 </head>
@@ -88,8 +88,8 @@
     <nav class="nav" id="nav" aria-label="Menu chính">
       <ul>
         <li class="nav__item">
-          <a class="nav__link " href="/tripcompany/visa">Visa</a><button class="nav__caret" aria-expanded="false" aria-label="Mở danh sách visa"><svg class="icon " aria-hidden="true"><use href="#i-chevron"/></svg></button>
-          <ul class="nav__sub">
+          <a class="nav__link " href="/tripcompany/visa">Visa</a><button class="nav__caret" type="button" aria-controls="sub-1" aria-expanded="false" aria-label="Mở danh sách visa"><svg class="icon " aria-hidden="true"><use href="#i-chevron"/></svg></button>
+          <ul class="nav__sub" id="sub-1">
             <li><a href="/tripcompany/visa/trung-quoc"><img class="nav__flag" src="https://flagcdn.com/w80/cn.png" alt="" width="22" height="22"> <span>Visa Trung Quốc <small>Thế mạnh · du lịch, thăm thân, thương mại</small></span></a></li>
             <li><a href="/tripcompany/visa/han-quoc"><img class="nav__flag" src="https://flagcdn.com/w80/kr.png" alt="" width="22" height="22"> <span>Visa Hàn Quốc <small>Thế mạnh · 3 tháng, 5 năm, 10 năm</small></span></a></li>
             <li><a href="/tripcompany/visa/nhat-ban"><img class="nav__flag" src="https://flagcdn.com/w80/jp.png" alt="" width="22" height="22"> <span>Visa Nhật Bản <small>Thế mạnh · single & multiple</small></span></a></li>
@@ -99,15 +99,15 @@
           </ul>
         </li>
         <li class="nav__item">
-          <a class="nav__link " href="/tripcompany/dich-vu/dich-thuat">Dịch thuật</a><button class="nav__caret" aria-expanded="false" aria-label="Mở danh sách dịch thuật"><svg class="icon " aria-hidden="true"><use href="#i-chevron"/></svg></button>
-          <ul class="nav__sub">
+          <a class="nav__link " href="/tripcompany/dich-vu/dich-thuat">Dịch thuật</a><button class="nav__caret" type="button" aria-controls="sub-2" aria-expanded="false" aria-label="Mở danh sách dịch thuật"><svg class="icon " aria-hidden="true"><use href="#i-chevron"/></svg></button>
+          <ul class="nav__sub" id="sub-2">
             <li><a href="/tripcompany/dich-vu/dich-thuat">Dịch thuật công chứng <small>Anh, Trung, Hàn, Nhật, Thái, Lào…</small></a></li>
             <li><a href="/tripcompany/dich-vu/hop-phap-hoa-lanh-su">Hợp pháp hoá · Chứng nhận lãnh sự</a></li>
           </ul>
         </li>
         <li class="nav__item">
-          <a class="nav__link " href="/tripcompany/dich-vu">Dịch vụ khác</a><button class="nav__caret" aria-expanded="false" aria-label="Mở danh sách dịch vụ khác"><svg class="icon " aria-hidden="true"><use href="#i-chevron"/></svg></button>
-          <ul class="nav__sub">
+          <a class="nav__link " href="/tripcompany/dich-vu">Dịch vụ khác</a><button class="nav__caret" type="button" aria-controls="sub-3" aria-expanded="false" aria-label="Mở danh sách dịch vụ khác"><svg class="icon " aria-hidden="true"><use href="#i-chevron"/></svg></button>
+          <ul class="nav__sub" id="sub-3">
             <li><a href="/tripcompany/dich-vu/ho-chieu">Làm hộ chiếu</a></li>
             <li><a href="/tripcompany/dich-vu/ve-may-bay">Vé máy bay · Vé tàu</a></li>
             <li><a href="/tripcompany/dich-vu/thue-xe">Xe đưa đón · Thuê xe tự lái</a></li>
@@ -131,7 +131,7 @@
 </header>
 <main id="main">
 
-<section class="page-hero">
+<section class="page-hero page-hero--photo" style="--bg:url('/tripcompany/img/team/team-banner.jpg')">
   <div class="sparkles"><i style="top:18%;left:70%;--s:12px"></i><i style="top:40%;left:88%;--s:9px;--d:-1s"></i><i style="top:12%;left:52%;--s:7px;--d:-2s"></i></div>
   <div class="container" style="position:relative;z-index:1">
     <ol class="breadcrumb" aria-label="Breadcrumb">
@@ -213,16 +213,17 @@
       <h2>Chuyên viên theo từng mảng dịch vụ</h2>
       <p>Mỗi thị trường visa và mảng dịch vụ đều có chuyên viên phụ trách riêng.</p>
     </div>
-    <div class="team-gallery">
-      <figure class="photo-frame reveal"><img src="/tripcompany/img/team/thumbs-up.jpg" alt="Nhân viên TRIP" width="1000" height="1000" loading="lazy"></figure>
-      <figure class="photo-frame reveal"><img src="/tripcompany/img/team/consultant.jpg" alt="Tư vấn viên TRIP" width="800" height="1000" loading="lazy"></figure>
-      <figure class="photo-frame reveal"><img src="/tripcompany/img/team/team.jpg" alt="Tập thể TRIP" width="1400" height="1050" loading="lazy"></figure>
-    </div>
     <div class="grid grid--3">
       <div class="card reveal"><div class="card__icon"><svg class="icon " aria-hidden="true"><use href="#i-passport"/></svg></div><h3>Visa</h3><ul class="consultants"><li><a href="tel:0935191394">Phạm Minh Trí <span>0935.191.394</span></a></li><li><a href="tel:0886933786">Lê Kim Ngọc Nhi <span>0886.933.786</span></a></li><li><a href="tel:0971712254">Lâm Thị Yến Nhị <span>0971.712.254</span></a></li></ul></div>
       <div class="card reveal"><div class="card__icon"><svg class="icon " aria-hidden="true"><use href="#i-lang"/></svg></div><h3>Dịch thuật</h3><ul class="consultants"><li><a href="tel:0768141862">Phạm Trang <span>0768.141.862</span></a></li><li><a href="tel:0971712254">Lâm Thị Yến Nhị <span>0971.712.254</span></a></li></ul></div>
       <div class="card reveal"><div class="card__icon"><svg class="icon " aria-hidden="true"><use href="#i-car"/></svg></div><h3>Hộ chiếu · Xe · Tour</h3><ul class="consultants"><li><a href="tel:0935191394">Phạm Minh Trí <span>0935.191.394</span></a></li><li><a href="tel:0935182687">Phan Sỹ Nhật Anh <span>0935.182.687</span></a></li></ul></div>
     </div>
+    <div class="team-gallery mt-4">
+      <figure class="photo-frame reveal"><img src="/tripcompany/img/team/thumbs-up.jpg" alt="Nhân viên TRIP" width="1000" height="1000" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><img src="/tripcompany/img/team/consultant.jpg" alt="Tư vấn viên TRIP" width="800" height="1000" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><img src="/tripcompany/img/team/team.jpg" alt="Tập thể TRIP" width="1400" height="1050" loading="lazy"></figure>
+    </div>
+    <p class="text-center muted small mt-2">Đội ngũ TRIP tại văn phòng 35 Cao Thắng, Đà Nẵng</p>
   </div>
 </section>
 
@@ -331,7 +332,8 @@
   <p class="muted">Cần gấp? Nhắn ngay cho TRIP:</p>
   <div class="form-done__actions">
     <a class="btn btn--zalo" href="https://zalo.me/0935191394" target="_blank" rel="noopener">Nhắn Zalo ngay</a>
-    <a class="btn btn--navy" href="tel:0935191394"><svg class="icon " aria-hidden="true"><use href="#i-phone"/></svg> 0935.191.394</a>
+    <a class="btn btn--navy" data-thanks-call href="tel:0935191394"
+       data-phone-trans="0768141862" data-phone-trans-label="0768.141.862"><svg class="icon " aria-hidden="true"><use href="#i-phone"/></svg> <span>0935.191.394</span></a>
   </div>
   <button class="form-done__again" type="button" data-thanks-again>Gửi thêm yêu cầu khác</button>
 </template>
@@ -362,7 +364,7 @@
     <label for="modal-service">Dịch vụ cần tư vấn <span class="req">*</span></label>
     <select class="select" id="modal-service" name="service" required>
       <option value="">— Chọn dịch vụ —</option>
-      <option>Visa Trung Quốc</option><option>Visa Hàn Quốc</option><option>Visa Nhật Bản</option><option>Visa Châu Âu (Schengen, Anh)</option><option>Visa Mỹ / Úc / Canada</option><option>Visa nước khác</option><option>E-visa Việt Nam (người nước ngoài)</option><option>Dịch thuật công chứng</option><option>Hợp pháp hoá / Chứng nhận lãnh sự</option><option>Hộ chiếu</option><option>Vé máy bay / Vé tàu</option><option>Tour du lịch</option><option>Thuê xe / Xe đưa đón</option><option>Bảo hiểm du lịch / eSIM</option><option>Khác</option>
+      <option>Visa Trung Quốc</option><option>Visa Hàn Quốc</option><option>Visa Nhật Bản</option><option>Visa Châu Âu (Schengen, Anh)</option><option>Visa Mỹ / Úc / Canada</option><option>Visa nước khác</option><option>E-visa Việt Nam (người nước ngoài)</option><option>Dịch thuật công chứng</option><option>Hợp pháp hoá lãnh sự</option><option>Hộ chiếu</option><option>Vé máy bay / Vé tàu</option><option>Tour du lịch</option><option>Thuê xe / Xe đưa đón</option><option>Bảo hiểm du lịch / eSIM</option><option>Khác</option>
     </select>
     <span class="field__error" data-error="service"></span>
   </div>
@@ -435,7 +437,7 @@
   </div>
 </div>
 
-<script src="/tripcompany/js/site.js?v=mvv9g2j6" defer></script>
+<script src="/tripcompany/js/site.js?v=mvvsameq" defer></script>
 </body>
 </html>
 

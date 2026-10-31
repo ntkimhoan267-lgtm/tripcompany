@@ -124,19 +124,19 @@ const TOURS = [
     highlights: 'Chùa Phật Vàng\nĐảo Coral\nChợ nổi Bốn Miền' },
   { slug: 'tour-nhat-ban', image: '/img/tours/nhat-ban.jpg', title: 'Tour Nhật Bản', destination: 'Nhật Bản', region: 'quoc-te', duration: 'Theo lịch', departure: 'Đà Nẵng', price: null,
     highlights: 'Cung đường vàng Tokyo – Phú Sĩ – Osaka\nHỗ trợ visa Nhật Bản' },
-  { slug: 'tour-da-nang-phu-quoc-4n3d', title: 'Tour Đà Nẵng – Phú Quốc 4N3Đ', destination: 'Phú Quốc', region: 'trong-nuoc', duration: '4 ngày 3 đêm', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-da-nang-phu-quoc-4n3d', image: '/img/tours/phu-quoc.jpg', title: 'Tour Đà Nẵng – Phú Quốc 4N3Đ', destination: 'Phú Quốc', region: 'trong-nuoc', duration: '4 ngày 3 đêm', departure: 'Đà Nẵng', price: null,
     highlights: 'Grand World\nCáp treo Hòn Thơm\nNam đảo & Bắc đảo' },
-  { slug: 'tour-ba-na-hills-1-ngay', title: 'Tour Bà Nà Hills 1 ngày', destination: 'Đà Nẵng', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-ba-na-hills-1-ngay', image: '/img/tours/ba-na.jpg', title: 'Tour Bà Nà Hills 1 ngày', destination: 'Đà Nẵng', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Cầu Vàng\nLàng Pháp\nFantasy Park' },
-  { slug: 'tour-son-tra-ngu-hanh-son-hoi-an', title: 'Tour Sơn Trà – Ngũ Hành Sơn – Hội An', destination: 'Đà Nẵng · Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-son-tra-ngu-hanh-son-hoi-an', image: '/img/tours/son-tra-hoi-an.jpg', title: 'Tour Sơn Trà – Ngũ Hành Sơn – Hội An', destination: 'Đà Nẵng · Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Chùa Linh Ứng\nNgũ Hành Sơn\nPhố cổ Hội An về đêm' },
-  { slug: 'tour-cu-lao-cham-1-ngay', title: 'Tour Cù Lao Chàm 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng · Hội An', price: null,
+  { slug: 'tour-cu-lao-cham-1-ngay', image: '/img/tours/cu-lao-cham.jpg', title: 'Tour Cù Lao Chàm 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng · Hội An', price: null,
     highlights: 'Cano cao tốc\nLặn ngắm san hô\nĐi bộ dưới biển (tuỳ chọn)' },
-  { slug: 'tour-rung-dua-bay-mau-hoi-an', title: 'Tour Rừng dừa Bảy Mẫu – Hội An', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-rung-dua-bay-mau-hoi-an', image: '/img/tours/bay-mau.jpg', title: 'Tour Rừng dừa Bảy Mẫu – Hội An', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Thuyền thúng rừng dừa\nPhố cổ Hội An' },
-  { slug: 'tour-hue-1-ngay', title: 'Tour Huế 1 ngày từ Đà Nẵng', destination: 'Huế', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-hue-1-ngay', image: '/img/tours/hue.jpg', title: 'Tour Huế 1 ngày từ Đà Nẵng', destination: 'Huế', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Đại Nội Huế\nChùa Thiên Mụ\nLăng Khải Định' },
-  { slug: 'tour-vinwonders-nam-hoi-an', title: 'Tour VinWonders Nam Hội An 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-vinwonders-nam-hoi-an', image: '/img/tours/hoi-an-dem.jpg', title: 'Tour VinWonders Nam Hội An 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Công viên chủ đề\nRiver Safari\nBiểu diễn thực cảnh' },
 ];
 
@@ -161,6 +161,10 @@ function seed() {
 
   const insSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
   for (const [k, v] of Object.entries(DEFAULT_SETTINGS)) insSetting.run(k, v);
+
+  // Bổ sung ảnh cho tour mẫu còn trống ảnh (database tạo trước khi có ảnh); không đè ảnh đã đổi trong Dashboard
+  const fillImg = db.prepare("UPDATE tours SET image = ? WHERE slug = ? AND (image IS NULL OR image = '')");
+  for (const t of TOURS) if (t.image) fillImg.run(t.image, t.slug);
 
   // Dữ liệu mẫu (bài viết, tour) chỉ tạo 1 lần; xoá hết trong Dashboard thì không bị tạo lại khi khởi động
   const seeded = db.prepare("SELECT value FROM settings WHERE key = 'seeded_content'").get();

@@ -112,7 +112,7 @@ ffmpeg -i TRIP_final.mp4 -map 0:v:0 -map 0:a:0 -vf scale=1280:720 -c:v libx264 -
 
 ### Video và ảnh các nước
 
-Video nền phần đầu trang chủ (`hero-montage.mp4`), video 4 thị trường (`public/media/markets/`), ảnh trang Visa (`public/img/visa/`) và ảnh tour (`public/img/tours/`) lấy từ [Mixkit](https://mixkit.co). Giấy phép Mixkit Free License cho phép dùng miễn phí cho mục đích thương mại, không bắt buộc ghi nguồn. Mã video gốc:
+Video nền phần đầu trang chủ (`hero-montage.mp4`), video 4 thị trường (`public/media/markets/`), ảnh trang Visa (`public/img/visa/`) và ảnh tour nước ngoài (`public/img/tours/`) lấy từ [Mixkit](https://mixkit.co). Giấy phép Mixkit Free License cho phép dùng miễn phí cho mục đích thương mại, không bắt buộc ghi nguồn. Mã video gốc:
 
 | Nước | Mã video gốc |
 |---|---|
@@ -121,6 +121,20 @@ Video nền phần đầu trang chủ (`hero-montage.mp4`), video 4 thị trư�
 | Nhật Bản | Núi Phú Sĩ 30148 · Chùa Senso-ji 4403 · Hoa anh đào 30141 |
 | Châu Âu | Tháp Eiffel 25220, 27046 |
 | Tour | Singapore 20177 · Bangkok 22171 |
+
+### Ảnh tour trong nước
+
+Ảnh 7 tour trong nước lấy từ [Wikimedia Commons](https://commons.wikimedia.org), chỉ chọn ảnh giấy phép CC0 hoặc Public domain (dùng thương mại tự do, không bắt buộc ghi nguồn). Đã cắt 800x600 và xoá metadata. Không dùng ảnh Pinterest vì không có quyền dùng thương mại.
+
+| File | Nội dung | Ảnh gốc | Giấy phép |
+|---|---|---|---|
+| `ba-na.jpg` | Cầu Vàng, Bà Nà Hills | [Golden Bridge at Ba Na Hills 20250718.jpg](https://commons.wikimedia.org/wiki/File:Golden_Bridge_at_Ba_Na_Hills_20250718.jpg) | CC0 |
+| `phu-quoc.jpg` | Hoàng hôn Phú Quốc | [1 Phu Quoc sunset.jpg](https://commons.wikimedia.org/wiki/File:1_Phu_Quoc_sunset.jpg) | CC0 |
+| `son-tra-hoi-an.jpg` | Phố cổ Hội An | [Hoi An - HoiAn1457.jpg](https://commons.wikimedia.org/wiki/File:Hoi_An_-_HoiAn1457.jpg) | CC0 |
+| `cu-lao-cham.jpg` | Bãi biển Cù Lao Chàm | [A seaside shot in Cù Lao Chàm, Quảng Nam province, taken in July 2024.jpg](https://commons.wikimedia.org/wiki/File:A_seaside_shot_in_C%C3%B9_Lao_Ch%C3%A0m,_Qu%E1%BA%A3ng_Nam_province,_taken_in_July_2024.jpg) | CC0 |
+| `bay-mau.jpg` | Thuyền thúng rừng dừa | [Basket Boat and the Bamboo forest (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Basket_Boat_and_the_Bamboo_forest_(Unsplash).jpg) | CC0 |
+| `hue.jpg` | Chùa Thiên Mụ, Huế | [Hue Thien Mu-Pagoda.JPG](https://commons.wikimedia.org/wiki/File:Hue_Thien_Mu-Pagoda.JPG) | Public domain |
+| `hoi-an-dem.jpg` | Sông Hoài, Hội An về đêm | [Hoi An - HoiAn1441.jpg](https://commons.wikimedia.org/wiki/File:Hoi_An_-_HoiAn1441.jpg) | CC0 |
 
 ## Cấu trúc thư mục
 

@@ -101,7 +101,7 @@ Hộ chiếu, bảo hiểm du lịch (Liberty), eSIM du lịch, vé máy bay và
 ## 6. Trang chủ (landing page): các section
 1. **Header:** logo, menu, hotline, nút "Tư vấn miễn phí".
 2. **Hero video:** phát video `TRIP_final.mp4` nền (tự chạy, tắt tiếng, có nút bật tiếng hoặc xem full). Tiêu đề: *"Visa & Dịch thuật trọn gói tại Đà Nẵng"*. 2 nút "Tư vấn visa" và "Báo giá dịch thuật", kèm form tư vấn nhanh 3 trường.
-3. **Dải tin cậy:** 25+ quốc gia visa · 6+ ngôn ngữ dịch · Luyện phỏng vấn 1-1 · Hoàn phí dịch vụ nếu rớt visa (*cần xác nhận cho khách lẻ*).
+3. **Dải tin cậy:** 6+ ngôn ngữ dịch · Luyện phỏng vấn 1-1 · Kiểm tra hồ sơ miễn phí. (Không đưa chính sách hoàn phí lên web.)
 4. **2 dịch vụ trọng tâm:** 2 thẻ lớn Visa và Dịch thuật, có giá "từ…".
 5. **Visa nổi bật:** thẻ quốc gia (Trung Quốc, Nhật, Hàn, Mỹ, Schengen, Úc) gồm cờ, thời gian xét duyệt và "Giá từ".
 6. **Bảng giá dịch thuật rút gọn:** chọn ngôn ngữ để xem giá mỗi trang.
@@ -183,7 +183,7 @@ Website → Backend (lưu SQLite) → Google Apps Script
 ## ❓ Cần TRIP xác nhận
 1. **Địa chỉ hiển thị:** 35 Cao Thắng (văn phòng) hay K18/38 Ông Ích Khiêm (trụ sở), hay cả hai?
 2. **Hotline chính:** 0886.933.786, đúng không?
-3. **Chính sách hoàn phí khi rớt visa:** trong bảng giá ghi chỉ áp dụng cho đại lý. Có áp dụng cho khách lẻ để đưa lên web không?
+3. **Chính sách hoàn phí:** đã chốt KHÔNG đưa lên website.
 4. **Video `TRIP_final.mp4`:** file nặng 159MB. Bạn đặt quyền chia sẻ thành "Bất kỳ ai có liên kết" để mình nén còn khoảng 15MB và đưa vào web, hoặc up lên YouTube.
 5. **Mạng xã hội:** link Facebook, Zalo OA, TikTok của TRIP?
 6. **Domain:** đã có chưa (ví dụ `triptranslate.com`)?

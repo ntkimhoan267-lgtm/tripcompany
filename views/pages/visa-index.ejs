@@ -8,7 +8,7 @@
   visual: '/img/visa/jp.jpg',
   badge: { value: company.stats[2].value + '%', label: 'Tỉ lệ đậu visa' },
   stamp: { top: 'VISA · CHINA · TRUNG QUỐC · ', mid: '中国', sub: 'APPROVED', cls: 'stamp--hero stamp--cn' },
-  facts: [{ icon: 'globe', label: 'Quốc gia', value: '25+' }, { icon: 'award', label: 'Thế mạnh', value: 'Trung · Hàn · Nhật' }],
+  facts: [{ icon: 'globe', label: 'Quốc gia & vùng lãnh thổ', value: (new Set(services.worldVisa.map(function (v) { return v.code; })).size + 1) + '' }, { icon: 'award', label: 'Thế mạnh', value: 'Trung · Hàn · Nhật' }],
 }) %>
 
 <section class="section">

@@ -82,7 +82,7 @@ router.get('/visa/:slug', (req, res, next) => {
 
 router.get('/dich-vu/dich-thuat', (req, res) => {
   res.render('pages/service-translation', {
-    meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật tại Đà Nẵng', description: 'Dịch thuật công chứng dấu công ty, dấu tư pháp từ 40.000đ/trang. Hợp pháp hoá, chứng nhận lãnh sự. Dịch hoả tốc trong ngày tại TRIP Đà Nẵng.' },
+    meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật tại Đà Nẵng', description: 'Dịch thuật từ 40.000đ/trang, công chứng dấu công ty hoặc dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự. Có gói dịch hoả tốc tại TRIP Đà Nẵng.' },
     services,
   });
 });

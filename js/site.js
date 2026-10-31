@@ -264,6 +264,10 @@
   var heroBg = $('.hero__bg');
   if (heroBg && heroBg.dataset.src && !reduce && window.matchMedia('(min-width: 768px)').matches) {
     heroBg.src = heroBg.dataset.src; var hp = heroBg.play(); if (hp && hp.catch) hp.catch(function () {});
+    // Tạm dừng khi cuộn khỏi màn hình để đỡ tốn pin/CPU
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { var p = heroBg.play(); if (p && p.catch) p.catch(function () {}); } else heroBg.pause(); });
+    }).observe(heroBg);
   }
   // Rê chuột vào khung cửa sổ: phát thử đoạn video ngắn trên nền thumbnail
   var porthole = $('.porthole'); var pv = porthole && $('.porthole__teaser', porthole);

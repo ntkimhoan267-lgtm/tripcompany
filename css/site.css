@@ -1301,3 +1301,11 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .pcard__bottom::before, .pcard__bottom::after, .bpass::before, .bpass::after { display: none; }
 .ppanel .pcard__bottom::before, .ppanel .pcard__bottom::after { display: block; }
 .section-head p, .ppanel__note, .table-note, .block-head + p { color: #34475a; }
+
+/* Video nền ở phần đầu trang con (tải như trang chủ: chỉ màn hình >= 768px, điện thoại hiện ảnh poster) */
+.page-hero--video { background: var(--navy-900); }
+.page-hero__video { z-index: -2; }
+.page-hero__shade { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, rgba(13,28,43,.94) 0%, rgba(13,28,43,.82) 42%, rgba(13,28,43,.5) 75%, rgba(13,28,43,.6) 100%),
+              linear-gradient(0deg, rgba(13,28,43,.6), transparent 40%); }
+@media (max-width: 900px) { .page-hero__shade { background: linear-gradient(180deg, rgba(13,28,43,.84), rgba(13,28,43,.9)); } }

@@ -6,8 +6,15 @@
   const fx = typeof facts !== 'undefined' && facts ? facts : [];
   const st = typeof stamp !== 'undefined' && stamp ? stamp : null;
   const bd = typeof badge !== 'undefined' && badge ? badge : null;
+  // Video nền: 'cn' | 'kr' | 'jp' | 'eu' (video từng nước), false = không có, mặc định = video tổng hợp
+  const vkey = typeof video !== 'undefined' ? video : 'montage';
+  const vsrc = vkey === false ? null : (['cn', 'kr', 'jp', 'eu'].includes(vkey) ? '/media/markets/' + vkey : '/media/hero-montage');
 %>
-<section class="page-hero<%= hasBg ? ' page-hero--photo' : '' %><%= vis ? ' page-hero--split' : '' %>"<% if (hasBg) { %> style="--bg:url('<%= bg %>')"<% } %>>
+<section class="page-hero<%= hasBg ? ' page-hero--photo' : '' %><%= vis ? ' page-hero--split' : '' %><%= vsrc ? ' page-hero--video' : '' %>"<% if (hasBg) { %> style="--bg:url('<%= bg %>')"<% } %>>
+  <% if (vsrc) { %>
+    <video class="hero__bg page-hero__video" data-src="<%= vsrc %>.mp4" poster="<%= vsrc %>.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+    <div class="page-hero__shade"></div>
+  <% } %>
   <img class="page-hero__mark" src="/img/logo-plane.png" alt="" width="398" height="385" aria-hidden="true">
   <div class="sparkles"><i style="top:18%;left:70%;--s:12px"></i><i style="top:40%;left:88%;--s:9px;--d:-1s"></i><i style="top:12%;left:52%;--s:7px;--d:-2s"></i></div>
   <div class="container page-hero__grid">

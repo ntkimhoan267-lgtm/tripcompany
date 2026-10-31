@@ -2,7 +2,7 @@
   // Tham số: crumbs, heading, headingEm (phần in nghiêng), sub, actions, bg (ảnh nền mờ),
   // visual (ảnh khung bên phải), facts [{icon, label, value}], stamp {top, mid, sub, cls}, badge {value, label}
   const vis = typeof visual !== 'undefined' && visual;
-  const hasBg = typeof bg !== 'undefined' && bg;
+  const hasBg = typeof bg !== 'undefined' && /^\/(img|uploads|media)\/[\w./-]+$/.test(bg || '');
   const fx = typeof facts !== 'undefined' && facts ? facts : [];
   const st = typeof stamp !== 'undefined' && stamp ? stamp : null;
   const bd = typeof badge !== 'undefined' && badge ? badge : null;

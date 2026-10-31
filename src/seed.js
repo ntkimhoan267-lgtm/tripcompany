@@ -165,11 +165,15 @@ function seed() {
   const insSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
   for (const [k, v] of Object.entries(DEFAULT_SETTINGS)) insSetting.run(k, v);
 
-  // Bổ sung ảnh cho tour mẫu còn trống ảnh (database tạo trước khi có ảnh); không đè ảnh đã đổi trong Dashboard
-  const fillImg = db.prepare("UPDATE tours SET image = ? WHERE slug = ? AND (image IS NULL OR image = '')");
-  for (const t of TOURS) if (t.image) fillImg.run(t.image, t.slug);
-  const fillCover = db.prepare("UPDATE posts SET cover = ? WHERE slug = ? AND (cover IS NULL OR cover = '')");
-  for (const p of POSTS) if (p.cover) fillCover.run(p.cover, p.slug);
+  // Bổ sung ảnh cho tour/bài mẫu còn trống ảnh (database tạo trước khi có ảnh). Chỉ chạy 1 lần,
+  // để ảnh mà quản trị viên chủ động xoá trong Dashboard không bị gắn lại sau mỗi lần khởi động.
+  if (!db.prepare("SELECT 1 FROM settings WHERE key = 'backfill_images_v1'").get()) {
+    const fillImg = db.prepare("UPDATE tours SET image = ? WHERE slug = ? AND (image IS NULL OR image = '')");
+    for (const t of TOURS) if (t.image) fillImg.run(t.image, t.slug);
+    const fillCover = db.prepare("UPDATE posts SET cover = ? WHERE slug = ? AND (cover IS NULL OR cover = '')");
+    for (const p of POSTS) if (p.cover) fillCover.run(p.cover, p.slug);
+    db.prepare("INSERT INTO settings (key, value) VALUES ('backfill_images_v1', datetime('now'))").run();
+  }
 
   // Dữ liệu mẫu (bài viết, tour) chỉ tạo 1 lần; xoá hết trong Dashboard thì không bị tạo lại khi khởi động
   const seeded = db.prepare("SELECT value FROM settings WHERE key = 'seeded_content'").get();

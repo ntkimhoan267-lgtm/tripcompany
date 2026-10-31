@@ -334,7 +334,8 @@
       if (panels[j]) panels[j].hidden = !on;
     });
     if (opts.focus) tabs[i].focus();
-    tabs[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    // Chỉ cuộn ngang thanh tab (điện thoại) khi người dùng chọn tab, không làm trang tự nhảy lúc mới tải
+    if (opts.focus || opts.push) nav.scrollLeft += tabs[i].getBoundingClientRect().left - nav.getBoundingClientRect().left - 20;
     if (opts.push && history.replaceState) history.replaceState(null, '', '#' + tabs[i].getAttribute('aria-controls'));
     if (opts.scroll) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }

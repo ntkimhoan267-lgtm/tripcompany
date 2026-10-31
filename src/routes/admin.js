@@ -311,7 +311,7 @@ router.post(['/posts/new', '/posts/:id(\\d+)'], withUpload('cover_file'), csrf, 
   const uploaded = await saveImage(req.file);
   if (req.file && !uploaded) { flash(req, 'error', 'Ảnh bìa không hợp lệ. Chỉ nhận ảnh JPG, PNG, WEBP.'); return res.redirect(req.originalUrl); }
   const keepCover = qs(b.cover, 300).trim();
-  const cover = uploaded || (b.remove_cover ? null : (/^\/uploads\/[\w.-]+$/.test(keepCover) ? keepCover : null));
+  const cover = uploaded || (b.remove_cover ? null : (/^\/(uploads|img)\/[\w./-]+$/.test(keepCover) ? keepCover : null));
   const status = b.status === 'published' ? 'published' : 'draft';
   const fields = [uniqueSlug('posts', slugify(qs(b.slug, 200) || title), 'bai-viet', id), title, qs(b.excerpt, 400), qs(b.content, 2 * 1024 * 1024), cover, qs(b.category, 50).trim(), status];
   if (id) {

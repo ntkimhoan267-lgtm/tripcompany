@@ -14,6 +14,10 @@ if ([repoRoot, process.cwd(), path.parse(outDir).root, require('node:os').homedi
   console.error(`Thư mục ra không an toàn: ${outDir}. Hãy dùng một thư mục con riêng, VD: dist-preview`);
   process.exit(1);
 }
+if (outDir.startsWith(repoRoot + path.sep) && path.relative(repoRoot, outDir) !== 'dist-preview') {
+  console.error(`Thư mục ra nằm trong dự án: ${outDir}. Trong dự án chỉ được xuất vào dist-preview.`);
+  process.exit(1);
+}
 const base = (process.argv[3] || '/tripcompany').replace(/\/$/, '');
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'trip-export-'));

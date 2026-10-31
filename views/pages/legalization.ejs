@@ -1,9 +1,9 @@
 <%- include('../partials/head') %>
 <%- include('../partials/page-hero', {
-  crumbs: [{ label: 'Dịch thuật', href: '/dich-vu/dich-thuat' }, { label: 'Hợp pháp hoá lãnh sự' }],
+  crumbs: [{ label: 'Dịch vụ', href: '/dich-vu' }, { label: 'Dịch thuật', href: '/dich-vu/dich-thuat' }, { label: 'Hợp pháp hoá lãnh sự' }],
   heading: 'Hợp pháp hoá & Chứng nhận lãnh sự',
   sub: 'Giấy tờ Việt Nam dùng ở nước ngoài (và ngược lại) thường phải được chứng nhận hoặc hợp pháp hoá lãnh sự. TRIP làm trọn gói, kèm dịch thuật công chứng.',
-  actions: { service: 'Hợp pháp hoá / Chứng nhận lãnh sự' },
+  actions: { service: 'Hợp pháp hoá lãnh sự' },
 }) %>
 <% const tr = services.translation; %>
 
@@ -38,7 +38,7 @@
       </div>
     </div>
     <aside class="sidebar">
-      <%- include('../partials/consult-box', { people: company.consultants.translation, presetService: 'Hợp pháp hoá / Chứng nhận lãnh sự' }) %>
+      <%- include('../partials/consult-box', { people: company.consultants.translation, presetService: 'Hợp pháp hoá lãnh sự' }) %>
     </aside>
   </div>
 </section>

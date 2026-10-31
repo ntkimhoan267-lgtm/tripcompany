@@ -30,7 +30,7 @@
             <tbody>
               <% tr.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %>
                 <tr>
-                  <td><% if (i === 0) { %><strong><%= l.pair %></strong><% } %></td>
+                  <td><% if (i === 0) { %><strong><%= l.pair %></strong><% } else { %><span class="only-mobile"><%= l.pair %></span><% } %></td>
                   <td><%= r.level %></td>
                   <td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td>
                 </tr>

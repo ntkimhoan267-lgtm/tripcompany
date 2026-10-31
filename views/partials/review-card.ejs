@@ -1,11 +1,14 @@
 <%
   const SOURCES = { zalo: 'qua Zalo', facebook: 'trên Facebook', google: 'trên Google', 'truc-tiep': 'tại văn phòng', web: 'trên website' };
+  // Chữ cái đại diện: bỏ phần trong ngoặc "(Đà Nẵng)", lấy tên (từ cuối), hỗ trợ ký tự đặc biệt/emoji
+  const words = r.name.replace(/\(.*?\)/g, ' ').trim().split(/\s+/).filter(Boolean);
+  const initial = (Array.from(words[words.length - 1] || '?')[0] || '?').toUpperCase();
 %>
 <figure class="review-card reveal">
-  <div class="review-card__stars" aria-label="<%= r.rating %> trên 5 sao"><% for (let i = 1; i <= 5; i++) { %><span class="<%= i <= r.rating ? 'on' : '' %>">★</span><% } %></div>
+  <div class="review-card__stars" role="img" aria-label="<%= r.rating %> trên 5 sao"><% for (let i = 1; i <= 5; i++) { %><span class="<%= i <= r.rating ? 'on' : '' %>" aria-hidden="true">★</span><% } %></div>
   <blockquote><%= r.content %></blockquote>
   <figcaption>
-    <span class="review-card__avatar" aria-hidden="true"><%= (r.name.trim().split(/\s+/).pop() || '?').charAt(0).toUpperCase() %></span>
+    <span class="review-card__avatar" aria-hidden="true"><%= initial %></span>
     <span><strong><%= r.name %></strong><% if (r.service) { %><%= r.service %> · <% } %>Đánh giá <%= SOURCES[r.source] || '' %></span>
   </figcaption>
 </figure>

@@ -82,7 +82,7 @@ app.use((err, req, res, _next) => {
   const status = err.status || err.statusCode || 500;
   if (status >= 500) console.error(err);
   const message = status === 413 ? 'Dữ liệu gửi lên quá lớn.' : status < 500 ? 'Yêu cầu không hợp lệ.' : 'Đã có lỗi xảy ra. Vui lòng thử lại sau.';
-  if (res.headersSent) return;
+  if (res.headersSent) return _next(err);
   res.status(status);
   if (req.path.startsWith('/api/') || req.accepts(['html', 'json']) === 'json') return res.json({ ok: false, error: message });
   res.send(message);

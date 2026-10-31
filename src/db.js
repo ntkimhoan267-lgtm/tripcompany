@@ -110,5 +110,9 @@ CREATE INDEX IF NOT EXISTS idx_subs_synced ON subscribers(sheet_synced);
 // Nâng cấp schema cho database đã tạo từ phiên bản trước
 const hasColumn = (table, col) => db.prepare(`PRAGMA table_info(${table})`).all().some((c) => c.name === col);
 if (!hasColumn('users', 'session_version')) db.exec('ALTER TABLE users ADD COLUMN session_version INTEGER NOT NULL DEFAULT 1');
+// SĐT người đánh giá: chỉ để nhân viên xác minh, không bao giờ hiển thị công khai
+if (!hasColumn('reviews', 'phone')) db.exec('ALTER TABLE reviews ADD COLUMN phone TEXT');
+// Bản tin tạo từ phiên bản cũ (không theo dõi từng người nhận) coi như đã gửi xong, tránh gửi lại
+if (!hasColumn('newsletters', 'batched')) db.exec('ALTER TABLE newsletters ADD COLUMN batched INTEGER NOT NULL DEFAULT 0');
 
 module.exports = db;

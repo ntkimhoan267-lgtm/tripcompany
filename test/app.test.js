@@ -94,7 +94,9 @@ test('đăng ký nhận tin + trùng email + huỷ đăng ký', async () => {
   const r1 = await postJson('/api/subscribe', { email: 'Khach@Gmail.com', name: 'Khách' });
   assert.ok((await r1.json()).ok);
   const r2 = await postJson('/api/subscribe', { email: 'khach@gmail.com' });
-  assert.match((await r2.json()).message, /đã có/);
+  const m2 = (await r2.json()).message;
+  const r3 = await postJson('/api/subscribe', { email: 'moi-hoan-toan@gmail.com' });
+  assert.equal(m2, (await r3.json()).message, 'không lộ email nào đã đăng ký');
   const bad = await postJson('/api/subscribe', { email: 'abc' });
   assert.equal(bad.status, 400);
   await wait(200);
@@ -174,9 +176,9 @@ test('gửi bản tin qua Apps Script', async () => {
   const r = await form('/admin/newsletter', { _csrf: csrf, subject: 'Tour tháng 12', body: 'Xin chào', mode: 'all', tours: '1' });
   assert.equal(r.status, 302);
   const call = received.find((x) => x.action === 'newsletter');
-  assert.equal(call.data.recipients.length, 1);
+  assert.equal(call.data.recipients.length, 2);
   const page = await (await fetch(base + '/admin/newsletter', { headers: { cookie } })).text();
-  assert.match(page, /1 người/);
+  assert.match(page, /2 người/);
   assert.equal(call.data.tours[0].url.endsWith('/tour/tour-bac-kinh-7n6d'), true);
 });
 
@@ -286,4 +288,36 @@ test('đánh giá: khách gửi phải chờ duyệt; nhân viên nhập phải 
   await form(`/admin/reviews/${id}/status`, { _csrf: csrf, status: 'published' });
   home = await (await fetch(base + '/')).text();
   assert.ok(home.includes('Chị Test'), 'duyệt xong thì hiện trên trang chủ');
+});
+
+test('vòng 2: slug lạ, đánh giá không cần dịch vụ, bản tin không gửi cho người đăng ký sau', async () => {
+  assert.equal((await fetch(base + '/visa/constructor')).status, 404);
+  assert.equal((await fetch(base + '/dich-vu/toString')).status, 404);
+
+  // IP khác (qua proxy) để không chạm giới hạn 3 đánh giá/giờ của các test trước
+  const postFrom = (ip, body) => fetch(base + '/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip }, body: JSON.stringify(body) });
+  const rv = await postFrom('10.0.0.21', { name: 'Anh Test', rating: 4, content: 'Không chọn dịch vụ vẫn gửi được nhé.', phone: '' });
+  assert.equal(rv.status, 200);
+  const badPhone = await postFrom('10.0.0.22', { name: 'Anh Test', rating: 4, content: 'Số điện thoại sai định dạng nè.', phone: '123' });
+  assert.equal(badPhone.status, 400);
+
+  // tạo bản tin, sau đó có người đăng ký mới -> người mới không nằm trong danh sách "còn lại"
+  let csrf = await getCsrf('/admin/newsletter');
+  await form('/admin/newsletter', { _csrf: csrf, subject: 'Bản tin vòng 2', body: 'Nội dung', mode: 'all' });
+  await wait(1100);
+  await postJson('/api/subscribe', { email: 'nguoi-moi-sau@gmail.com' });
+  const page = await (await fetch(base + '/admin/newsletter', { headers: { cookie } })).text();
+  const row = page.split('Bản tin vòng 2')[1].split('</tr>')[0];
+  assert.ok(!/còn \d/.test(row), 'không gửi bản tin cũ cho người đăng ký sau');
+});
+
+test('vòng 2: request không có CSRF không làm khoá đăng nhập admin', async () => {
+  for (let i = 0; i < 12; i++) {
+    await fetch(base + '/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'username=admin&password=x' });
+  }
+  const saved = cookie; cookie = '';
+  const csrf = await getCsrf('/admin/login');
+  const ok = await form('/admin/login', { _csrf: csrf, username: 'admin', password: 'matkhau123' });
+  assert.equal(ok.status, 302, 'admin vẫn đăng nhập được');
+  cookie = saved;
 });

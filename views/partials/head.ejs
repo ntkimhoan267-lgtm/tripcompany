@@ -70,8 +70,8 @@
     <nav class="nav" id="nav" aria-label="Menu chính">
       <ul>
         <li class="nav__item">
-          <a class="nav__link <%= isActive('/visa') %>" href="/visa">Visa</a><button class="nav__caret" aria-expanded="false" aria-label="Mở danh sách visa"><%- icon('chevron') %></button>
-          <ul class="nav__sub">
+          <a class="nav__link <%= isActive('/visa') %>" href="/visa">Visa</a><button class="nav__caret" type="button" aria-controls="sub-1" aria-expanded="false" aria-label="Mở danh sách visa"><%- icon('chevron') %></button>
+          <ul class="nav__sub" id="sub-1">
             <li><a href="/visa/trung-quoc"><img class="nav__flag" src="<%= flag('cn') %>" alt="" width="22" height="22"> <span>Visa Trung Quốc <small>Thế mạnh · du lịch, thăm thân, thương mại</small></span></a></li>
             <li><a href="/visa/han-quoc"><img class="nav__flag" src="<%= flag('kr') %>" alt="" width="22" height="22"> <span>Visa Hàn Quốc <small>Thế mạnh · 3 tháng, 5 năm, 10 năm</small></span></a></li>
             <li><a href="/visa/nhat-ban"><img class="nav__flag" src="<%= flag('jp') %>" alt="" width="22" height="22"> <span>Visa Nhật Bản <small>Thế mạnh · single & multiple</small></span></a></li>
@@ -81,15 +81,15 @@
           </ul>
         </li>
         <li class="nav__item">
-          <a class="nav__link <%= isActive('/dich-vu/dich-thuat') || isActive('/dich-vu/hop-phap-hoa') %>" href="/dich-vu/dich-thuat">Dịch thuật</a><button class="nav__caret" aria-expanded="false" aria-label="Mở danh sách dịch thuật"><%- icon('chevron') %></button>
-          <ul class="nav__sub">
+          <a class="nav__link <%= isActive('/dich-vu/dich-thuat') || isActive('/dich-vu/hop-phap-hoa') %>" href="/dich-vu/dich-thuat">Dịch thuật</a><button class="nav__caret" type="button" aria-controls="sub-2" aria-expanded="false" aria-label="Mở danh sách dịch thuật"><%- icon('chevron') %></button>
+          <ul class="nav__sub" id="sub-2">
             <li><a href="/dich-vu/dich-thuat">Dịch thuật công chứng <small>Anh, Trung, Hàn, Nhật, Thái, Lào…</small></a></li>
             <li><a href="/dich-vu/hop-phap-hoa-lanh-su">Hợp pháp hoá · Chứng nhận lãnh sự</a></li>
           </ul>
         </li>
         <li class="nav__item">
-          <a class="nav__link <%= path === '/dich-vu' || ['ho-chieu','ve-may-bay','thue-xe','bao-hiem-esim','tour'].some(x => path === '/dich-vu/' + x) ? 'is-active' : '' %>" href="/dich-vu">Dịch vụ khác</a><button class="nav__caret" aria-expanded="false" aria-label="Mở danh sách dịch vụ khác"><%- icon('chevron') %></button>
-          <ul class="nav__sub">
+          <a class="nav__link <%= path === '/dich-vu' || ['ho-chieu','ve-may-bay','thue-xe','bao-hiem-esim','tour'].some(x => path === '/dich-vu/' + x) ? 'is-active' : '' %>" href="/dich-vu">Dịch vụ khác</a><button class="nav__caret" type="button" aria-controls="sub-3" aria-expanded="false" aria-label="Mở danh sách dịch vụ khác"><%- icon('chevron') %></button>
+          <ul class="nav__sub" id="sub-3">
             <li><a href="/dich-vu/ho-chieu">Làm hộ chiếu</a></li>
             <li><a href="/dich-vu/ve-may-bay">Vé máy bay · Vé tàu</a></li>
             <li><a href="/dich-vu/thue-xe">Xe đưa đón · Thuê xe tự lái</a></li>

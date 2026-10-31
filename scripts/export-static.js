@@ -8,6 +8,12 @@ const os = require('node:os');
 const path = require('node:path');
 
 const outDir = path.resolve(process.argv[2] || 'dist-preview');
+// An toàn: thư mục ra sẽ bị xoá trước khi xuất, nên không cho trỏ vào thư mục gốc dự án, thư mục hiện tại hay thư mục cha
+const repoRoot = path.resolve(__dirname, '..');
+if ([repoRoot, process.cwd(), path.parse(outDir).root, require('node:os').homedir()].some((p) => outDir === p || p.startsWith(outDir + path.sep))) {
+  console.error(`Thư mục ra không an toàn: ${outDir}. Hãy dùng một thư mục con riêng, VD: dist-preview`);
+  process.exit(1);
+}
 const base = (process.argv[3] || '/tripcompany').replace(/\/$/, '');
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'trip-export-'));

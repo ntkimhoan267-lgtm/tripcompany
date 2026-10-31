@@ -126,7 +126,7 @@
       <div><span class="eyebrow">Tour nổi bật</span><h2>Khởi hành từ <em>Đà Nẵng</em></h2></div>
       <a class="btn btn--ghost" href="/tour">Xem tất cả tour <%- icon('arrow') %></a>
     </div>
-    <div class="grid grid--4">
+    <div class="grid grid--4 tours-scroll">
       <% tours.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %>
     </div>
   </div>

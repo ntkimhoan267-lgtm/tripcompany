@@ -21,7 +21,7 @@
     <tbody>
       <% leads.forEach(function (l) { %>
       <tr>
-        <td class="nowrap small"><%= h.fmtDate(l.created_at, true) %><br><span class="muted"><%= l.sheet_synced ? '✓ Đã lên Google Sheet' : '• Chưa lên Google Sheet' %></span></td>
+        <td class="nowrap small"><%= h.fmtDate(l.created_at, true) %><% if (googleReady) { %><br><span class="muted"><%= l.sheet_synced ? '✓ Đã lên Google Sheet' : '• Chưa lên Google Sheet' %></span><% } %></td>
         <td><strong><%= l.name %></strong><br><a class="nowrap" href="tel:<%= l.phone %>"><%= h.phoneDisplay(l.phone) %></a> · <a href="https://zalo.me/<%= l.phone %>" target="_blank" rel="noopener">Zalo</a></td>
         <td><%= l.service %><% if (l.source_page) { %><br><span class="muted small">Gửi từ: <%= h.pageName(l.source_page) %></span><% } %></td>
         <td class="small" style="max-width:240px"><%= l.note %></td>

@@ -55,7 +55,7 @@ const VISA_EXTRA = {
     blurb: 'Dành cho người nước ngoài nhập cảnh Việt Nam, kèm Fast Track tại sân bay.',
   },
 };
-const visaPageOf = (slug) => services.markets.find((m) => m.id === slug) || VISA_EXTRA[slug];
+const visaPageOf = (slug) => services.markets.find((m) => m.id === slug) || (Object.hasOwn(VISA_EXTRA, slug) ? VISA_EXTRA[slug] : null);
 
 router.get('/dich-vu/visa', (req, res) => res.redirect(301, '/visa'));
 
@@ -95,7 +95,7 @@ router.get('/dich-vu/hop-phap-hoa-lanh-su', (req, res) => {
 });
 
 router.get('/dich-vu/:slug', (req, res, next) => {
-  const svc = services.otherServices[req.params.slug];
+  const svc = Object.hasOwn(services.otherServices, req.params.slug) ? services.otherServices[req.params.slug] : null;
   if (!svc) return next();
   res.render('pages/service-generic', {
     meta: { title: svc.title, description: svc.short },
@@ -162,10 +162,12 @@ router.get('/blog/:slug', (req, res, next) => {
 
 router.get('/danh-gia', (req, res) => {
   const reviews = publishedReviews(60);
-  const avg = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : 0;
+  const agg = db.prepare("SELECT COUNT(*) AS n, AVG(rating) AS avg FROM reviews WHERE status = 'published'").get();
+  const avg = agg.avg || 0;
+  const total = agg.n;
   res.render('pages/reviews', {
     meta: { title: 'Đánh giá của khách hàng về TRIP', description: 'Khách hàng nói gì về dịch vụ visa, dịch thuật và du lịch của TRIP Đà Nẵng. Chia sẻ trải nghiệm của bạn.' },
-    reviews, avg,
+    reviews, avg, total,
   });
 });
 

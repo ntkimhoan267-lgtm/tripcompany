@@ -4,6 +4,8 @@ const rateLimit = require('express-rate-limit');
 const db = require('../db');
 const { leadServiceOptions } = require('../data/services');
 const { isValidVnPhone, normalizePhone, isValidEmail } = require('../lib/helpers');
+// Cùng một câu trả lời cho email mới / đã có / đã huỷ để không lộ ai đang trong danh sách
+const SUBSCRIBE_OK = 'Cảm ơn bạn! Mỗi tháng TRIP sẽ gửi cập nhật visa và lịch tour mới nhất tới email này.';
 const google = require('../lib/google');
 
 const router = express.Router();
@@ -66,16 +68,14 @@ router.post('/subscribe', subscribeLimiter, (req, res) => {
   const existing = db.prepare('SELECT * FROM subscribers WHERE email = ?').get(email);
   if (existing) {
     // Không tự kích hoạt lại email đã huỷ (tránh người khác đăng ký hộ); khách muốn nhận lại thì liên hệ TRIP
-    return res.json({ ok: true, message: existing.status === 'active'
-      ? 'Email này đã có trong danh sách nhận tin của TRIP. Cảm ơn bạn!'
-      : 'Email này đã huỷ nhận tin trước đó. Nếu muốn nhận lại, bạn vui lòng nhắn TRIP qua Zalo hoặc hotline.' });
+    return res.json({ ok: true, message: SUBSCRIBE_OK });
   }
   const info = db.prepare('INSERT INTO subscribers (email, name, source_page, token) VALUES (?, ?, ?, ?)')
     .run(email, name, source, crypto.randomBytes(16).toString('hex'));
   const sub = db.prepare('SELECT * FROM subscribers WHERE id = ?').get(info.lastInsertRowid);
 
   google.syncSubscriber(sub).catch((e) => console.error(e));
-  res.json({ ok: true, message: 'Đăng ký thành công! Mỗi tháng TRIP sẽ gửi bạn cập nhật visa và lịch tour mới nhất.' });
+  res.json({ ok: true, message: SUBSCRIBE_OK });
 });
 
 // Khách tự gửi đánh giá: luôn ở trạng thái chờ duyệt, chỉ hiện lên web khi nhân viên duyệt
@@ -94,9 +94,11 @@ router.post('/reviews', reviewLimiter, (req, res) => {
   if (!(rating >= 1 && rating <= 5)) errors.rating = 'Vui lòng chọn số sao.';
   if (content.length < 15) errors.content = 'Bạn chia sẻ thêm một chút nhé (ít nhất 15 ký tự).';
   if (service && !leadServiceOptions.includes(service)) errors.service = 'Dịch vụ không hợp lệ.';
+  const phone = clean(b.phone, 20);
+  if (phone && !isValidVnPhone(phone)) errors.phone = 'Số điện thoại chưa đúng.';
   if (Object.keys(errors).length) return res.status(400).json({ ok: false, errors });
-  db.prepare("INSERT INTO reviews (name, service, rating, content, source, status) VALUES (?, ?, ?, ?, 'web', 'pending')")
-    .run(name, service, rating, content);
+  db.prepare("INSERT INTO reviews (name, service, rating, content, source, status, phone) VALUES (?, ?, ?, ?, 'web', 'pending', ?)")
+    .run(name, service, rating, content, phone ? normalizePhone(phone) : null);
   res.json({ ok: true, message: 'Cảm ơn bạn đã đánh giá! TRIP sẽ hiển thị sau khi xác nhận.' });
 });
 

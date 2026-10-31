@@ -34,7 +34,7 @@ function doPost(e) {
     var data = req.data || {};
     switch (req.action) {
       case 'ping':
-        return json({ ok: true, sheetUrl: getSpreadsheet().getUrl(), mailQuota: MailApp.getRemainingDailyQuota() });
+        return json(withLock(function () { return { ok: true, sheetUrl: getSpreadsheet().getUrl(), mailQuota: MailApp.getRemainingDailyQuota() }; }));
       case 'lead':
         return json(withLock(function () { return handleLead(data, req.siteUrl); }));
       case 'subscribe':
@@ -62,7 +62,8 @@ function verify(e) {
   var expected = toHex(Utilities.computeHmacSha256Signature(body.payload, secret, Utilities.Charset.UTF_8));
   if (!safeEqual(expected, body.sig)) throw new Error('Sai chữ ký (GOOGLE_SCRIPT_SECRET không khớp TRIP_SECRET)');
   var req = JSON.parse(body.payload);
-  if (Math.abs(Date.now() - Number(req.ts)) > 10 * 60 * 1000) throw new Error('Request đã hết hạn');
+  // Viết dạng !(... <= ...) để ts thiếu / không phải số (NaN) cũng bị từ chối
+  if (!(Math.abs(Date.now() - Number(req.ts)) <= 10 * 60 * 1000)) throw new Error('Request đã hết hạn');
   var cache = CacheService.getScriptCache();
   if (cache.get('sig_' + body.sig)) throw new Error('Request bị gửi lại');
   cache.put('sig_' + body.sig, '1', 900);
@@ -113,12 +114,14 @@ function sheetByName(ss, name, headers) {
   return ss.getSheetByName(name) || (function () { var s = ss.insertSheet(name); setupSheet(s, headers, []); return s; })();
 }
 
-// Đã có dòng với mã web này chưa (để đồng bộ lại không bị trùng)
-function hasId(sheet, col, id) {
+// Đã có dòng này chưa (để đồng bộ lại không bị trùng). So khớp CẢ mã web lẫn thời gian tạo,
+// để nếu database website bị tạo lại (mã bắt đầu lại từ 1) thì khách mới không bị coi là trùng.
+function hasRow(sheet, col, id, time) {
   var last = sheet.getLastRow();
   if (last < 2) return false;
-  var values = sheet.getRange(2, col, last - 1, 1).getValues();
-  for (var i = 0; i < values.length; i++) if (String(values[i][0]) === String(id)) return true;
+  var ids = sheet.getRange(2, col, last - 1, 1).getValues();
+  var times = sheet.getRange(2, 1, last - 1, 1).getDisplayValues();
+  for (var i = 0; i < ids.length; i++) if (String(ids[i][0]) === String(id) && times[i][0] === time) return true;
   return false;
 }
 
@@ -135,8 +138,9 @@ function canMail() { return MailApp.getRemainingDailyQuota() > MAIL_RESERVE; }
 function handleLead(d, siteUrl) {
   var ss = getSpreadsheet();
   var sheet = sheetByName(ss, 'Tư vấn', LEAD_HEADERS);
-  if (hasId(sheet, LEAD_ID_COL, d.id)) return { ok: true, duplicate: true };
-  sheet.appendRow([fmtTime(d.created_at), safe(d.name), "'" + String(d.phone || ''), safe(d.service), safe(d.note), safe(d.source_page), d.id, 'Mới']);
+  var time = fmtTime(d.created_at);
+  if (hasRow(sheet, LEAD_ID_COL, d.id, time)) return { ok: true, duplicate: true };
+  sheet.appendRow(["'" + time, safe(d.name), "'" + String(d.phone || ''), safe(d.service), safe(d.note), safe(d.source_page), d.id, 'Mới']);
 
   if (d.resync || !canMail()) return { ok: true, emailSkipped: true };
   var phone = String(d.phone || '').replace(/[^\d+]/g, '');
@@ -166,8 +170,9 @@ function handleLead(d, siteUrl) {
 function handleSubscribe(d) {
   var ss = getSpreadsheet();
   var sheet = sheetByName(ss, 'Đăng ký nhận tin', SUB_HEADERS);
-  if (hasId(sheet, SUB_ID_COL, d.id)) return { ok: true, duplicate: true };
-  sheet.appendRow([fmtTime(d.created_at), safe(d.email), safe(d.name), safe(d.source_page), d.id]);
+  var time = fmtTime(d.created_at);
+  if (hasRow(sheet, SUB_ID_COL, d.id, time)) return { ok: true, duplicate: true };
+  sheet.appendRow(["'" + time, safe(d.email), safe(d.name), safe(d.source_page), d.id]);
   if (d.resync || !canMail()) return { ok: true, emailSkipped: true };
   MailApp.sendEmail({
     to: NOTIFY_EMAILS.join(','),
@@ -190,7 +195,12 @@ function sendNewsletter(d, siteUrl) {
     var r = list[i];
     if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i.test(String(r.email))) continue;
     var unsub = r.token ? siteUrl + '/huy-dang-ky?token=' + encodeURIComponent(r.token) : siteUrl;
-    MailApp.sendEmail({ to: r.email, subject: oneLine(d.subject), htmlBody: newsletterHtml(d, siteUrl, unsub), name: 'TRIP Đà Nẵng' });
+    try {
+      MailApp.sendEmail({ to: r.email, subject: oneLine(d.subject), htmlBody: newsletterHtml(d, siteUrl, unsub), name: 'TRIP Đà Nẵng' });
+    } catch (err) {
+      // Dừng lại nhưng vẫn báo danh sách đã gửi để website không gửi lại cho họ
+      return { ok: false, error: 'Gửi bị gián đoạn: ' + String((err && err.message) || err), sent: sent, remaining: list.length - sent.length };
+    }
     sent.push(r.email);
   }
   return { ok: true, sent: sent, remaining: list.length - sent.length };

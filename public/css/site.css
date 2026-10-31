@@ -927,7 +927,7 @@ a.market:hover .market__art video { transform: scale(1.05); }
 @media (max-width: 560px) { .stat-item strong, .stats--inline .stat-item strong { font-size: 1.45rem; } }
 
 /* ---------- Đánh giá của khách ---------- */
-.reviews-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 22px; }
 .reviews-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 900px) { .reviews-grid, .reviews-grid--2 { grid-template-columns: 1fr; } }
 .review-card { margin: 0; padding: 24px; border-radius: 22px; background: #fff; border: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; position: relative; }
@@ -939,10 +939,10 @@ a.market:hover .market__art video { transform: scale(1.05); }
 .review-card figcaption strong { display: block; color: var(--navy); font-size: .95rem; }
 .review-card__avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, var(--sky), var(--navy)); color: #fff; font-weight: 800; }
 .field__label { font-weight: 600; font-size: .88rem; color: var(--navy); }
-.star-input { display: inline-flex; flex-direction: row-reverse; justify-content: flex-end; gap: 4px; }
+.star-input { display: inline-flex; gap: 4px; }
 .star-input input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .star-input label { font-size: 2rem; line-height: 1; color: #d9e2ea; cursor: pointer; transition: color .15s; }
-.star-input input:checked ~ label, .star-input label:hover, .star-input label:hover ~ label { color: #f2a01b; }
+.star-input label.on { color: #f2a01b; }
 .star-input input:focus-visible + label { outline: 3px solid var(--sky); border-radius: 4px; }
 
 /* ---------- Sửa lỗi frontend sau review ---------- */
@@ -952,3 +952,29 @@ a.market:hover .market__art video { transform: scale(1.05); }
 @media (max-width: 1180px) and (min-width: 981px) { .header__cta { margin-left: auto; } }
 /* Bản xem trước tĩnh trên GitHub Pages */
 html[data-preview] body::before { content: 'Bản xem trước giao diện · Form và Dashboard sẽ hoạt động khi website chạy chính thức tại tripdn.com'; display: block; padding: 8px 16px; text-align: center; font-size: .8rem; font-weight: 600; background: #fff3cd; color: #6b4e00; }
+
+/* ---------- Sửa UX vòng 2 ---------- */
+.only-mobile { display: none; }
+@media (max-width: 640px) { .only-mobile { display: inline; font-weight: 700; } }
+.sticky-chips { position: sticky; top: calc(var(--header-h) + 6px); z-index: 5; background: rgba(255,255,255,.95); padding: 8px 0; backdrop-filter: blur(6px); flex-wrap: nowrap; overflow-x: auto; }
+.sticky-chips li { white-space: nowrap; }
+.modal__head { padding-right: 56px; }
+.docs-card h2 { font-size: 1.5rem; }
+.docs-card .checklist .icon { color: var(--sky-600); }
+@media (max-width: 640px) {
+  .visa-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .visa-facts .card { padding: 12px 10px; }
+  .visa-facts .card__icon { display: none; }
+  .visa-facts small { font-size: .7rem; }
+  .visa-facts strong, .visa-facts strong.serif { font-size: 1rem; }
+  /* Trang chủ: tour cuộn ngang cho trang ngắn hơn */
+  .tours-scroll { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; margin: 0 -20px; padding: 0 20px 8px; }
+  .tours-scroll > * { flex: 0 0 78%; scroll-snap-align: start; }
+}
+@media (max-width: 560px) {
+  .hero--video .eyebrow { display: none; }
+  .hero--video { padding-top: 28px; }
+  .hero--video h1 { font-size: 2.05rem; margin-bottom: 10px; }
+  .hero--video .hero__lead { font-size: 1rem; }
+  .hero--video .hero__actions .btn { padding: 11px 16px; }
+}

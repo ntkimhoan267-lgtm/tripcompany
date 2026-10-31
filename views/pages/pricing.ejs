@@ -8,7 +8,7 @@
 
 <section class="section">
   <div class="container">
-    <ul class="chips mb-3">
+    <ul class="chips mb-3 sticky-chips">
       <li><a href="#visa-trung-quoc">Visa Trung Quốc</a></li>
       <li><a href="#visa-cac-nuoc">Visa các nước</a></li>
       <li><a href="#e-visa">E-visa Việt Nam</a></li>
@@ -31,7 +31,7 @@
         <h2>Visa các nước</h2>
         <div class="table-wrap"><table class="table">
           <thead><tr><th>Quốc gia</th><th>Loại visa</th><th>Thời gian</th><th class="num">Giá</th></tr></thead>
-          <tbody><% services.worldVisa.forEach(function (v) { %>
+          <tbody><% const ORDER = { kr: 0, jp: 1 }; services.worldVisa.slice().sort(function (a, b) { const ra = a.code in ORDER ? ORDER[a.code] : a.region === 'chau-au' ? 2 : 3; const rb = b.code in ORDER ? ORDER[b.code] : b.region === 'chau-au' ? 2 : 3; return ra - rb; }).forEach(function (v) { %>
             <tr><td><span class="table__country"><img src="<%= flag(v.code) %>" alt="" width="28" height="20" loading="lazy"><%= v.country %></span></td><td><%= v.type %><% if (v.note) { %><br><span class="muted"><%= v.note %></span><% } %></td><td><%= v.time %></td><td class="num"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></td></tr>
           <% }) %></tbody>
         </table></div>
@@ -50,7 +50,7 @@
         <h2>Dịch thuật <span class="muted" style="font-size:1rem;font-weight:500">(VNĐ / trang)</span></h2>
         <div class="table-wrap"><table class="table">
           <thead><tr><th>Ngôn ngữ</th><th>Cấp độ</th><th class="num">Giá</th></tr></thead>
-          <tbody><% services.translation.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %><tr><td><% if (i === 0) { %><strong><%= l.pair %></strong><% } %></td><td><%= r.level %></td><td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td></tr><% }) }) %></tbody>
+          <tbody><% services.translation.languages.forEach(function (l) { l.rows.forEach(function (r, i) { %><tr><td><% if (i === 0) { %><strong><%= l.pair %></strong><% } else { %><span class="only-mobile"><%= l.pair %></span><% } %></td><td><%= r.level %></td><td class="num"><%= r.price ? h.vnd(r.price) : r.text %></td></tr><% }) }) %></tbody>
         </table></div>
         <p class="table-note"><a href="/dich-vu/dich-thuat#bang-gia">Xem phụ phí công chứng, in ấn, hiệu đính →</a></p>
       </div>

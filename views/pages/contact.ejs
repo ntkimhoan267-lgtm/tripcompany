@@ -4,13 +4,15 @@
   heading: 'Liên hệ TRIP',
   sub: 'Gọi hotline, nhắn Zalo, hoặc ghé văn phòng. TRIP luôn sẵn sàng hỗ trợ bạn.',
   actions: null,
+  bg: '/img/team/thumbs-up.jpg',
 }) %>
 
 <section class="section">
   <div class="container">
-    <div class="grid grid--3">
+    <div class="grid grid--4">
       <a class="card card--link" href="tel:<%= h.phoneTel(settings.hotline) %>"><div class="card__icon"><%- icon('passport') %></div><h3>Visa & Tour</h3><p><strong style="color:var(--navy);font-size:1.2rem"><%= h.phoneDisplay(settings.hotline) %></strong></p></a>
       <a class="card card--link" href="tel:<%= h.phoneTel(settings.hotline_translation) %>"><div class="card__icon"><%- icon('lang') %></div><h3>Dịch thuật</h3><p><strong style="color:var(--navy);font-size:1.2rem"><%= h.phoneDisplay(settings.hotline_translation) %></strong></p></a>
+      <a class="card card--link" href="https://zalo.me/<%= h.phoneTel(settings.zalo || settings.hotline) %>" target="_blank" rel="noopener"><div class="card__icon" style="background:#e6f0ff;color:#0068ff;font-weight:800;font-size:.8rem">Zalo</div><h3>Nhắn Zalo</h3><p><strong style="color:var(--navy);font-size:1.2rem"><%= h.phoneDisplay(settings.zalo || settings.hotline) %></strong></p></a>
       <a class="card card--link" href="mailto:<%= settings.email %>"><div class="card__icon"><%- icon('mail') %></div><h3>Email</h3><p><%= settings.email %></p></a>
     </div>
 

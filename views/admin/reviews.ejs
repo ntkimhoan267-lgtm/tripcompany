@@ -18,7 +18,7 @@
       <thead><tr><th>Khách</th><th>Đánh giá</th><th>Trạng thái</th><th></th></tr></thead>
       <tbody><% reviews.forEach(function (r) { %>
         <tr>
-          <td><strong><%= r.name %></strong><br><span class="muted small"><%= r.service || '—' %><br><%= REVIEW_SOURCES[r.source] %> · <%= h.fmtDate(r.created_at) %></span></td>
+          <td><strong><%= r.name %></strong><br><span class="muted small"><%= r.service || '—' %><br><%= REVIEW_SOURCES[r.source] %> · <%= h.fmtDate(r.created_at) %><% if (r.phone) { %><br>SĐT xác minh: <a href="tel:<%= r.phone %>"><%= h.phoneDisplay(r.phone) %></a><% } %></span></td>
           <td style="max-width:340px"><span style="color:#f2a01b"><%= '★'.repeat(r.rating) %></span><span class="muted"><%= '★'.repeat(5 - r.rating) %></span><br><span class="small"><%= r.content %></span></td>
           <td><span class="badge badge--<%= r.status === 'published' ? 'published' : r.status === 'pending' ? 'new' : 'hidden' %>"><%= REVIEW_STATUSES[r.status] %></span></td>
           <td class="actions">

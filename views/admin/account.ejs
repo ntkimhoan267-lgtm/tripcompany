@@ -14,8 +14,9 @@
     <h2>Tài khoản quản trị</h2>
     <table><tbody><% users.forEach(function (u) { %>
       <tr><td><strong><%= u.username %></strong><br><span class="muted small">Tạo <%= h.fmtDate(u.created_at) %></span></td>
-      <td style="text-align:right"><% if (u.username !== adminUser) { %><form method="post" action="/admin/account/users/<%= u.id %>/delete" data-confirm="Xoá tài khoản <%= u.username %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">Xoá</button></form><% } else { %><span class="badge">Bạn</span><% } %></td></tr>
+      <td style="text-align:right"><% if (u.id === ownerId) { %><span class="badge">Chủ</span> <% } %><% if (isOwner && u.username !== adminUser) { %><form method="post" action="/admin/account/users/<%= u.id %>/delete" data-confirm="Xoá tài khoản <%= u.username %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">Xoá</button></form><% } else if (u.username === adminUser) { %><span class="badge">Bạn</span><% } %></td></tr>
     <% }) %></tbody></table>
+    <% if (isOwner) { %>
     <form class="form" method="post" action="/admin/account/users" style="margin-top:18px">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <h2>Thêm tài khoản nhân viên</h2>
@@ -25,6 +26,7 @@
       </div>
       <div class="actions"><button class="btn btn--ghost">Tạo tài khoản</button></div>
     </form>
+    <% } else { %><p class="hint" style="margin-top:14px">Chỉ tài khoản chủ mới tạo hoặc xoá được tài khoản nhân viên.</p><% } %>
   </div>
 </div>
 <%- include('_foot') %>

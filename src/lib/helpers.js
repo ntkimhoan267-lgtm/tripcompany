@@ -1,7 +1,7 @@
 const db = require('../db');
 
 const vnd = (n) => (n == null ? '' : Number(n).toLocaleString('vi-VN').replace(/,/g, '.') + 'đ');
-const usd = (n) => (n == null ? '' : '$' + Number(n).toLocaleString('en-US'));
+const usd = (n) => (n == null ? '' : '$' + Number(n).toLocaleString('en-US').replace(/,/g, '.'));
 const money = (p) => (p == null ? 'Liên hệ' : p.vnd != null ? vnd(p.vnd) : p.usd != null ? usd(p.usd) : vnd(p));
 
 // 0935191394 -> 0935.191.394

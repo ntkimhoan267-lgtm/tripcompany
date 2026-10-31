@@ -165,6 +165,11 @@ function seed() {
   // Dữ liệu mẫu (bài viết, tour) chỉ tạo 1 lần; xoá hết trong Dashboard thì không bị tạo lại khi khởi động
   const seeded = db.prepare("SELECT value FROM settings WHERE key = 'seeded_content'").get();
   if (seeded) return;
+  // Database có từ phiên bản trước (đã có tài khoản trước lần chạy này): đánh dấu đã có dữ liệu, không thêm dữ liệu mẫu
+  if (userCount > 0) {
+    db.prepare("INSERT INTO settings (key, value) VALUES ('seeded_content', datetime('now'))").run();
+    return;
+  }
   db.prepare("INSERT INTO settings (key, value) VALUES ('seeded_content', datetime('now'))").run();
 
   if (db.prepare('SELECT COUNT(*) AS n FROM posts').get().n === 0) {

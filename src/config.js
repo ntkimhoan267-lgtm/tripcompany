@@ -13,6 +13,11 @@ if (fs.existsSync(envFile)) {
 const dataDir = path.resolve(process.env.DATA_DIR || path.join(__dirname, '..', 'data'));
 const isProd = process.env.NODE_ENV === 'production';
 
+// SESSION_SECRET dùng để ký cookie đăng nhập: production bắt buộc có, dài >= 32 ký tự và không phải giá trị mẫu
+const PLACEHOLDER_SECRETS = ['thay-bang-chuoi-ngau-nhien-dai', 'dev-secret-change-me', 'changeme', 'secret'];
+if (process.env.SESSION_SECRET && (process.env.SESSION_SECRET.length < 32 || PLACEHOLDER_SECRETS.includes(process.env.SESSION_SECRET))) {
+  throw new Error('SESSION_SECRET quá ngắn hoặc là giá trị mẫu. Hãy dùng chuỗi ngẫu nhiên dài ít nhất 32 ký tự.');
+}
 if (isProd && !process.env.SESSION_SECRET) {
   throw new Error('Thiếu SESSION_SECRET trong biến môi trường (bắt buộc khi chạy production).');
 }

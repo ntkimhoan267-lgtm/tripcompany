@@ -62,6 +62,16 @@
         <% } %>
       </div>
 
+      <div class="card docs-card">
+        <h2>Hồ sơ cần chuẩn bị</h2>
+        <ul class="checklist"><% (services.visaDocs[page.id] || services.visaDocs.default).forEach(function (x) { %><li><%- icon('file') %><%= x %></li><% }) %></ul>
+        <p class="muted">Mỗi hồ sơ có yêu cầu riêng tuỳ nghề nghiệp và mục đích chuyến đi. TRIP sẽ gửi bạn danh sách chi tiết và kiểm tra giấy tờ miễn phí trước khi nộp.</p>
+        <div class="flex">
+          <% if (settings.zalo) { %><a class="btn btn--zalo" href="https://zalo.me/<%= h.phoneTel(settings.zalo) %>" target="_blank" rel="noopener">Gửi giấy tờ qua Zalo để kiểm tra</a><% } %>
+          <button class="btn btn--ghost" data-open-lead data-service="<%= page.leadService %>">Để TRIP gọi lại</button>
+        </div>
+      </div>
+
       <% if (!isEvisa) { %>
       <div class="grid grid--2">
         <div class="card"><h3>Giá trọn gói đã bao gồm</h3><ul class="checklist"><% services.visaListFor(services.visaIncluded, page.id).forEach(function (x) { %><li><%- icon('check-circle') %><%= x %></li><% }) %></ul></div>

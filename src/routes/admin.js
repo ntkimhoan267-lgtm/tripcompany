@@ -50,6 +50,8 @@ async function saveImage(file) {
 }
 
 router.use((req, res, next) => {
+  // Trang quản trị chứa dữ liệu khách: không lưu vào bộ nhớ đệm trình duyệt
+  res.setHeader('Cache-Control', 'no-store');
   res.locals.flash = req.session.flash;
   delete req.session.flash;
   res.locals.googleReady = google.isConfigured();
@@ -65,10 +67,11 @@ const qs = (v, max = 100) => (typeof v === 'string' ? v.slice(0, max) : '');
 const pageOf = (v) => Math.min(1000, Math.max(1, parseInt(qs(v), 10) || 1));
 
 // ---------- Đăng nhập ----------
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false });
+// Chỉ đếm lần đăng nhập SAI (đăng nhập đúng không bị chặn); CSRF kiểm tra trước nên request vô danh không thể khoá tài khoản
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false, skipSuccessfulRequests: true });
 // Thêm giới hạn theo tên đăng nhập để không thể né bằng cách đổi IP
 const userLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: false, legacyHeaders: false,
+  windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: false, legacyHeaders: false, skipSuccessfulRequests: true,
   keyGenerator: (req) => 'u:' + qs(req.body && req.body.username, 60).trim().toLowerCase(),
   validate: { keyGeneratorIpFallback: false },
 });
@@ -77,7 +80,7 @@ router.get('/login', csrf, (req, res) => {
   res.render('admin/login', { error: null, next: qs(req.query.next, 300) || '/admin' });
 });
 
-router.post('/login', loginLimiter, userLimiter, csrf, (req, res) => {
+router.post('/login', csrf, loginLimiter, userLimiter, (req, res) => {
   const rawNext = qs(req.body.next, 300);
   const nextUrl = /^\/admin(\/|$|\?)/.test(rawNext) ? rawNext : '/admin';
   const user = db.prepare('SELECT * FROM users WHERE username = ?').get(qs(req.body.username, 60).trim().toLowerCase());
@@ -210,8 +213,11 @@ router.get('/subscribers.csv', (req, res) => {
 });
 
 // ---------- Bản tin tháng (gửi theo đợt, vừa hạn mức Gmail) ----------
-const pendingRecipients = (newsletterId) => db.prepare(`SELECT email, token FROM subscribers s WHERE status = 'active'
-  AND NOT EXISTS (SELECT 1 FROM newsletter_sends ns WHERE ns.newsletter_id = ? AND ns.email = s.email) ORDER BY id`).all(newsletterId);
+// Người nhận còn lại của một bản tin: chỉ những ai đã đăng ký TRƯỚC khi tạo bản tin và chưa nhận
+const pendingRecipients = (newsletterId) => db.prepare(`SELECT s.email, s.token FROM subscribers s JOIN newsletters n ON n.id = ?
+  WHERE s.status = 'active' AND n.batched = 1 AND s.created_at <= n.created_at
+  AND NOT EXISTS (SELECT 1 FROM newsletter_sends ns WHERE ns.newsletter_id = n.id AND ns.email = s.email) ORDER BY s.id`).all(newsletterId);
+const sendingNow = new Set(); // chống bấm "Gửi tiếp" 2 lần cùng lúc
 
 const newsletterTours = (ids) => (ids.length
   ? db.prepare(`SELECT * FROM tours WHERE id IN (${ids.map(() => '?').join(',')})`).all(...ids)
@@ -219,6 +225,11 @@ const newsletterTours = (ids) => (ids.length
   : []);
 
 async function sendBatch(newsletter) {
+  if (sendingNow.has(newsletter.id)) return { ok: false, error: 'Bản tin này đang được gửi, vui lòng đợi.', sentNow: 0, remaining: pendingRecipients(newsletter.id).length };
+  sendingNow.add(newsletter.id);
+  try { return await sendBatchUnlocked(newsletter); } finally { sendingNow.delete(newsletter.id); }
+}
+async function sendBatchUnlocked(newsletter) {
   const recipients = pendingRecipients(newsletter.id);
   if (!recipients.length) return { ok: true, sentNow: 0, remaining: 0 };
   let data = {};
@@ -256,7 +267,7 @@ router.post('/newsletter', csrf, ah(async (req, res) => {
   }
   const active = db.prepare("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'active'").get().n;
   if (!active) { flash(req, 'error', 'Chưa có người đăng ký nào để gửi.'); return res.redirect('/admin/newsletter'); }
-  const id = db.prepare('INSERT INTO newsletters (subject, body, recipients, result) VALUES (?, ?, ?, ?)')
+  const id = db.prepare('INSERT INTO newsletters (subject, body, recipients, result, batched) VALUES (?, ?, ?, ?, 1)')
     .run(subject, body, active, JSON.stringify({ tours })).lastInsertRowid;
   const r = await sendBatch(db.prepare('SELECT * FROM newsletters WHERE id = ?').get(id));
   flash(req, r.ok ? 'success' : 'error', `Đã gửi ${r.sentNow} email.` + (r.remaining ? ` Còn ${r.remaining} người chưa gửi (giới hạn Gmail) — bấm "Gửi tiếp" vào ngày mai.` : '') + (r.ok ? '' : ` Lỗi: ${r.error}`));
@@ -451,8 +462,9 @@ router.post('/settings', csrf, (req, res) => {
 router.post('/sync', csrf, ah(async (req, res) => {
   if (!google.isConfigured()) { flash(req, 'error', 'Chưa cấu hình Google Apps Script.'); return res.redirect('/admin'); }
   let ok = 0; let fail = 0;
-  for (const l of db.prepare('SELECT * FROM leads WHERE sheet_synced = 0 ORDER BY id LIMIT 20').all()) ((await google.syncLead(l, true)).ok ? ok++ : fail++);
-  for (const s of db.prepare('SELECT * FROM subscribers WHERE sheet_synced = 0 ORDER BY id LIMIT 20').all()) ((await google.syncSubscriber(s, true)).ok ? ok++ : fail++);
+  // resync = false: những bản ghi này chưa lên Sheet nên cần gửi cả email thông báo (Apps Script tự bỏ qua nếu dòng đã có)
+  for (const l of db.prepare('SELECT * FROM leads WHERE sheet_synced = 0 ORDER BY id LIMIT 20').all()) ((await google.syncLead(l, false)).ok ? ok++ : fail++);
+  for (const s of db.prepare('SELECT * FROM subscribers WHERE sheet_synced = 0 ORDER BY id LIMIT 20').all()) ((await google.syncSubscriber(s, false)).ok ? ok++ : fail++);
   flash(req, fail ? 'error' : 'success', `Đồng bộ Google Sheet: ${ok} thành công${fail ? `, ${fail} lỗi` : ''}.`);
   res.redirect('/admin');
 }));
@@ -466,8 +478,10 @@ router.post('/test-google', csrf, ah(async (req, res) => {
 }));
 
 // ---------- Tài khoản ----------
+// Tài khoản chủ = tài khoản tạo đầu tiên; chỉ tài khoản chủ được tạo / xoá tài khoản nhân viên
+const ownerId = () => db.prepare('SELECT MIN(id) AS id FROM users').get().id;
 router.get('/account', csrf, (req, res) => {
-  res.render('admin/account', { title: 'Tài khoản', users: db.prepare('SELECT id, username, created_at FROM users ORDER BY id').all() });
+  res.render('admin/account', { title: 'Tài khoản', users: db.prepare('SELECT id, username, created_at FROM users ORDER BY id').all(), isOwner: req.user.id === ownerId(), ownerId: ownerId() });
 });
 
 router.post('/account/password', csrf, (req, res) => {
@@ -487,6 +501,7 @@ router.post('/account/password', csrf, (req, res) => {
 });
 
 router.post('/account/users', csrf, (req, res) => {
+  if (req.user.id !== ownerId()) { flash(req, 'error', 'Chỉ tài khoản chủ mới tạo được tài khoản.'); return res.redirect('/admin/account'); }
   const username = qs(req.body.username, 60).trim().toLowerCase();
   const password = qs(req.body.password, 200);
   if (!/^[a-z0-9._-]{3,30}$/.test(username)) flash(req, 'error', 'Tên đăng nhập 3–30 ký tự, chỉ gồm chữ thường, số, dấu . _ -');
@@ -500,7 +515,8 @@ router.post('/account/users', csrf, (req, res) => {
 });
 
 router.post('/account/users/:id(\\d+)/delete', csrf, (req, res) => {
-  if (Number(req.params.id) === req.user.id) flash(req, 'error', 'Không thể xoá tài khoản đang đăng nhập.');
+  if (req.user.id !== ownerId()) flash(req, 'error', 'Chỉ tài khoản chủ mới xoá được tài khoản.');
+  else if (Number(req.params.id) === req.user.id) flash(req, 'error', 'Không thể xoá tài khoản đang đăng nhập.');
   else {
     const r = db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
     flash(req, r.changes ? 'success' : 'error', r.changes ? 'Đã xoá tài khoản (phiên đăng nhập của tài khoản đó cũng hết hiệu lực).' : 'Không tìm thấy tài khoản.');

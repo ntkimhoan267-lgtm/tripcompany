@@ -78,7 +78,8 @@
   <p class="muted">Cần gấp? Nhắn ngay cho TRIP:</p>
   <div class="form-done__actions">
     <% if (s.zalo) { %><a class="btn btn--zalo" href="https://zalo.me/<%= h.phoneTel(s.zalo) %>" target="_blank" rel="noopener">Nhắn Zalo ngay</a><% } %>
-    <a class="btn btn--navy" href="tel:<%= h.phoneTel(s.hotline) %>"><%- icon('phone') %> <%= h.phoneDisplay(s.hotline) %></a>
+    <a class="btn btn--navy" data-thanks-call href="tel:<%= h.phoneTel(s.hotline) %>"
+       data-phone-trans="<%= h.phoneTel(s.hotline_translation || s.hotline) %>" data-phone-trans-label="<%= h.phoneDisplay(s.hotline_translation || s.hotline) %>"><%- icon('phone') %> <span><%= h.phoneDisplay(s.hotline) %></span></a>
   </div>
   <button class="form-done__again" type="button" data-thanks-again>Gửi thêm yêu cầu khác</button>
 </template>

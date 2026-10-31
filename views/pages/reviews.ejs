@@ -2,15 +2,16 @@
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Đánh giá' }],
   heading: 'Khách hàng nói gì về TRIP',
-  sub: reviews.length ? `${reviews.length} đánh giá · trung bình ${avg.toFixed(1)}/5 sao` : 'Bạn đã từng làm visa, dịch thuật hay đi tour cùng TRIP? Hãy là người đầu tiên chia sẻ trải nghiệm.',
+  sub: reviews.length ? `${total} đánh giá · trung bình ${avg.toFixed(1)}/5 sao` : 'Bạn đã từng làm visa, dịch thuật hay đi tour cùng TRIP? Hãy là người đầu tiên chia sẻ trải nghiệm.',
   actions: null,
+  bg: '/img/team/thumbs-up.jpg',
 }) %>
 
 <section class="section">
   <div class="container layout-side">
     <div>
       <% if (reviews.length) { %>
-        <div class="reviews-grid reviews-grid--2"><% reviews.forEach(function (r) { %><%- include('../partials/review-card', { r }) %><% }) %></div>
+        <div class="reviews-grid"><% reviews.forEach(function (r) { %><%- include('../partials/review-card', { r }) %><% }) %></div>
       <% } else { %>
         <div class="card text-center" style="background:var(--sky-50);border:0">
           <h3>Chưa có đánh giá nào được đăng</h3>
@@ -26,7 +27,7 @@
           <div class="field">
             <span class="field__label">Bạn chấm TRIP mấy sao? <span class="req">*</span></span>
             <div class="star-input" role="radiogroup" aria-label="Số sao">
-              <% for (let i = 5; i >= 1; i--) { %><input type="radio" id="star<%= i %>" name="rating" value="<%= i %>"<%= i === 5 ? ' checked' : '' %>><label for="star<%= i %>" title="<%= i %> sao">★</label><% } %>
+              <% for (let i = 1; i <= 5; i++) { %><input type="radio" id="star<%= i %>" name="rating" value="<%= i %>"<%= i === 5 ? ' checked' : '' %>><label for="star<%= i %>"><span aria-hidden="true">★</span><span class="sr-only"><%= i %> sao</span></label><% } %>
             </div>
             <span class="field__error" data-error="rating"></span>
           </div>
@@ -36,7 +37,12 @@
             <span class="field__error" data-error="name"></span>
           </div>
           <div class="field">
-            <label for="rv-service">Dịch vụ đã dùng</label>
+            <label for="rv-phone">Số điện thoại <span class="muted">(không hiển thị công khai)</span></label>
+            <input class="input" id="rv-phone" name="phone" type="tel" inputmode="tel" maxlength="20" placeholder="Để TRIP xác nhận bạn là khách hàng">
+            <span class="field__error" data-error="phone"></span>
+          </div>
+          <div class="field">
+            <label for="rv-service">Dịch vụ đã dùng <span class="muted">(không bắt buộc)</span></label>
             <select class="select" id="rv-service" name="service"><option value="">— Chọn dịch vụ —</option><% leadServiceOptions.forEach(function (o) { %><option><%= o %></option><% }) %></select>
             <span class="field__error" data-error="service"></span>
           </div>
@@ -48,7 +54,7 @@
           <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <button class="btn btn--accent btn--block" type="submit"><%- icon('send') %> Gửi đánh giá</button>
           <div class="form-msg" role="status" aria-live="polite"></div>
-          <p class="form-privacy"><%- icon('shield') %> Đánh giá được TRIP xác nhận trước khi hiển thị. Chỉ hiện tên bạn nhập, không hiện số điện thoại hay email.</p>
+          <p class="form-privacy"><%- icon('shield') %> Đánh giá được TRIP xác nhận trước khi hiển thị. Chỉ hiện tên bạn nhập, số điện thoại chỉ dùng để xác nhận.</p>
         </form>
       </div>
     </aside>

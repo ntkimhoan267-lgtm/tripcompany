@@ -4,6 +4,7 @@
   heading: 'Về TRIP',
   sub: company.legalName + '. Chuyên dịch thuật và dịch vụ du lịch tại Đà Nẵng.',
   actions: null,
+  bg: '/img/team/team-banner.jpg',
 }) %>
 
 <section class="section">
@@ -49,16 +50,17 @@
       <h2>Chuyên viên theo từng mảng dịch vụ</h2>
       <p>Mỗi thị trường visa và mảng dịch vụ đều có chuyên viên phụ trách riêng.</p>
     </div>
-    <div class="team-gallery">
-      <figure class="photo-frame reveal"><img src="/img/team/thumbs-up.jpg" alt="Nhân viên TRIP" width="1000" height="1000" loading="lazy"></figure>
-      <figure class="photo-frame reveal"><img src="/img/team/consultant.jpg" alt="Tư vấn viên TRIP" width="800" height="1000" loading="lazy"></figure>
-      <figure class="photo-frame reveal"><img src="/img/team/team.jpg" alt="Tập thể TRIP" width="1400" height="1050" loading="lazy"></figure>
-    </div>
     <div class="grid grid--3">
       <div class="card reveal"><div class="card__icon"><%- icon('passport') %></div><h3>Visa</h3><ul class="consultants"><% company.consultants.visa.forEach(function (c) { %><li><a href="tel:<%= h.phoneTel(c.phone) %>"><%= c.name %> <span><%= h.phoneDisplay(c.phone) %></span></a></li><% }) %></ul></div>
       <div class="card reveal"><div class="card__icon"><%- icon('lang') %></div><h3>Dịch thuật</h3><ul class="consultants"><% company.consultants.translation.forEach(function (c) { %><li><a href="tel:<%= h.phoneTel(c.phone) %>"><%= c.name %> <span><%= h.phoneDisplay(c.phone) %></span></a></li><% }) %></ul></div>
       <div class="card reveal"><div class="card__icon"><%- icon('car') %></div><h3>Hộ chiếu · Xe · Tour</h3><ul class="consultants"><% company.consultants.car.forEach(function (c) { %><li><a href="tel:<%= h.phoneTel(c.phone) %>"><%= c.name %> <span><%= h.phoneDisplay(c.phone) %></span></a></li><% }) %></ul></div>
     </div>
+    <div class="team-gallery mt-4">
+      <figure class="photo-frame reveal"><img src="/img/team/thumbs-up.jpg" alt="Nhân viên TRIP" width="1000" height="1000" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><img src="/img/team/consultant.jpg" alt="Tư vấn viên TRIP" width="800" height="1000" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><img src="/img/team/team.jpg" alt="Tập thể TRIP" width="1400" height="1050" loading="lazy"></figure>
+    </div>
+    <p class="text-center muted small mt-2">Đội ngũ TRIP tại văn phòng 35 Cao Thắng, Đà Nẵng</p>
   </div>
 </section>
 

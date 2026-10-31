@@ -17,7 +17,7 @@
     eu: { top: 'SCHENGEN · EUROPE · ', mid: 'EU', cls: 'stamp--eu' },
   };
   const st = STAMPS[page.art] || { top: isEvisa ? 'E-VISA · VIETNAM · WELCOME · ' : 'VISA · WORLD · TRIP · ', mid: isEvisa ? 'VN' : '✦', cls: 'stamp--kr' };
-  const visual = page.art ? '/img/visa/' + page.art + '.jpg' : isEvisa ? '/img/tours/son-tra-hoi-an.jpg' : '/img/services/ve-may-bay.jpg';
+  const visual = page.art ? '/img/visa/' + page.art + '.jpg' : isEvisa ? '/img/visa/e-visa-viet-nam.jpg' : '/img/visa/nuoc-khac.jpg';
 %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Visa', href: '/visa' }, { label: page.short || page.country }],

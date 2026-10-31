@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS = {
 const POSTS = [
   {
     slug: 'thu-tuc-xin-visa-trung-quoc-can-chuan-bi-gi',
+    cover: '/img/visa/cn.jpg',
     title: 'Thủ tục xin visa Trung Quốc: cần chuẩn bị những gì?',
     category: 'Visa',
     excerpt: 'Tổng hợp giấy tờ cơ bản, các loại visa Trung Quốc phổ biến và những lưu ý giúp hồ sơ của bạn được xét duyệt suôn sẻ.',
@@ -56,6 +57,7 @@ Thời gian xét duyệt thông thường khoảng **10–14 ngày làm việc**
   },
   {
     slug: 'dich-thuat-cong-chung-dau-cong-ty-hay-dau-tu-phap',
+    cover: '/img/services/dich-thuat.jpg',
     title: 'Dịch thuật công chứng: nên chọn dấu công ty hay dấu tư pháp?',
     category: 'Dịch thuật',
     excerpt: 'Hai hình thức xác nhận bản dịch phổ biến nhất — khác nhau thế nào và khi nào cần dùng loại nào?',
@@ -85,6 +87,7 @@ Xem chi tiết tại trang [Bảng giá dịch thuật](/dich-vu/dich-thuat).`,
   },
   {
     slug: 'kinh-nghiem-phong-van-visa-my',
+    cover: '/img/blog/visa-my-phong-van.jpg',
     title: 'Kinh nghiệm phỏng vấn visa Mỹ: 7 điều cần nhớ',
     category: 'Visa',
     excerpt: 'Buổi phỏng vấn chỉ kéo dài vài phút nhưng quyết định kết quả hồ sơ. Đây là những điều bạn nên chuẩn bị.',
@@ -165,6 +168,8 @@ function seed() {
   // Bổ sung ảnh cho tour mẫu còn trống ảnh (database tạo trước khi có ảnh); không đè ảnh đã đổi trong Dashboard
   const fillImg = db.prepare("UPDATE tours SET image = ? WHERE slug = ? AND (image IS NULL OR image = '')");
   for (const t of TOURS) if (t.image) fillImg.run(t.image, t.slug);
+  const fillCover = db.prepare("UPDATE posts SET cover = ? WHERE slug = ? AND (cover IS NULL OR cover = '')");
+  for (const p of POSTS) if (p.cover) fillCover.run(p.cover, p.slug);
 
   // Dữ liệu mẫu (bài viết, tour) chỉ tạo 1 lần; xoá hết trong Dashboard thì không bị tạo lại khi khởi động
   const seeded = db.prepare("SELECT value FROM settings WHERE key = 'seeded_content'").get();
@@ -177,9 +182,9 @@ function seed() {
   db.prepare("INSERT INTO settings (key, value) VALUES ('seeded_content', datetime('now'))").run();
 
   if (db.prepare('SELECT COUNT(*) AS n FROM posts').get().n === 0) {
-    const ins = db.prepare(`INSERT INTO posts (slug, title, category, excerpt, content, status, published_at)
-      VALUES (?, ?, ?, ?, ?, 'published', datetime('now', ?))`);
-    POSTS.forEach((p, i) => ins.run(p.slug, p.title, p.category, p.excerpt, p.content, `-${i * 3} days`));
+    const ins = db.prepare(`INSERT INTO posts (slug, title, category, excerpt, content, cover, status, published_at)
+      VALUES (?, ?, ?, ?, ?, ?, 'published', datetime('now', ?))`);
+    POSTS.forEach((p, i) => ins.run(p.slug, p.title, p.category, p.excerpt, p.content, p.cover || null, `-${i * 3} days`));
   }
 
   if (db.prepare('SELECT COUNT(*) AS n FROM tours').get().n === 0) {

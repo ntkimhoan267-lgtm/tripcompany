@@ -35,7 +35,13 @@ app.use(helmet({
 }));
 
 app.use(compression());
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: config.isProd ? '7d' : 0 }));
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: config.isProd ? '30d' : 0,
+  setHeaders(res, filePath) {
+    // CSS/JS được gắn ?v=ASSET_VERSION nên cache lâu được; ảnh/video 30 ngày
+    if (config.isProd && /\.(css|js)$/.test(filePath)) res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  },
+}));
 // Ảnh do admin tải lên: chỉ phục vụ như ảnh, không bao giờ chạy được script hay hiển thị như trang HTML
 app.use('/uploads', express.static(config.uploadDir, {
   maxAge: '30d',

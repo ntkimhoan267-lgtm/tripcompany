@@ -52,8 +52,8 @@
           <div><h2>Visa <em>các nước</em></h2><p>Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản, khai form, đặt lịch.</p></div>
         </header>
         <ul class="filter-chips" data-filter-group>
-          <li><button type="button" class="is-on" data-filter="all">Tất cả</button></li>
-          <% services.visaRegions.forEach(function (r) { %><li><button type="button" data-filter="<%= r.id %>"><%= r.label %></button></li><% }) %>
+          <li><button type="button" class="is-on" data-filter="all" aria-pressed="true">Tất cả</button></li>
+          <% services.visaRegions.forEach(function (r) { %><li><button type="button" data-filter="<%= r.id %>" aria-pressed="false"><%= r.label %></button></li><% }) %>
         </ul>
         <%- include('../partials/price/countries', { rows: world }) %>
         <p class="ppanel__note"><%- icon('info') %>Chưa gồm VAT, phí VIP tại trung tâm tiếp nhận, bảo hiểm, vé máy bay và khách sạn.</p>

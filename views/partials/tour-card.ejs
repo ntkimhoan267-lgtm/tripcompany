@@ -9,7 +9,7 @@
   <div class="tour-card__media">
     <span class="tour-card__badge"><%- icon('clock') %> <%= t.duration || 'Liên hệ' %></span>
     <% if (t.image) { %>
-      <img src="<%= t.image %>" alt="<%= t.title %>" loading="lazy">
+      <img src="<%= t.image %>" alt="<%= t.title %>" width="800" height="533" loading="lazy">
     <% } else { %>
       <div class="tour-art" style="--g:<%= grads[t.region] || grads['quoc-te'] %>">
         <span><%= t.region === 'trong-ngay' ? 'Tour trong ngày' : t.region === 'trong-nuoc' ? 'Tour trong nước' : 'Tour nước ngoài' %></span>

@@ -1282,10 +1282,6 @@ h1, h2, .serif, .pcard__price strong, .ccard__price, .plan__from strong, .fees b
   .ccard__list { padding: 2px 14px 6px; } .ccard__head { padding: 12px 14px; }
 }
 
-/* Video giữ nguyên file, chỉ tăng độ tươi khi hiển thị */
-.hero__bg, .market__art video, .market__art img, .porthole__thumb, .porthole__teaser { filter: saturate(1.25) brightness(1.06) contrast(1.03); }
-/* Ảnh minh hoạ: tăng độ tươi (không áp dụng ảnh đội ngũ thật để giữ màu da tự nhiên) */
-.hero-photo img:not([src*="/team/"]), .tour-card img, .svc-card__img img, .route__img img, .post-card img, .photo-link img, .feature-price > img { filter: saturate(1.15) brightness(1.04); }
 
 /* ==========================================================================
    Ảnh nền hoàng hôn (thay nền trắng). Đường dẫn tương đối để chạy cả bản tĩnh.
@@ -1293,7 +1289,7 @@ h1, h2, .serif, .pcard__price strong, .ccard__price, .plan__from strong, .fees b
 html { background: #f3d2b4; }
 body { background: transparent; }
 body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(rgba(255,255,255,.40), rgba(255,255,255,.40)), url('../img/bg/hoang-hon.jpg') center / cover no-repeat; }
+  background: linear-gradient(rgba(255,255,255,.52), rgba(255,255,255,.52)), url('../img/bg/hoang-hon.jpg') center / cover no-repeat; }
 .section--soft, .section--pricing { background: rgba(255,255,255,.28); }
 .ptabs { background: transparent; }
 .clouds .c3 { fill: rgba(255,255,255,0); }
@@ -1309,3 +1305,13 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
   background: linear-gradient(90deg, rgba(13,28,43,.94) 0%, rgba(13,28,43,.82) 42%, rgba(13,28,43,.5) 75%, rgba(13,28,43,.6) 100%),
               linear-gradient(0deg, rgba(13,28,43,.6), transparent 40%); }
 @media (max-width: 900px) { .page-hero__shade { background: linear-gradient(180deg, rgba(13,28,43,.84), rgba(13,28,43,.9)); } }
+
+/* Độ tương phản chữ trên ảnh nền (kiểm tra tiếp cận): đậm hơn một bậc */
+:root { --muted: #4a5b6c; }
+.eyebrow { color: var(--sky-700); }
+h2 em, .serif em { color: #1f5f8f; }
+.section--navy h2 em, .page-hero h1 em, .hero h1 em { color: #9fd3f5; }
+.btn--ghost { background: rgba(255,255,255,.72); }
+.btn--ghost:hover { background: var(--b); }
+:focus-visible { outline-color: var(--sky-700); }
+.hero__callout { text-shadow: 0 2px 6px rgba(0,0,0,.75), 0 0 18px rgba(0,0,0,.5); }

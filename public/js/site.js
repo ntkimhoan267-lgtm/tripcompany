@@ -276,7 +276,8 @@
     porthole.addEventListener('mouseleave', function () { porthole.classList.remove('is-previewing'); pv.pause(); });
   }
   var lazyVideos = $$('video.js-inview');
-  if (!reduce && lazyVideos.length && 'IntersectionObserver' in window) {
+  // Điện thoại: chỉ hiện ảnh poster, không tải video thị trường (tiết kiệm dữ liệu di động)
+  if (!reduce && lazyVideos.length && 'IntersectionObserver' in window && window.matchMedia('(min-width: 768px)').matches) {
     var vio = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         var v = en.target;

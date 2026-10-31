@@ -16,6 +16,8 @@
   var burger = $('#burger'); var nav = $('#nav');
   if (burger && nav) {
     burger.addEventListener('click', function () {
+      // Menu bắt đầu ngay dưới header thật (thanh trên cùng có thể còn hiện) để không che nút đóng
+      nav.style.setProperty('--nav-top', Math.max(0, header.getBoundingClientRect().bottom) + 'px');
       var open = nav.classList.toggle('is-open');
       document.body.classList.toggle('nav-open', open);
       burger.setAttribute('aria-expanded', String(open));
@@ -48,7 +50,7 @@
     m.hidden = false;
     requestAnimationFrame(function () { m.classList.add('is-open'); });
     document.body.style.overflow = 'hidden';
-    var f = $('input:not(.hp), select, button.modal__close', m);
+    var f = $('input:not(.hp), select', m) || $('button.modal__close', m);
     setTimeout(function () { f && f.focus(); }, 60);
   }
   function closeModal(m) {
@@ -336,9 +338,9 @@
     });
     if (opts.focus) tabs[i].focus();
     // Chỉ cuộn ngang thanh tab (điện thoại) khi người dùng chọn tab, không làm trang tự nhảy lúc mới tải
-    if (opts.focus || opts.push) nav.scrollLeft += tabs[i].getBoundingClientRect().left - nav.getBoundingClientRect().left - 20;
+    if (nav.scrollWidth > nav.clientWidth) nav.scrollLeft = Math.max(0, nav.scrollLeft + tabs[i].getBoundingClientRect().left - nav.getBoundingClientRect().left - 20);
     if (opts.push && history.replaceState) history.replaceState(null, '', '#' + tabs[i].getAttribute('aria-controls'));
-    if (opts.scroll) nav.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (opts.scroll) nav.scrollIntoView({ block: 'start' });
   }
   function fromHash() {
     var id = location.hash.slice(1);

@@ -30,7 +30,7 @@ module.exports = {
   uploadDir: path.join(dataDir, 'uploads'),
   // Không có SESSION_SECRET (chỉ cho phép khi chạy thử trên máy): dùng chuỗi ngẫu nhiên mỗi lần khởi động
   sessionSecret: process.env.SESSION_SECRET || require('node:crypto').randomBytes(32).toString('hex'),
-  adminUsername: process.env.ADMIN_USERNAME || 'admin',
+  adminUsername: (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase(),
   adminPassword: process.env.ADMIN_PASSWORD || '',
   googleScriptUrl: process.env.GOOGLE_SCRIPT_URL || '',
   googleScriptSecret: process.env.GOOGLE_SCRIPT_SECRET || '',

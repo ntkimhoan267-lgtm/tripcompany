@@ -20,8 +20,8 @@ const publishedTours = (where = '', ...args) =>
 router.get('/', (req, res) => {
   res.render('pages/home', {
     meta: {
-      title: 'TRIP – Visa Trung Quốc, Hàn Quốc, Nhật Bản, Châu Âu & Dịch thuật công chứng tại Đà Nẵng',
-      description: 'TRIP Đà Nẵng chuyên visa Trung Quốc, Hàn Quốc, Nhật Bản và Châu Âu (Schengen, Anh); cùng Mỹ, Úc, Canada; dịch thuật công chứng Anh – Trung – Hàn – Nhật; vé máy bay, tour, thuê xe. Tư vấn miễn phí.',
+      title: 'TRIP – Visa & Dịch thuật công chứng tại Đà Nẵng',
+      description: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản, Châu Âu trọn gói và dịch thuật công chứng Anh – Trung – Hàn – Nhật tại Đà Nẵng. Tư vấn miễn phí.',
     },
     services,
     tours: publishedTours('AND featured = 1').slice(0, 4),
@@ -61,7 +61,7 @@ router.get('/dich-vu/visa', (req, res) => res.redirect(301, '/visa'));
 
 router.get('/visa', (req, res) => {
   res.render('pages/visa-index', {
-    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: 'Dịch vụ visa du lịch trọn gói tại TRIP Đà Nẵng: Trung Quốc từ 2.800.000đ, Hàn Quốc từ 120 USD, Nhật Bản từ 3.800.000đ, Schengen từ 220 USD. Luyện phỏng vấn 1 kèm 1.' },
+    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: 'Dịch vụ visa du lịch trọn gói tại TRIP Đà Nẵng: Trung Quốc từ 2.800.000đ, Hàn Quốc từ $120, Nhật Bản từ 3.800.000đ, Schengen từ 220 USD. Luyện phỏng vấn 1 kèm 1.' },
     services, extras: Object.values(VISA_EXTRA),
   });
 });
@@ -82,7 +82,7 @@ router.get('/visa/:slug', (req, res, next) => {
 
 router.get('/dich-vu/dich-thuat', (req, res) => {
   res.render('pages/service-translation', {
-    meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật tại Đà Nẵng', description: 'Dịch thuật từ 40.000đ/trang, công chứng dấu công ty hoặc dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự. Có gói dịch hoả tốc tại TRIP Đà Nẵng.' },
+    meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật', description: 'Dịch thuật từ 40.000đ/trang, công chứng dấu công ty hoặc dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự. Có gói dịch hoả tốc tại TRIP Đà Nẵng.' },
     services,
   });
 });
@@ -98,7 +98,7 @@ router.get('/dich-vu/:slug', (req, res, next) => {
   const svc = Object.hasOwn(services.otherServices, req.params.slug) ? services.otherServices[req.params.slug] : null;
   if (!svc) return next();
   res.render('pages/service-generic', {
-    meta: { title: svc.title, description: svc.short },
+    meta: { title: svc.title, description: svc.intro.length > 160 ? svc.intro.slice(0, svc.intro.lastIndexOf(' ', 155)) + '…' : svc.intro },
     svc,
     services,
     tours: svc.slug === 'tour' ? publishedTours().slice(0, 6) : [],
@@ -107,7 +107,7 @@ router.get('/dich-vu/:slug', (req, res, next) => {
 
 router.get('/bang-gia', (req, res) => {
   res.render('pages/pricing', {
-    meta: { title: 'Bảng giá dịch vụ TRIP', description: 'Bảng giá công khai: visa các nước, dịch thuật công chứng, hộ chiếu, e-visa Việt Nam, xe đưa đón Đà Nẵng.' },
+    meta: { title: 'Bảng giá dịch vụ TRIP', description: 'Bảng giá công khai, trọn gói tại TRIP Đà Nẵng: visa Trung Quốc và các nước, dịch thuật công chứng, hộ chiếu, E-visa Việt Nam, xe đưa đón.' },
     services,
   });
 });
@@ -127,7 +127,7 @@ router.get('/tour/:slug', (req, res, next) => {
   const tour = db.prepare("SELECT * FROM tours WHERE slug = ? AND status = 'published'").get(req.params.slug);
   if (!tour) return next();
   res.render('pages/tour-detail', {
-    meta: { title: tour.title, description: `${tour.title} – ${tour.duration}, khởi hành từ ${tour.departure}. Liên hệ TRIP để nhận lịch khởi hành và giá tốt nhất.`, image: tour.image },
+    meta: { title: tour.title, description: `${tour.title}${tour.duration && !tour.title.includes(tour.duration) && tour.duration !== 'Theo lịch' ? ' – ' + tour.duration : ''}, khởi hành từ ${tour.departure}. Liên hệ TRIP Đà Nẵng để nhận lịch khởi hành và giá chi tiết.`, image: tour.image },
     tour,
     itineraryHtml: renderMarkdown(tour.itinerary),
     related: publishedTours('AND id != ?', tour.id).slice(0, 3),
@@ -144,7 +144,7 @@ router.get('/blog', (req, res) => {
   const posts = db.prepare(`SELECT * FROM posts WHERE ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`).all(...args, perPage, (page - 1) * perPage);
   const categories = db.prepare("SELECT category, COUNT(*) AS n FROM posts WHERE status = 'published' AND category IS NOT NULL AND category != '' GROUP BY category").all();
   res.render('pages/blog', {
-    meta: { title: 'Cẩm nang Visa, Dịch thuật & Du lịch', description: 'Kinh nghiệm xin visa, dịch thuật công chứng và du lịch từ đội ngũ TRIP Đà Nẵng.' },
+    meta: { title: 'Cẩm nang Visa, Dịch thuật & Du lịch', description: 'Kinh nghiệm xin visa Trung Quốc, Hàn Quốc, Nhật Bản, Mỹ; dịch thuật công chứng và du lịch, chia sẻ từ đội ngũ tư vấn TRIP Đà Nẵng.' },
     posts, page, pages: Math.max(1, Math.ceil(total / perPage)), category, categories,
   });
 });

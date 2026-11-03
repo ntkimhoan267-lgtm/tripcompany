@@ -13,8 +13,33 @@ seed();
 const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-app.set('trust proxy', 1);
+// Số tầng proxy phía trước (Render: thường là 1). Kiểm tra bằng SHOW_CLIENT_IP=1 rồi mở /__ip sau khi triển khai.
+const tp = process.env.TRUST_PROXY;
+app.set('trust proxy', tp === undefined || tp === '' ? 1 : (/^\d+$/.test(tp) ? Number(tp) : tp));
 app.disable('x-powered-by');
+
+// Kiểm tra sức khoẻ cho Render: có truy cập được database không
+app.get('/healthz', (req, res) => {
+  try { require('./src/db').prepare('SELECT 1').get(); res.set('Cache-Control', 'no-store').send('ok'); }
+  catch (e) { res.status(500).send('db error'); }
+});
+
+// Chỉ bật tạm khi cần xác định đúng TRUST_PROXY (biến môi trường SHOW_CLIENT_IP=1), tắt ngay sau đó
+if (process.env.SHOW_CLIENT_IP === '1') {
+  app.get('/__ip', (req, res) => res.set('Cache-Control', 'no-store').json({ ip: req.ip, ips: req.ips, xff: req.get('x-forwarded-for') || null }));
+}
+
+// Production: www.tripdn.com -> tripdn.com; khi FORCE_CANONICAL_HOST=1 (bật sau khi tên miền đã chạy),
+// mọi tên miền khác (vd *.onrender.com) cũng chuyển về SITE_URL để tránh trùng lặp nội dung
+if (config.isProd) {
+  const siteHost = new URL(config.siteUrl).host;
+  app.use((req, res, next) => {
+    const host = (req.get('host') || '').toLowerCase();
+    if (host === siteHost || req.path === '/healthz') return next();
+    if (host === 'www.' + siteHost || process.env.FORCE_CANONICAL_HOST === '1') return res.redirect(301, config.siteUrl + req.originalUrl);
+    next();
+  });
+}
 
 app.use(helmet({
   contentSecurityPolicy: {
@@ -75,6 +100,8 @@ app.use((req, res, next) => {
       if (!err) html = nowrap(html);
       if (cb) return cb(err, html);
       if (err) return req.next(err);
+      // HTML luôn kiểm tra lại với server để thay đổi trong Dashboard hiện ngay
+      if (!res.get('Cache-Control')) res.set('Cache-Control', 'no-cache');
       res.send(html);
     });
   };
@@ -99,7 +126,7 @@ app.use('/api', require('./src/routes/api'));
 app.use('/admin', require('./src/routes/admin'));
 app.use('/', require('./src/routes/public'));
 
-app.use((req, res) => res.status(404).render('pages/404', { meta: { title: 'Không tìm thấy trang' } }));
+app.use((req, res) => res.status(404).render('pages/404', { meta: { title: 'Không tìm thấy trang', robots: 'noindex' } }));
 app.use((err, req, res, _next) => {
   // Lỗi do request sai (JSON hỏng, body quá lớn...) trả đúng mã 4xx; còn lại là lỗi máy chủ
   const status = err.status || err.statusCode || 500;
@@ -115,6 +142,19 @@ process.on('unhandledRejection', (reason) => console.error('[unhandledRejection]
 
 if (require.main === module) {
   app.listen(config.port, () => console.log(`TRIP website đang chạy tại http://localhost:${config.port}`));
+  // Tự đồng bộ lại khách tư vấn / người đăng ký chưa lên Google Sheet (Google lỗi tạm thời) mỗi 10 phút
+  const google = require('./src/lib/google');
+  if (google.isConfigured()) {
+    const db = require('./src/db');
+    let running = false;
+    setInterval(async () => {
+      if (running) return; running = true;
+      try {
+        for (const l of db.prepare("SELECT * FROM leads WHERE sheet_synced = 0 AND created_at < datetime('now', '-2 minutes') ORDER BY id LIMIT 20").all()) await google.syncLead(l, false);
+        for (const s of db.prepare("SELECT * FROM subscribers WHERE sheet_synced = 0 AND created_at < datetime('now', '-2 minutes') ORDER BY id LIMIT 20").all()) await google.syncSubscriber(s, false);
+      } catch (e) { console.warn('[google] Tự đồng bộ lỗi:', e.message); } finally { running = false; }
+    }, 10 * 60 * 1000).unref();
+  }
 }
 
 module.exports = app;

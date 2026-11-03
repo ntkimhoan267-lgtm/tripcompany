@@ -78,7 +78,11 @@ Tạo mã mới (Bước 1), cập nhật đồng thời `TRIP_SECRET` trong Scr
 Có. Vào **Triển khai**, chọn **Quản lý triển khai**, bấm ✏️ rồi chọn *Phiên bản: Phiên bản mới*, sau đó bấm **Triển khai**. URL giữ nguyên.
 
 **Giới hạn gửi email?**
-Gmail cá nhân gửi tối đa khoảng **100 email/ngày** qua Apps Script, tính cả email thông báo khách mới. Google Workspace gửi được khoảng 1.500 email/ngày. Mỗi lần bấm gửi, bản tin chỉ đi tối đa 80 người và luôn chừa lại hạn mức cho email báo khách mới. Danh sách lớn hơn thì vào hôm sau bấm **Gửi tiếp** ở mục Lịch sử gửi. Khi danh sách vượt vài trăm người, nên chuyển sang dịch vụ email marketing (Mailchimp, Brevo…), dùng dữ liệu xuất CSV từ Dashboard để import.
+Gmail cá nhân gửi tối đa khoảng **100 email/ngày** qua Apps Script, tính cả email thông báo khách mới. Google Workspace gửi được khoảng 1.500 email/ngày. Mỗi lần bấm gửi, bản tin chỉ đi tối đa 60 người và luôn chừa lại khoảng 30 email cho thông báo khách mới. Để chống spam form làm cạn hạn mức, mỗi ngày chỉ gửi tối đa 25 email báo khách tư vấn và 10 email báo người đăng ký mới; quá mức đó khách vẫn được ghi đầy đủ vào Sheet và Dashboard, chỉ không gửi email. Danh sách lớn hơn thì vào hôm sau bấm **Gửi tiếp** ở mục Lịch sử gửi. Khi danh sách vượt vài trăm người, nên chuyển sang dịch vụ email marketing (Mailchimp, Brevo…), dùng dữ liệu xuất CSV từ Dashboard để import.
 
 **Google bị lỗi thì dữ liệu có mất không?**
 Không. Mọi đăng ký luôn được lưu trong database của website trước. Bản ghi chưa đồng bộ được đánh dấu "chưa sync". Bấm **Đồng bộ** ở trang Tổng quan để gửi lại.
+
+## Thêm người nhận thông báo sau này
+
+Script chỉ tự chia sẻ Google Sheet cho các email trong `NOTIFY_EMAILS` **lúc tạo Sheet lần đầu**. Nếu thêm email mới vào `NOTIFY_EMAILS` sau đó: sửa danh sách trong script, **Deploy → Manage deployments → Edit → New version**, rồi tự bấm **Chia sẻ** Google Sheet cho email mới.

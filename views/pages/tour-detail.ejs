@@ -18,7 +18,7 @@
       <div class="grid grid--3">
         <div class="card"><div class="card__icon"><%- icon('clock') %></div><h3>Thời gian</h3><p><%= tour.duration || 'Liên hệ' %></p></div>
         <div class="card"><div class="card__icon"><%- icon('pin') %></div><h3>Khởi hành</h3><p><%= tour.departure || 'Đà Nẵng' %></p></div>
-        <div class="card"><div class="card__icon"><%- icon('wallet') %></div><h3>Giá từ</h3><p><strong style="color:var(--accent-600);font-size:1.2rem"><%= tour.price ? h.vnd(tour.price) : 'Liên hệ' %></strong><%= tour.price ? ' /khách' : '' %></p></div>
+        <div class="card"><div class="card__icon"><%- icon('wallet') %></div><h3><%= tour.price ? 'Giá từ' : 'Giá tour' %></h3><p><strong style="color:var(--accent-600);font-size:1.2rem"><%= tour.price ? h.vnd(tour.price) : 'Liên hệ báo giá' %></strong><%= tour.price ? ' /khách' : '' %></p></div>
       </div>
 
       <% if (highlights.length) { %>

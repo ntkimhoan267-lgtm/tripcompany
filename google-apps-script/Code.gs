@@ -19,8 +19,8 @@
 var NOTIFY_EMAILS = ['ntkimhoan267@gmail.com', 'triptranslate.com@gmail.com'];
 var SHEET_NAME = 'TRIP Website - Khách hàng';
 var TZ = 'Asia/Ho_Chi_Minh';
-var MAIL_RESERVE = 10;      // chừa lại hạn mức để email thông báo khách mới không bị nghẽn
-var NEWSLETTER_BATCH = 80;  // số người nhận tối đa mỗi lần bấm gửi
+var MAIL_RESERVE = 30;      // chừa lại hạn mức để email thông báo khách mới không bị nghẽn
+var NEWSLETTER_BATCH = 60;  // số người nhận tối đa mỗi lần bấm gửi
 // =========================
 
 var LEAD_HEADERS = ['Thời gian', 'Họ tên', 'Số điện thoại', 'Dịch vụ', 'Ghi chú của khách', 'Trang nguồn', 'Mã KH (web)', 'Trạng thái'];
@@ -133,6 +133,16 @@ function fmtTime(created) {
 }
 function safe(v) { v = String(v == null ? '' : v); return /^[=+\-@\t\r]/.test(v) ? "'" + v : v; }
 function canMail() { return MailApp.getRemainingDailyQuota() > MAIL_RESERVE; }
+// Trần số email thông báo mỗi ngày (chống spam form làm cạn hạn mức Gmail). Quá trần: vẫn ghi Sheet, không gửi email.
+var DAILY_NOTIFY_CAP = { lead: 25, subscribe: 10 };
+function underDailyCap(kind) {
+  var props = PropertiesService.getScriptProperties();
+  var key = 'notify_' + kind + '_' + Utilities.formatDate(new Date(), TZ, 'yyyyMMdd');
+  var n = Number(props.getProperty(key) || 0);
+  if (n >= DAILY_NOTIFY_CAP[kind]) return false;
+  props.setProperty(key, String(n + 1));
+  return true;
+}
 
 // ---------- Khách tư vấn ----------
 function handleLead(d, siteUrl) {
@@ -142,7 +152,7 @@ function handleLead(d, siteUrl) {
   if (hasRow(sheet, LEAD_ID_COL, d.id, time)) return { ok: true, duplicate: true };
   sheet.appendRow(["'" + time, safe(d.name), "'" + String(d.phone || ''), safe(d.service), safe(d.note), safe(d.source_page), d.id, 'Mới']);
 
-  if (d.resync || !canMail()) return { ok: true, emailSkipped: true };
+  if (d.resync || !canMail() || !underDailyCap('lead')) return { ok: true, emailSkipped: true };
   var phone = String(d.phone || '').replace(/[^\d+]/g, '');
   var html =
     '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1b2b3a">' +
@@ -173,7 +183,7 @@ function handleSubscribe(d) {
   var time = fmtTime(d.created_at);
   if (hasRow(sheet, SUB_ID_COL, d.id, time)) return { ok: true, duplicate: true };
   sheet.appendRow(["'" + time, safe(d.email), safe(d.name), safe(d.source_page), d.id]);
-  if (d.resync || !canMail()) return { ok: true, emailSkipped: true };
+  if (d.resync || !canMail() || !underDailyCap('subscribe')) return { ok: true, emailSkipped: true };
   MailApp.sendEmail({
     to: NOTIFY_EMAILS.join(','),
     subject: '📩 Đăng ký nhận tin mới: ' + oneLine(d.email),
@@ -214,7 +224,7 @@ function newsletterHtml(d, siteUrl, unsub) {
       (t.image ? '<img src="' + esc(t.image) + '" width="100%" style="display:block;max-height:220px;object-fit:cover" alt="">' : '') +
       '<div style="padding:14px 16px"><div style="font-weight:bold;font-size:16px;color:#1f3a52">' + esc(t.title) + '</div>' +
       '<div style="color:#5b6b7b;font-size:13px;margin:4px 0">' + esc(t.duration || '') + (t.departure ? ' · Khởi hành ' + esc(t.departure) : '') + '</div>' +
-      '<div style="color:#e0602f;font-weight:bold">' + (t.price ? 'Giá từ ' + Number(t.price).toLocaleString('vi-VN') + 'đ' : 'Liên hệ để nhận giá') + '</div></div></a></td></tr>';
+      '<div style="color:#e0602f;font-weight:bold">' + (t.price ? 'Giá từ ' + Number(t.price).toLocaleString('vi-VN') + 'đ' : 'Liên hệ báo giá') + '</div></div></a></td></tr>';
   }).join('');
   return '<div style="background:#f4f8fb;padding:24px 12px;font-family:Arial,sans-serif">' +
     '<table width="100%" style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden" cellpadding="0" cellspacing="0">' +

@@ -47,6 +47,7 @@
     <% if (googleReady) { %>
       <p>Đã cấu hình <code>GOOGLE_SCRIPT_URL</code>. Bấm nút dưới để kiểm tra kết nối và lấy link Google Sheet.</p>
       <form method="post" action="/admin/test-google"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Kiểm tra kết nối</button></form>
+      <p class="mt-2"><a class="btn btn--ghost" href="/admin/backup">Tải bản sao lưu dữ liệu</a> <span class="muted small">Nên tải mỗi tuần và lưu vào Google Drive.</span></p>
     <% } else { %>
       <p class="muted">Chưa kết nối. Người quản trị kỹ thuật làm theo hướng dẫn <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> (khoảng 5 phút). Trong lúc chờ, mọi đăng ký vẫn được lưu đầy đủ ở mục Khách tư vấn.</p>
     <% } %>

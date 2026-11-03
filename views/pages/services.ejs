@@ -20,7 +20,7 @@
       <a class="pillar pillar--photo reveal" href="/visa" style="--img:url('/media/hero-montage.jpg')">
         <span class="pillar__tag">✦ Thế mạnh</span>
         <h3>Dịch vụ Visa</h3>
-        <p>Visa trọn gói <%= new Set(services.worldVisa.map(function (v) { return v.code; })).size + 1 %> quốc gia & vùng lãnh thổ: Trung Quốc, Hàn, Nhật, Châu Âu, Mỹ, Úc, Canada và e-visa Việt Nam.</p>
+        <p>Visa trọn gói <%= new Set(services.worldVisa.map(function (v) { return v.code; })).size + 1 %> quốc gia & vùng lãnh thổ: Trung Quốc, Hàn, Nhật, Châu Âu, Mỹ, Úc, Canada và E-visa Việt Nam.</p>
         <ul class="pillar__flags"><% ['cn', 'kr', 'jp', 'eu', 'us', 'au'].forEach(function (c) { %><li><img src="<%= flag(c) %>" alt="" width="36" height="36" loading="lazy"></li><% }) %></ul>
         <div class="pillar__price"><div><small>Visa Trung Quốc từ</small><strong><%= h.vnd(services.chinaVisa.rows[0].price) %></strong></div><span class="btn btn--white">Xem visa <%- icon('arrow') %></span></div>
       </a>

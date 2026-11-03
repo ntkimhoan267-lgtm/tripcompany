@@ -72,7 +72,7 @@ const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHe
 // Thêm giới hạn theo tên đăng nhập để không thể né bằng cách đổi IP
 const userLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: false, legacyHeaders: false, skipSuccessfulRequests: true,
-  keyGenerator: (req) => 'u:' + qs(req.body && req.body.username, 60).trim().toLowerCase(),
+  keyGenerator: (req) => 'u:' + req.ip + ':' + qs(req.body && req.body.username, 60).trim().toLowerCase(),
   validate: { keyGeneratorIpFallback: false },
 });
 
@@ -468,6 +468,16 @@ router.post('/sync', csrf, ah(async (req, res) => {
   flash(req, fail ? 'error' : 'success', `Đồng bộ Google Sheet: ${ok} thành công${fail ? `, ${fail} lỗi` : ''}.`);
   res.redirect('/admin');
 }));
+
+// Tải bản sao lưu database (SQLite) — nên tải định kỳ, lưu nơi an toàn
+router.get('/backup', (req, res, next) => {
+  const fs = require('node:fs'); const os = require('node:os'); const path = require('node:path');
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'trip-backup-')), 'trip.db');
+  try { db.exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`); } catch (e) { return next(e); }
+  const stamp = new Date().toISOString().slice(0, 10);
+  res.set('Cache-Control', 'no-store');
+  res.download(file, `trip-backup-${stamp}.db`, () => fs.rm(path.dirname(file), { recursive: true, force: true }, () => {}));
+});
 
 router.post('/test-google', csrf, ah(async (req, res) => {
   const r = await google.callScript('ping', {});

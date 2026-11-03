@@ -7,12 +7,12 @@ services:
     region: singapore
     buildCommand: npm ci --omit=dev
     startCommand: npm start
-    healthCheckPath: /robots.txt
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
-        value: 22.13.0
+        value: 22.22.0
       - key: SITE_URL
         value: https://tripdn.com
       - key: DATA_DIR

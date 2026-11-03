@@ -151,6 +151,9 @@ function seed() {
     if (password && password.length < 8) {
       throw new Error('ADMIN_PASSWORD quá ngắn (tối thiểu 8 ký tự).');
     }
+    if (!password && config.isProd) {
+      throw new Error('Chưa đặt ADMIN_PASSWORD (tối thiểu 8 ký tự) để tạo tài khoản quản trị đầu tiên. Đăng nhập xong hãy xoá biến này.');
+    }
     if (!password) {
       password = crypto.randomBytes(9).toString('base64url');
       console.log('\n================================================================');

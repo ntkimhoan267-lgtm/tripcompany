@@ -9,7 +9,7 @@ Sau khi kết nối, mỗi khi khách điền form trên website:
 
 Dashboard cũng dùng kết nối này để **gửi bản tin tour hàng tháng**.
 
-> Nên dùng Gmail **triptranslate.com@gmail.com** để làm các bước dưới. Sheet sẽ nằm trong Drive của tài khoản này, và email gửi đi sẽ mang tên TRIP.
+> Có thể cài bằng **triptranslate.com@gmail.com** hoặc **ntkimhoan267@gmail.com**. Google Sheet sẽ nằm trong Drive của tài khoản dùng để cài (và tự chia sẻ cho Gmail còn lại). Dù cài bằng tài khoản nào, bản tin gửi khách luôn hiện tên **TRIP Đà Nẵng** và khách bấm "Trả lời" sẽ về **triptranslate.com@gmail.com** (cấu hình `SENDER_NAME`, `REPLY_TO` đầu file `Code.gs`). Địa chỉ người gửi thực tế vẫn là Gmail dùng để cài.
 
 ---
 

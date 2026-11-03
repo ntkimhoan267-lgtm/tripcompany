@@ -21,6 +21,10 @@ var SHEET_NAME = 'TRIP Website - Khách hàng';
 var TZ = 'Asia/Ho_Chi_Minh';
 var MAIL_RESERVE = 30;      // chừa lại hạn mức để email thông báo khách mới không bị nghẽn
 var NEWSLETTER_BATCH = 60;  // số người nhận tối đa mỗi lần bấm gửi
+// Email gửi khách hàng (bản tin) luôn hiện tên công ty và khách bấm "Trả lời" sẽ về Gmail công ty,
+// dù script được cài trên Gmail nào.
+var SENDER_NAME = 'TRIP Đà Nẵng';
+var REPLY_TO = 'triptranslate.com@gmail.com';
 // =========================
 
 var LEAD_HEADERS = ['Thời gian', 'Họ tên', 'Số điện thoại', 'Dịch vụ', 'Ghi chú của khách', 'Trang nguồn', 'Mã KH (web)', 'Trạng thái'];
@@ -206,7 +210,7 @@ function sendNewsletter(d, siteUrl) {
     if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i.test(String(r.email))) continue;
     var unsub = r.token ? siteUrl + '/huy-dang-ky?token=' + encodeURIComponent(r.token) : siteUrl;
     try {
-      MailApp.sendEmail({ to: r.email, subject: oneLine(d.subject), htmlBody: newsletterHtml(d, siteUrl, unsub), name: 'TRIP Đà Nẵng' });
+      MailApp.sendEmail({ to: r.email, subject: oneLine(d.subject), htmlBody: newsletterHtml(d, siteUrl, unsub), name: SENDER_NAME, replyTo: REPLY_TO });
     } catch (err) {
       // Dừng lại nhưng vẫn báo danh sách đã gửi để website không gửi lại cho họ
       return { ok: false, error: 'Gửi bị gián đoạn: ' + String((err && err.message) || err), sent: sent, remaining: list.length - sent.length };

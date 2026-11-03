@@ -1,6 +1,6 @@
 # Giao việc cho Claude Cowork: đưa website TRIP lên tripdn.com
 
-> **Cách dùng:** mở Claude Desktop → **Cowork** trên máy tính đã đăng nhập sẵn GitHub, Google (triptranslate.com@gmail.com), Render và trang quản lý tên miền tripdn.com. Dán toàn bộ nội dung từ dòng "--- BẮT ĐẦU ---" trở xuống.
+> **Cách dùng:** mở Claude Desktop → **Cowork** trên máy tính đã đăng nhập sẵn GitHub, Google (ntkimhoan267@gmail.com), Render và trang quản lý tên miền tripdn.com. Dán toàn bộ nội dung từ dòng "--- BẮT ĐẦU ---" trở xuống.
 
 --- BẮT ĐẦU ---
 
@@ -33,7 +33,7 @@ Bạn là trợ lý giúp tôi đưa website công ty TRIP lên Internet tại *
 
 ## Phần 2: Google Apps Script (Sheet + Gmail)
 
-Làm trên tài khoản **triptranslate.com@gmail.com**.
+Làm trên tài khoản **ntkimhoan267@gmail.com** (Google Sheet sẽ nằm trong Drive của tài khoản này và tự chia sẻ cho triptranslate.com@gmail.com; bản tin gửi khách vẫn hiện tên "TRIP Đà Nẵng", khách trả lời sẽ về triptranslate.com@gmail.com).
 
 1. **Mã bí mật:** nhắc tôi tự tạo một mã bí mật ngẫu nhiên ≥ 40 ký tự bằng trình quản lý mật khẩu, và lưu lại. Mã này dùng ở cả bước 4 và Phần 3. **Bạn không được tạo hay nhìn mã này.**
 2. Mở https://script.google.com, tạo **Dự án mới**, đặt tên `TRIP Website`.
@@ -46,7 +46,7 @@ Làm trên tài khoản **triptranslate.com@gmail.com**.
    - Ai có quyền truy cập (Who has access): **Bất kỳ ai (Anyone)**
 7. Bấm **Triển khai**, chép **URL ứng dụng web** (kết thúc bằng `/exec`). URL này không phải mã bí mật, có thể ghi lại cho Phần 3.
 
-✅ Kiểm tra: trong Drive của triptranslate.com@gmail.com có Google Sheet **"TRIP Website - Khách hàng"** với 2 tab *Tư vấn* và *Đăng ký nhận tin*. Sheet đã được chia sẻ cho ntkimhoan267@gmail.com.
+✅ Kiểm tra: trong Drive của ntkimhoan267@gmail.com có Google Sheet **"TRIP Website - Khách hàng"** với 2 tab *Tư vấn* và *Đăng ký nhận tin*. Sheet đã được chia sẻ cho triptranslate.com@gmail.com.
 
 ## Phần 3: Tạo website trên Render
 

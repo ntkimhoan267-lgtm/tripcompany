@@ -94,10 +94,16 @@ Bước này giúp giới hạn chống spam đếm theo đúng từng khách, k
 ## Phần 6: Gắn tên miền tripdn.com
 
 1. Render → `trip-website` → **Settings → Custom Domains**: kiểm tra đã có `tripdn.com` và `www.tripdn.com` (do `render.yaml` thêm sẵn). Ghi lại **bản ghi DNS Render yêu cầu**: IP cho tên miền gốc, CNAME cho www.
-2. Mở trang quản lý tên miền nơi tôi mua tripdn.com. **Hỏi tôi đó là nhà cung cấp nào nếu chưa rõ.** Vào phần **Quản lý DNS**:
-   - Bản ghi **A**: tên `@`, giá trị là IP Render cung cấp (thường là `216.24.57.1`; luôn lấy theo Render).
-   - Bản ghi **CNAME**: tên `www`, giá trị `trip-website.onrender.com` (theo Render).
-   - Nếu đang có bản ghi A / AAAA / CNAME cũ cho `@` hoặc `www` trỏ về website demo cũ, hãy **liệt kê cho tôi xem trước khi xoá**.
+2. Tên miền mua ở **Mắt Bão**. Mở https://manage.matbao.net/domains (tôi đã đăng nhập sẵn). Ở dòng **tripdn.com**, bấm **Chi tiết dịch vụ**.
+   - Trước tiên xem **Name server (DNS server)** của tên miền:
+     - Nếu là name server của Mắt Bão (thường có dạng `ns1.matbao.com`, `ns2.matbao.com`…) thì sửa bản ghi ngay tại Mắt Bão, theo bước kế tiếp.
+     - Nếu là name server của nơi khác (ví dụ Cloudflare hay nhà cung cấp hosting của website demo cũ) thì **dừng lại báo tôi**, vì phải sửa bản ghi ở nơi đó.
+   - Vào mục **Quản lý DNS / Cấu hình DNS / Quản lý bản ghi**. **Chụp lại danh sách bản ghi hiện có** cho tôi xem trước khi đổi gì.
+   - Sửa hoặc thêm 2 bản ghi:
+     - Loại **A**: tên/host `@` (để trống nếu ô yêu cầu vậy), giá trị là IP Render cung cấp (thường là `216.24.57.1`; luôn lấy theo Render), TTL mặc định.
+     - Loại **CNAME**: tên/host `www`, giá trị `trip-website.onrender.com` (theo Render).
+   - Bản ghi **A / AAAA / CNAME cũ** của `@` hoặc `www` đang trỏ về website demo: **liệt kê cho tôi xác nhận rồi mới xoá**. **Không đụng** tới bản ghi **MX, TXT** (email và xác minh) nếu có.
+   - Lưu thay đổi. Bản ghi tại Mắt Bão thường có hiệu lực sau 5 – 30 phút, đôi khi lâu hơn.
 3. Quay lại Render, bấm **Verify**. Chờ chứng chỉ HTTPS được cấp, thường mất 5 – 60 phút.
 
 ✅ Kiểm tra:
@@ -110,6 +116,7 @@ Bước này giúp giới hạn chống spam đếm theo đúng từng khách, k
 2. Kiểm tra `https://tripdn.com/admin` đăng nhập được (cookie đăng nhập gắn theo tên miền nên phải đăng nhập lại).
 3. Mở https://search.google.com/search-console → thêm tài sản **tripdn.com** (xác minh bằng bản ghi TXT DNS ở trang quản lý tên miền) → **Sơ đồ trang web** → gửi `https://tripdn.com/sitemap.xml`.
 4. Dashboard → **Cài đặt** → **Tải bản sao lưu dữ liệu**, lưu file vào Google Drive. Nhắc tôi làm việc này **mỗi tuần**.
+5. Ở trang quản lý tên miền Mắt Bão, nhắc tôi **bật "Gia hạn tự động"** cho tripdn.com (hiện đang tắt, hết hạn 16/06/2027), để website không bị mất tên miền.
 
 ✅ Báo cáo cuối: liệt kê các phần đã xong, các bước tôi tự làm, và mọi điều bất thường gặp phải.
 

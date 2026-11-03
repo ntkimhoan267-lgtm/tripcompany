@@ -1,6 +1,6 @@
 // Tiếng Việt viết tách từng âm tiết nên trình duyệt có thể ngắt dòng giữa một từ ghép ("chuyên | nghiệp").
 // Hàm này nối các từ ghép thường gặp và "số + đơn vị" bằng khoảng trắng không ngắt (U+00A0),
-// chỉ trong phần chữ hiển thị của HTML (bỏ qua thẻ, thuộc tính, script, style, textarea, pre).
+// chỉ trong phần chữ hiển thị của HTML (bỏ qua thẻ, thuộc tính, script, style, textarea, pre, title, code, option, noscript).
 const WORDS = `
 chuyên nghiệp|dịch thuật|dịch vụ|công chứng|hộ chiếu|hồ sơ|du lịch|tư vấn|miễn phí|trọn gói|lãnh sự|đại sứ|sứ quán|hợp pháp|pháp hoá|chứng nhận
 Đà Nẵng|Trung Quốc|Hàn Quốc|Nhật Bản|Châu Âu|Châu Á|Châu Mỹ|Việt Nam|Hội An|Bà Nà|Phú Quốc|Cù Lao|Lao Chàm|Hải Châu|Cao Thắng|Thái Lan|Hoa Kỳ|Ấn Độ|Đài Loan|Hồng Kông|New Zealand|Tây Ban|Ban Nha|Thuỵ Sĩ|Vương quốc|quốc Anh|Bắc Kinh|Phú Sĩ|Vạn Lý|Lý Trường|Trường Thành|Tử Cấm|Cấm Thành|Cầu Vàng|Sơn Trà|Ngũ Hành|Hành Sơn|Bảy Mẫu|Thiên Mụ|Nam Hội|Thần Tài
@@ -23,7 +23,7 @@ function fixText(t) {
 
 module.exports = function nowrap(html) {
   // Tách thành: khối bỏ qua (script/style/textarea/pre), thẻ HTML, và phần chữ
-  const re = /<(script|style|textarea|pre)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->|<[^>]+>|[^<]+/gi;
+  const re = /<(script|style|textarea|pre|title|code|option|noscript)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->|<(?:"[^"]*"|'[^']*'|[^'">])+>|[^<]+/gi;
   return html.replace(re, (part) => (part[0] === '<' ? part : fixText(part)));
 };
 module.exports.fixText = fixText;

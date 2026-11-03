@@ -62,7 +62,9 @@
     }, 220);
     document.body.style.overflow = '';
     if (m.id === 'news-modal') store.set('trip_news_seen', String(Date.now()));
-    lastFocus && lastFocus.focus && lastFocus.focus();
+    // Nút đã mở modal có thể nằm trong menu điện thoại vừa đóng (không nhận focus được) -> trả focus về nút menu
+    var back = lastFocus && lastFocus.offsetParent !== null ? lastFocus : $('#burger');
+    back && back.focus && back.focus();
   }
   $$('.modal').forEach(function (m) {
     m.addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeModal(m); });

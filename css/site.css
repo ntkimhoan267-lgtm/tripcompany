@@ -726,11 +726,11 @@ a.market:hover .market__art video { transform: scale(1.05); }
 
 /* ---------- Ảnh đội ngũ TRIP ---------- */
 .photo-frame { position: relative; margin: 0; border-radius: 28px; overflow: hidden; background: var(--sky-50); box-shadow: 0 30px 60px -30px rgba(17,34,51,.45); }
-.photo-frame > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-frame > img, .photo-frame > picture > img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .photo-frame--tilt { aspect-ratio: 4 / 3; transform: rotate(-1.5deg); outline: 10px solid #fff; outline-offset: -1px; }
 .photo-frame--tall { aspect-ratio: 4 / 5; max-width: 460px; justify-self: center; width: 100%; }
 .photo-frame--wide { aspect-ratio: 16 / 10; }
-.photo-frame--wide > img { object-position: center 30%; }
+.photo-frame--wide > img, .photo-frame--wide > picture > img { object-position: center 30%; }
 .photo-caption { position: absolute; left: 16px; bottom: 16px; display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px;
   background: rgba(255,255,255,.95); border-radius: 16px; box-shadow: 0 10px 24px -10px rgba(0,0,0,.35); font-size: .82rem; color: var(--muted); line-height: 1.35; }
 .photo-caption img { width: 40px; height: 40px; border-radius: 11px; }
@@ -743,7 +743,7 @@ a.market:hover .market__art video { transform: scale(1.05); }
 .photo-banner strong { display: block; font-family: var(--serif); font-size: clamp(1.4rem, 3vw, 2.2rem); line-height: 1.2; }
 .team-gallery { display: grid; grid-template-columns: 1fr .8fr 1.3fr; gap: 20px; margin-bottom: 32px; align-items: stretch; }
 .team-gallery .photo-frame { aspect-ratio: auto; height: 300px; }
-.team-gallery .photo-frame:nth-child(2) > img { object-position: center 62%; }
+.team-gallery .photo-frame:nth-child(2) > img, .team-gallery .photo-frame:nth-child(2) > picture > img { object-position: center 62%; }
 @media (max-width: 860px) { .team-gallery { grid-template-columns: 1fr 1fr; } .team-gallery .photo-frame:last-child { grid-column: 1 / -1; } .team-gallery .photo-frame { height: 240px; } }
 @media (max-width: 560px) { .photo-banner { aspect-ratio: 4 / 3; } .photo-frame--tilt { transform: none; } .photo-frame--tilt .photo-caption { transform: none; } }
 
@@ -1153,7 +1153,7 @@ html[data-preview] body::before { content: 'Bản xem trước giao diện · Fo
 .ppanel[hidden] { display: none; }
 .ppanel .pcard, .ppanel .ccard, .ppanel .route, .ppanel .speed:not(.speed--std), .ppanel .fees li { background: #fff; }
 .ppanel__head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
-.ppanel__head > img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 3px 10px rgba(17,34,51,.2); }
+.ppanel__head > img, .ppanel__head > picture > img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 3px 10px rgba(17,34,51,.2); }
 .ppanel__icon { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--navy); color: #fff; flex-shrink: 0; }
 .ppanel__icon .icon { width: 26px; height: 26px; }
 .ppanel__head > div { flex: 1; min-width: 220px; }
@@ -1163,11 +1163,11 @@ html[data-preview] body::before { content: 'Bản xem trước giao diện · Fo
 .ppanel__note .icon { width: 16px; height: 16px; color: var(--sky-600); flex-shrink: 0; margin-top: 3px; }
 .ppanel__sub { margin: 30px 0 12px; font-size: 1.1rem; }
 .feature-price { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center; }
-.feature-price > img { border-radius: 20px; aspect-ratio: 4 / 3; object-fit: cover; width: 100%; }
+.feature-price > img, .feature-price > picture > img { border-radius: 20px; aspect-ratio: 4 / 3; object-fit: cover; width: 100%; height: auto; }
 .feature-price h3 { margin: 8px 0 4px; }
 .feature-price__num { font-family: var(--serif); font-size: 2.4rem; color: var(--accent); font-weight: 700; margin-bottom: 14px; }
 .quote-band { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; background: linear-gradient(120deg, var(--navy), #2a5b82); color: #cfe1ef; border-radius: 24px; padding: 22px 28px; }
-.quote-band > img { width: 72px; height: 72px; background: #fff; border-radius: 50%; padding: 8px; }
+.quote-band > img, .quote-band > picture > img { width: 72px; height: 72px; background: #fff; border-radius: 50%; padding: 8px; }
 .quote-band > div { flex: 1; min-width: 220px; }
 .quote-band h3 { color: #fff; margin: 0 0 4px; }
 .quote-band p { margin: 0; }
@@ -1367,3 +1367,14 @@ picture.pic { display: contents; }
 .modal { transition: opacity .2s, visibility 0s .2s; }
 .modal.is-open { transition: opacity .2s, visibility 0s; }
 @media (max-width: 1180px) { .nav.is-open { transition: transform .25s ease, visibility 0s; } }
+
+/* Trình duyệt tắt JavaScript: nút mở popup không hoạt động -> hiện sẵn form tư vấn & nhận tin ở cuối trang */
+.no-js .modal:not(#video-modal) { position: static; visibility: visible; opacity: 1; display: block; padding: 0 16px 32px; }
+.no-js .modal:not(#video-modal)[hidden] { display: block; }
+.no-js .modal__backdrop, .no-js .modal__close, .no-js #video-modal { display: none !important; }
+.no-js .modal .modal__dialog { transform: none; margin: 0 auto; box-shadow: var(--shadow); }
+/* Màn hình rất hẹp: nhãn video không xuống dòng, nút play thấp hơn để không đè cằm */
+@media (max-width: 370px) {
+  .porthole__glass .porthole__play .porthole__btn { top: 68%; width: 64px; height: 64px; }
+  .porthole__label small { letter-spacing: .06em; font-size: .66rem; white-space: nowrap; }
+}

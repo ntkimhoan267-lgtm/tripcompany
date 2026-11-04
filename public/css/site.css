@@ -1357,3 +1357,5 @@ p, li { text-wrap: pretty; }
 /* Giá & số liệu dùng serif mới: in đậm hơn một chút cho dễ đọc */
 .pcard__price strong, .ccard__price, .plan__from strong, .fees b, .speed__row strong, .feature-price__num, .market__foot strong, .pillar__price strong, .feature-band__price strong { font-weight: 700; }
 
+/* <picture> chứa ảnh WebP nhiều cỡ: không tạo hộp riêng để mọi CSS viết cho img (width/height 100%, object-fit) vẫn áp dụng */
+picture.pic { display: contents; }

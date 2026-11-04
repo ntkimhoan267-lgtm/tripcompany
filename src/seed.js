@@ -162,7 +162,7 @@ function seed() {
       console.log('================================================================\n');
     }
     db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)')
-      .run(config.adminUsername, bcrypt.hashSync(password, 10));
+      .run(config.adminUsername, bcrypt.hashSync(password, config.bcryptCost));
   }
 
   const insSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');

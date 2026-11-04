@@ -28,6 +28,8 @@ const app = require('../server');
 function rewrite(html) {
   return html
     .replace(/(\s(?:href|src|poster|data-src|data-video-modal|action)=")\/(?!\/)/g, `$1${base}/`)
+    // srcset chứa nhiều URL cách nhau bởi dấu phẩy: đổi từng URL
+    .replace(/(\ssrcset=")([^"]*)"/g, (m, a, v) => `${a}${v.replace(/(^|,\s*)\/(?!\/)/g, `$1${base}/`)}"`)
     .replace(/url\('\/(?!\/)/g, `url('${base}/`)
     .replace('<html lang="vi" class="no-js">', '<html lang="vi" class="no-js" data-preview="1">');
 }

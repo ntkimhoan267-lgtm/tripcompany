@@ -74,7 +74,48 @@ function pageName(p) {
   return p;
 }
 
+// ---------- Ảnh: WebP nhiều kích cỡ (srcset) ----------
+// Bản WebP do scripts/build-images.js sinh sẵn cạnh ảnh gốc: /img/tours/ba-na.jpg -> /img/tours/ba-na-480.webp …
+// Ảnh chưa có bản WebP (ảnh admin tải lên, ảnh ngoài) hiển thị bình thường bằng <img>.
+const fs = require('node:fs');
+const path = require('node:path');
+const PUBLIC_DIR = path.join(__dirname, '..', '..', 'public');
+const IMAGE_WIDTHS = [480, 800, 1200];
+const variantCache = new Map();
+function webpVariants(src) {
+  if (variantCache.has(src)) return variantCache.get(src);
+  let list = [];
+  const m = /^\/img\/(?!.*\.\.)([\w/-]+)\.(jpe?g|png)$/i.exec(String(src || ''));
+  if (m) {
+    const dir = path.posix.dirname(`/img/${m[1]}`); const name = path.posix.basename(m[1]);
+    const re = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}-(\\d+)\\.webp$`);
+    let files = [];
+    try { files = fs.readdirSync(path.join(PUBLIC_DIR, dir)); } catch { /* thư mục không có */ }
+    list = files.map((f) => re.exec(f)).filter(Boolean)
+      .map((x) => ({ url: `${dir}/${x[0]}`, w: Number(x[1]) })).sort((a, b) => a.w - b.w);
+  }
+  variantCache.set(src, list);
+  return list;
+}
+const escAttr = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// Dùng trong EJS: <%- h.picture(src, { alt, width, height, sizes, loading, fetchpriority, cls, style }) %>
+function picture(src, o = {}) {
+  const attrs = [
+    `src="${escAttr(src)}"`, `alt="${escAttr(o.alt || '')}"`,
+    o.width ? `width="${Number(o.width)}"` : '', o.height ? `height="${Number(o.height)}"` : '',
+    o.cls ? `class="${escAttr(o.cls)}"` : '', o.style ? `style="${escAttr(o.style)}"` : '',
+    o.fetchpriority ? `fetchpriority="${escAttr(o.fetchpriority)}"` : `loading="${o.loading === 'eager' ? 'eager' : 'lazy'}"`,
+    'decoding="async"',
+  ].filter(Boolean).join(' ');
+  const img = `<img ${attrs}>`;
+  const v = webpVariants(src);
+  if (!v.length) return img;
+  const sizes = o.sizes || '(max-width: 640px) 100vw, 50vw';
+  return `<picture class="pic"><source type="image/webp" srcset="${v.map((x) => `${x.url} ${x.w}w`).join(', ')}" sizes="${escAttr(sizes)}">${img}</picture>`;
+}
+
 module.exports = {
+  picture, IMAGE_WIDTHS,
   pageName,
   vnd, usd, money, phoneDisplay, phoneTel, slugify, fmtDate,
   getSettings, setSettings, parseVideo, isValidVnPhone, normalizePhone, isValidEmail,

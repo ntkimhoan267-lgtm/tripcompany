@@ -19,7 +19,11 @@
 var NOTIFY_EMAILS = ['ntkimhoan267@gmail.com', 'triptranslate.com@gmail.com'];
 var SHEET_NAME = 'TRIP Website - Khách hàng';
 var TZ = 'Asia/Ho_Chi_Minh';
-var MAIL_RESERVE = 30;      // chừa lại hạn mức để email thông báo khách mới không bị nghẽn
+// Trần số email thông báo mỗi ngày (chống spam form làm cạn hạn mức Gmail). Quá trần: vẫn ghi Sheet, không gửi email.
+var DAILY_NOTIFY_CAP = { lead: 25, subscribe: 10 };
+// Hạn mức Gmail tính theo SỐ NGƯỜI NHẬN (1 email gửi 2 Gmail = 2 lượt). Luôn chừa đủ cho mọi email báo khách mới
+// trong ngày: 25 email × số Gmail nhận thông báo. Bản tin và báo đăng ký nhận tin không được dùng phần dự trữ này.
+var MAIL_RESERVE = DAILY_NOTIFY_CAP.lead * NOTIFY_EMAILS.length;
 var NEWSLETTER_BATCH = 60;  // số người nhận tối đa mỗi lần bấm gửi
 // Email gửi khách hàng (bản tin) luôn hiện tên công ty và khách bấm "Trả lời" sẽ về Gmail công ty,
 // dù script được cài trên Gmail nào.
@@ -136,9 +140,10 @@ function fmtTime(created) {
   return Utilities.formatDate(d, TZ, 'dd/MM/yyyy HH:mm');
 }
 function safe(v) { v = String(v == null ? '' : v); return /^[=+\-@\t\r]/.test(v) ? "'" + v : v; }
-function canMail() { return MailApp.getRemainingDailyQuota() > MAIL_RESERVE; }
-// Trần số email thông báo mỗi ngày (chống spam form làm cạn hạn mức Gmail). Quá trần: vẫn ghi Sheet, không gửi email.
-var DAILY_NOTIFY_CAP = { lead: 25, subscribe: 10 };
+// Báo khách mới (quan trọng nhất): được dùng cả phần dự trữ, chỉ cần đủ lượt cho mọi Gmail nhận thông báo
+function canNotifyLead() { return MailApp.getRemainingDailyQuota() >= NOTIFY_EMAILS.length; }
+// Việc khác (báo đăng ký nhận tin, bản tin): gửi xong vẫn phải còn nguyên phần dự trữ cho báo khách mới
+function canSpend(recipients) { return MailApp.getRemainingDailyQuota() - recipients >= MAIL_RESERVE; }
 function underDailyCap(kind) {
   var props = PropertiesService.getScriptProperties();
   var key = 'notify_' + kind + '_' + Utilities.formatDate(new Date(), TZ, 'yyyyMMdd');
@@ -156,7 +161,7 @@ function handleLead(d, siteUrl) {
   if (hasRow(sheet, LEAD_ID_COL, d.id, time)) return { ok: true, duplicate: true };
   sheet.appendRow(["'" + time, safe(d.name), "'" + String(d.phone || ''), safe(d.service), safe(d.note), safe(d.source_page), d.id, 'Mới']);
 
-  if (d.resync || !canMail() || !underDailyCap('lead')) return { ok: true, emailSkipped: true };
+  if (d.resync || !canNotifyLead() || !underDailyCap('lead')) return { ok: true, emailSkipped: true };
   var phone = String(d.phone || '').replace(/[^\d+]/g, '');
   var html =
     '<div style="font-family:Arial,sans-serif;font-size:15px;color:#1b2b3a">' +
@@ -187,7 +192,7 @@ function handleSubscribe(d) {
   var time = fmtTime(d.created_at);
   if (hasRow(sheet, SUB_ID_COL, d.id, time)) return { ok: true, duplicate: true };
   sheet.appendRow(["'" + time, safe(d.email), safe(d.name), safe(d.source_page), d.id]);
-  if (d.resync || !canMail() || !underDailyCap('subscribe')) return { ok: true, emailSkipped: true };
+  if (d.resync || !canSpend(NOTIFY_EMAILS.length) || !underDailyCap('subscribe')) return { ok: true, emailSkipped: true };
   MailApp.sendEmail({
     to: NOTIFY_EMAILS.join(','),
     subject: '📩 Đăng ký nhận tin mới: ' + oneLine(d.email),
@@ -201,6 +206,7 @@ function handleSubscribe(d) {
 // ---------- Bản tin tháng (gửi theo đợt) ----------
 function sendNewsletter(d, siteUrl) {
   var list = d.recipients || [];
+  // Mỗi email bản tin gửi 1 người = 1 lượt; không lấn vào phần dự trữ cho báo khách mới
   var room = Math.min(NEWSLETTER_BATCH, MailApp.getRemainingDailyQuota() - MAIL_RESERVE);
   if (room <= 0) return { ok: false, error: 'Gmail đã hết hạn mức gửi hôm nay. Vui lòng bấm "Gửi tiếp" vào ngày mai.', sent: [] };
   var sent = [];

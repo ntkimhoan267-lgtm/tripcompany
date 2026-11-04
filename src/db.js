@@ -114,5 +114,8 @@ if (!hasColumn('users', 'session_version')) db.exec('ALTER TABLE users ADD COLUM
 if (!hasColumn('reviews', 'phone')) db.exec('ALTER TABLE reviews ADD COLUMN phone TEXT');
 // Bản tin tạo từ phiên bản cũ (không theo dõi từng người nhận) coi như đã gửi xong, tránh gửi lại
 if (!hasColumn('newsletters', 'batched')) db.exec('ALTER TABLE newsletters ADD COLUMN batched INTEGER NOT NULL DEFAULT 0');
+// Trạng thái từng người nhận bản tin: 'sending' ghi TRƯỚC khi gọi Apps Script, 'sent' khi Apps Script xác nhận.
+// Dòng 'sending' còn lại (lỗi mạng, server tắt giữa chừng) = chưa rõ đã nhận hay chưa -> không tự gửi lại để tránh trùng.
+if (!hasColumn('newsletter_sends', 'status')) db.exec("ALTER TABLE newsletter_sends ADD COLUMN status TEXT NOT NULL DEFAULT 'sent'");
 
 module.exports = db;

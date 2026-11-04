@@ -30,6 +30,9 @@ module.exports = {
   uploadDir: path.join(dataDir, 'uploads'),
   // Không có SESSION_SECRET (chỉ cho phép khi chạy thử trên máy): dùng chuỗi ngẫu nhiên mỗi lần khởi động
   sessionSecret: process.env.SESSION_SECRET || require('node:crypto').randomBytes(32).toString('hex'),
+  // Độ khó băm mật khẩu (bcrypt). 12 ≈ 0,25 giây mỗi lần trên máy chủ thường.
+  bcryptCost: 12,
+  syncTimeoutMs: Number(process.env.SYNC_TIMEOUT_MS) || 8000,
   adminUsername: (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase(),
   adminPassword: process.env.ADMIN_PASSWORD || '',
   googleScriptUrl: process.env.GOOGLE_SCRIPT_URL || '',

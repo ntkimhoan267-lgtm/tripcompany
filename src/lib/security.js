@@ -29,6 +29,11 @@ function requireAdmin(req, res, next) {
     return next();
   }
   req.session = null;
+  // Request gọi bằng fetch (nút lưu nhanh, tải ảnh): trả 401 JSON thay vì chuyển hướng sang trang đăng nhập,
+  // nếu không fetch sẽ đi theo redirect, nhận trang HTML 200 và báo nhầm "Đã lưu".
+  if (req.get('x-requested-with') === 'fetch' || req.accepts(['html', 'json']) === 'json') {
+    return res.status(401).json({ ok: false, error: 'Phiên đăng nhập đã hết hạn. Vui lòng tải lại trang và đăng nhập lại.', login: '/admin/login' });
+  }
   return res.redirect('/admin/login?next=' + encodeURIComponent(req.originalUrl));
 }
 

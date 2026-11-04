@@ -2,7 +2,8 @@
 <div class="topline"><h1>Gửi bản tin tour hàng tháng</h1><span class="muted"><%= active %> người đang nhận tin</span></div>
 
 <div class="grid grid--2">
-  <form class="card form" method="post" action="/admin/newsletter" data-confirm-submit>
+  <% if (busy) { %><div class="flash flash--error">Đang có một đợt gửi bản tin. Vui lòng đợi vài phút rồi tải lại trang.</div><% } %>
+  <form class="card form" method="post" action="/admin/newsletter" data-confirm-submit data-once>
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <div><label for="subject">Tiêu đề email</label><input type="text" id="subject" name="subject" required maxlength="200" placeholder="VD: TRIP – Lịch tour tháng <%= new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2 %> & ưu đãi visa"></div>
     <div>
@@ -29,8 +30,8 @@
       <table><thead><tr><th>Ngày</th><th>Tiêu đề</th><th>Đã gửi</th><th></th></tr></thead>
       <tbody><% history.forEach(function (n) { %><tr>
         <td class="small nowrap"><%= h.fmtDate(n.created_at, true) %></td><td><%= n.subject %></td>
-        <td class="small nowrap"><%= n.sent %> người<% if (n.remaining) { %><br><span class="muted">còn <%= n.remaining %></span><% } %></td>
-        <td><% if (n.remaining) { %><form method="post" action="/admin/newsletter/<%= n.id %>/continue"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm">Gửi tiếp</button></form><% } else { %><span class="badge badge--published">Xong</span><% } %></td>
+        <td class="small nowrap"><%= n.sent %> người<% if (n.remaining) { %><br><span class="muted">còn <%= n.remaining %></span><% } %><% if (n.unknown) { %><br><span class="muted" title="Mất kết nối với Google giữa chừng: không tự gửi lại để tránh khách nhận 2 lần">chưa rõ <%= n.unknown %></span><% } %></td>
+        <td><% if (n.remaining) { %><form method="post" action="/admin/newsletter/<%= n.id %>/continue" data-once><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm">Gửi tiếp</button></form><% } else { %><span class="badge badge--published">Xong</span><% } %></td>
       </tr><% }) %></tbody></table>
     <% } else { %><p class="muted">Chưa gửi bản tin nào.</p><% } %>
   </div>

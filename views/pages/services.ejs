@@ -41,12 +41,12 @@
     <div class="svc-grid">
       <% Object.values(services.otherServices).forEach(function (s) { %>
         <a class="svc-card reveal" href="/dich-vu/<%= s.slug %>">
-          <div class="svc-card__img"><img src="<%= PIC[s.slug] || '/img/services/thue-xe.jpg' %>" alt="" width="1200" height="800" loading="lazy"><span class="svc-card__icon"><%- icon(s.icon) %></span></div>
+          <div class="svc-card__img"><%- h.picture(PIC[s.slug] || '/img/services/thue-xe.jpg', { width: 1200, height: 800, sizes: '(max-width: 640px) 100vw, (max-width: 980px) 50vw, 380px' }) %><span class="svc-card__icon"><%- icon(s.icon) %></span></div>
           <div class="svc-card__body"><h3><%= s.title %></h3><p><%= s.short %></p><span class="more">Xem chi tiết <%- icon('arrow') %></span></div>
         </a>
       <% }) %>
       <a class="svc-card reveal" href="/dich-vu/hop-phap-hoa-lanh-su">
-        <div class="svc-card__img"><img src="/img/services/hop-phap-hoa.jpg" alt="" width="1200" height="800" loading="lazy"><span class="svc-card__icon"><%- icon('stamp') %></span></div>
+        <div class="svc-card__img"><%- h.picture('/img/services/hop-phap-hoa.jpg', { width: 1200, height: 800, sizes: '(max-width: 640px) 100vw, (max-width: 980px) 50vw, 380px' }) %><span class="svc-card__icon"><%- icon('stamp') %></span></div>
         <div class="svc-card__body"><h3>Hợp pháp hoá lãnh sự</h3><p>Chứng nhận và hợp pháp hoá lãnh sự cho giấy tờ dân sự, học thuật, kinh tế.</p><span class="more">Xem chi tiết <%- icon('arrow') %></span></div>
       </a>
     </div>

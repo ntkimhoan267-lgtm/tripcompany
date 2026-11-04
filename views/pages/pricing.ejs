@@ -86,7 +86,7 @@
           <a class="btn btn--ghost btn--sm" href="/dich-vu/ho-chieu">Thủ tục chi tiết <%- icon('arrow') %></a>
         </header>
         <div class="feature-price">
-          <img src="/img/services/ho-chieu.jpg" alt="" width="1200" height="800" loading="lazy">
+          <%- h.picture('/img/services/ho-chieu.jpg', { width: 1200, height: 800, sizes: '(max-width: 700px) 92vw, 520px' }) %>
           <div>
             <% services.passport.rows.forEach(function (r) { %>
               <span class="pcard__tag"><%- icon('clock') %> <%= r.time %></span>

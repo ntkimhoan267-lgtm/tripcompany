@@ -1,0 +1,32 @@
+<%- include('../partials/head') %>
+<%
+  // Trang kết quả khi form được gửi không qua JavaScript (trình duyệt tắt / lỗi JavaScript)
+  const ok = result && result.ok;
+  const errs = result && result.errors ? Object.values(result.errors) : [];
+  const transl = ok && /Dịch thuật|Hợp pháp/i.test(result.service || '');
+  const phone = transl ? (settings.hotline_translation || settings.hotline) : settings.hotline;
+%>
+<section class="section">
+  <div class="container text-center" style="max-width:640px">
+    <img src="/img/logo-icon-sm.png" alt="" width="120" height="120" style="margin:0 auto 24px;border-radius:28px">
+    <% if (ok) { %>
+      <h1 style="font-size:2.2rem">Cảm ơn bạn!</h1>
+      <p class="lead"><%= result.message %></p>
+    <% } else { %>
+      <h1 style="font-size:2.2rem">Chưa gửi được</h1>
+      <% if (errs.length) { %>
+        <p class="lead">Vui lòng kiểm tra lại:</p>
+        <ul class="form-result__errors" style="text-align:left;display:inline-block;margin:0 auto 8px"><% errs.forEach(function (e) { %><li><%= e %></li><% }) %></ul>
+      <% } else { %>
+        <p class="lead"><%= (result && result.error) || 'Đã có lỗi xảy ra. Vui lòng thử lại.' %></p>
+      <% } %>
+    <% } %>
+    <p class="muted">Cần gấp? Gọi ngay cho TRIP.</p>
+    <div class="flex mt-3" style="justify-content:center;flex-wrap:wrap">
+      <a class="btn btn--navy" href="<%= back %>"><%= ok ? 'Quay lại trang trước' : 'Quay lại và sửa' %></a>
+      <a class="btn btn--accent" href="tel:<%= h.phoneTel(phone) %>"><%- icon('phone') %> <%= h.phoneDisplay(phone) %></a>
+      <% if (settings.zalo) { %><a class="btn btn--zalo" href="https://zalo.me/<%= h.phoneTel(settings.zalo) %>" target="_blank" rel="noopener">Nhắn Zalo</a><% } %>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

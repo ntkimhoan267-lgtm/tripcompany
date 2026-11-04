@@ -8,7 +8,9 @@
     "start": "node --no-warnings=ExperimentalWarning server.js",
     "dev": "node --no-warnings=ExperimentalWarning --watch server.js",
     "test": "node --no-warnings=ExperimentalWarning --test test/*.test.js",
-    "export:preview": "node --no-warnings=ExperimentalWarning scripts/export-static.js dist-preview /tripcompany"
+    "export:preview": "node --no-warnings=ExperimentalWarning scripts/export-static.js dist-preview /tripcompany",
+    "images": "node scripts/build-images.js",
+    "flags": "node scripts/fetch-flags.js"
   },
   "engines": {
     "node": ">=22.13"
@@ -24,6 +26,8 @@
     "marked": "^18.1.2",
     "multer": "^2.5.0",
     "sanitize-html": "^2.18.1",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "yauzl": "^3.4.0",
+    "yazl": "^3.3.1"
   }
 }

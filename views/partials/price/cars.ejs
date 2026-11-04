@@ -12,7 +12,7 @@
 <div class="routes">
   <% services.carTransfer.rows.forEach(function (r) { %>
     <article class="route">
-      <div class="route__img"><img src="<%= pic(r.route) %>" alt="" width="800" height="600" loading="lazy"><span><%= r.way %></span></div>
+      <div class="route__img"><%- h.picture(pic(r.route), { width: 800, height: 600, sizes: '(max-width: 640px) 100vw, 320px' }) %><span><%= r.way %></span></div>
       <div class="route__body">
         <h3><%= r.route.replace(/^KS Đà Nẵng – /, '') %></h3>
         <p><%= /^KS Đà Nẵng/.test(r.route) ? 'Từ khách sạn Đà Nẵng' : 'Đưa đón trong thành phố' %></p>

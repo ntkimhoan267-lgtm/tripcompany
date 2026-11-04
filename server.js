@@ -18,10 +18,15 @@ const tp = process.env.TRUST_PROXY;
 app.set('trust proxy', tp === undefined || tp === '' ? 1 : (/^\d+$/.test(tp) ? Number(tp) : tp));
 app.disable('x-powered-by');
 
-// Kiểm tra sức khoẻ cho Render: có truy cập được database không
+// Kiểm tra sức khoẻ cho Render: đọc được database VÀ ghi được ổ đĩa dữ liệu (ổ đầy / mất ổ đĩa -> báo lỗi để Render cảnh báo)
 app.get('/healthz', (req, res) => {
-  try { require('./src/db').prepare('SELECT 1').get(); res.set('Cache-Control', 'no-store').send('ok'); }
-  catch (e) { res.status(500).send('db error'); }
+  res.set('Cache-Control', 'no-store');
+  try { require('./src/db').prepare('SELECT 1').get(); } catch (e) { return res.status(500).send('db error'); }
+  try {
+    const probe = path.join(config.dataDir, '.healthz');
+    require('node:fs').writeFileSync(probe, String(Date.now()));
+  } catch (e) { return res.status(500).send('disk error'); }
+  res.send('ok');
 });
 
 // Chỉ bật tạm khi cần xác định đúng TRUST_PROXY (biến môi trường SHOW_CLIENT_IP=1), tắt ngay sau đó
@@ -57,6 +62,9 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false,
+  // Mặc định của helmet là 'no-referrer', khiến trình duyệt gửi "Origin: null" khi form được gửi không qua JavaScript
+  // -> form tư vấn bị chặn. Giữ Referer/Origin trong cùng website, chỉ gửi tên miền khi sang website khác.
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 app.use(compression());
@@ -108,12 +116,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Cờ quốc gia lưu tại chỗ (public/img/flags, tải bằng `npm run flags`): không phụ thuộc CDN bên ngoài.
+// Thiếu file thì tạm dùng flagcdn.com để trang vẫn hiển thị.
+const LOCAL_FLAGS = new Set((() => { try { return require('node:fs').readdirSync(path.join(__dirname, 'public', 'img', 'flags')); } catch { return []; } })());
+const flagUrl = (code) => (LOCAL_FLAGS.has(`${code}.png`) ? `/img/flags/${code}.png` : `https://flagcdn.com/w80/${code}.png`);
+
 // Biến dùng chung cho mọi view
 app.use((req, res, next) => {
   res.locals.assetV = ASSET_VERSION;
   res.locals.h = helpers;
   res.locals.icon = (name, cls = '') => `<svg class="icon ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
-  res.locals.flag = (code) => `https://flagcdn.com/w80/${code}.png`;
+  res.locals.flag = flagUrl;
   res.locals.company = company;
   res.locals.settings = helpers.getSettings();
   res.locals.siteUrl = config.siteUrl;
@@ -141,20 +154,34 @@ app.use((err, req, res, _next) => {
 process.on('unhandledRejection', (reason) => console.error('[unhandledRejection]', reason));
 
 if (require.main === module) {
-  app.listen(config.port, () => console.log(`TRIP website đang chạy tại http://localhost:${config.port}`));
+  const lifecycle = require('./src/lib/lifecycle');
+  const server = app.listen(config.port, () => console.log(`TRIP website đang chạy tại http://localhost:${config.port}`));
   // Tự đồng bộ lại khách tư vấn / người đăng ký chưa lên Google Sheet (Google lỗi tạm thời) mỗi 10 phút
   const google = require('./src/lib/google');
+  let syncTimer = null;
   if (google.isConfigured()) {
-    const db = require('./src/db');
-    let running = false;
-    setInterval(async () => {
-      if (running) return; running = true;
-      try {
-        for (const l of db.prepare("SELECT * FROM leads WHERE sheet_synced = 0 AND created_at < datetime('now', '-2 minutes') ORDER BY id LIMIT 20").all()) await google.syncLead(l, false);
-        for (const s of db.prepare("SELECT * FROM subscribers WHERE sheet_synced = 0 AND created_at < datetime('now', '-2 minutes') ORDER BY id LIMIT 20").all()) await google.syncSubscriber(s, false);
-      } catch (e) { console.warn('[google] Tự đồng bộ lỗi:', e.message); } finally { running = false; }
-    }, 10 * 60 * 1000).unref();
+    syncTimer = setInterval(() => {
+      google.syncPending({ olderThanMinutes: 2 })
+        .then((r) => { if (!r.ok && !r.busy) console.warn('[google] Tự đồng bộ dừng:', r.error); })
+        .catch((e) => console.warn('[google] Tự đồng bộ lỗi:', e.message));
+    }, 10 * 60 * 1000);
+    syncTimer.unref();
   }
+
+  // Tắt gọn khi Render deploy (SIGTERM): ngừng nhận kết nối mới, không nhận việc dài mới (gửi bản tin),
+  // chờ các request đang chạy xong (tối đa ~25 giây; Render cho 30 giây) rồi mới thoát.
+  const GRACE_MS = Number(process.env.SHUTDOWN_GRACE_MS) || 25000;
+  const shutdown = (signal) => {
+    if (lifecycle.shuttingDown) return;
+    lifecycle.shuttingDown = true;
+    console.log(`[${signal}] Đang tắt, chờ tối đa ${Math.round(GRACE_MS / 1000)} giây cho các request đang chạy…`);
+    if (syncTimer) clearInterval(syncTimer);
+    server.close(() => { console.log('Đã tắt gọn.'); process.exit(0); });
+    server.closeIdleConnections();
+    setTimeout(() => { console.warn('Hết thời gian chờ, buộc tắt.'); server.closeAllConnections(); process.exit(1); }, GRACE_MS).unref();
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 module.exports = app;

@@ -13,7 +13,7 @@
 <section class="section">
   <div class="container why">
     <figure class="photo-frame photo-frame--tall reveal">
-      <img src="/img/team/heart.jpg" alt="Nhân viên TRIP tại văn phòng" width="1000" height="1250" loading="lazy">
+      <%- h.picture('/img/team/heart.jpg', { alt: 'Nhân viên TRIP tại văn phòng', width: 1000, height: 1250, sizes: '(max-width: 860px) 92vw, 480px' }) %>
       <figcaption class="photo-caption"><img src="/img/logo-icon-sm.png" alt="" width="40" height="40"><span><strong>Trẻ · Đam mê · Tận tâm</strong>Đội ngũ TRIP Đà Nẵng</span></figcaption>
     </figure>
     <div class="reveal prose">
@@ -29,7 +29,7 @@
 <section class="section section--soft">
   <div class="container">
     <figure class="photo-banner reveal">
-      <img src="/img/team/team-banner.jpg" alt="Tập thể nhân viên TRIP" width="1600" height="686" loading="lazy">
+      <%- h.picture('/img/team/team-banner.jpg', { alt: 'Tập thể nhân viên TRIP', width: 1600, height: 686, sizes: '(max-width: 1200px) 100vw, 1160px' }) %>
       <figcaption><span class="eyebrow" style="color:#bfe3fa">Đội ngũ TRIP</span><strong>Những người đồng hành cùng hồ sơ của bạn</strong></figcaption>
     </figure>
     <div class="mt-4"><%- include('../partials/stats', { variant: 'inline' }) %></div>
@@ -59,9 +59,9 @@
       <div class="card reveal"><div class="card__icon"><%- icon('car') %></div><h3>Hộ chiếu · Xe · Tour</h3><ul class="consultants"><% company.consultants.car.forEach(function (c) { %><li><a href="tel:<%= h.phoneTel(c.phone) %>"><%= c.name %> <span><%= h.phoneDisplay(c.phone) %></span></a></li><% }) %></ul></div>
     </div>
     <div class="team-gallery mt-4">
-      <figure class="photo-frame reveal"><img src="/img/team/thumbs-up.jpg" alt="Nhân viên TRIP" width="1000" height="1000" loading="lazy"></figure>
-      <figure class="photo-frame reveal"><img src="/img/team/consultant.jpg" alt="Tư vấn viên TRIP" width="800" height="1000" loading="lazy"></figure>
-      <figure class="photo-frame reveal"><img src="/img/team/team.jpg" alt="Tập thể TRIP" width="1400" height="1050" loading="lazy"></figure>
+      <figure class="photo-frame reveal"><%- h.picture('/img/team/thumbs-up.jpg', { alt: 'Nhân viên TRIP', width: 1000, height: 1000, sizes: '(max-width: 640px) 100vw, 380px' }) %></figure>
+      <figure class="photo-frame reveal"><%- h.picture('/img/team/consultant.jpg', { alt: 'Tư vấn viên TRIP', width: 800, height: 1000, sizes: '(max-width: 640px) 100vw, 380px' }) %></figure>
+      <figure class="photo-frame reveal"><%- h.picture('/img/team/team.jpg', { alt: 'Tập thể TRIP', width: 1400, height: 1050, sizes: '(max-width: 640px) 100vw, 380px' }) %></figure>
     </div>
     <p class="text-center muted small mt-2">Đội ngũ TRIP tại văn phòng 35 Cao Thắng, Đà Nẵng</p>
   </div>

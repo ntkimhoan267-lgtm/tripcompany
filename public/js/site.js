@@ -14,20 +14,37 @@
   window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
   var burger = $('#burger'); var nav = $('#nav');
+  var visible = function (el) { return el.offsetParent !== null && getComputedStyle(el).visibility !== 'hidden'; };
+  // Nội dung phía sau menu điện thoại: đánh dấu inert khi menu mở để Tab / trình đọc màn hình không lọt ra ngoài menu
+  var behindNav = function () { return $$('#main, .footer, .topbar, .fab, .mobile-bar'); };
+  var navOpen = function () { return nav && nav.classList.contains('is-open'); };
+  function openNav() {
+    // Menu bắt đầu ngay dưới header thật (thanh trên cùng có thể còn hiện) để không che nút đóng
+    nav.style.setProperty('--nav-top', Math.max(0, header.getBoundingClientRect().bottom) + 'px');
+    nav.classList.add('is-open'); document.body.classList.add('nav-open');
+    burger.setAttribute('aria-expanded', 'true'); burger.setAttribute('aria-label', 'Đóng menu');
+    behindNav().forEach(function (el) { el.inert = true; });
+    // Đợi menu hiện ra rồi mới focus mục đầu tiên đang nhìn thấy (mục ẩn không nhận focus)
+    requestAnimationFrame(function () {
+      var first = $$('a[href], button:not([disabled])', nav).filter(visible)[0];
+      if (first) first.focus();
+    });
+  }
+  function closeNav(returnFocus) {
+    if (!navOpen()) return;
+    nav.classList.remove('is-open'); document.body.classList.remove('nav-open');
+    burger.setAttribute('aria-expanded', 'false'); burger.setAttribute('aria-label', 'Mở menu');
+    behindNav().forEach(function (el) { el.inert = false; });
+    if (returnFocus) burger.focus();
+  }
   if (burger && nav) {
-    burger.addEventListener('click', function () {
-      // Menu bắt đầu ngay dưới header thật (thanh trên cùng có thể còn hiện) để không che nút đóng
-      nav.style.setProperty('--nav-top', Math.max(0, header.getBoundingClientRect().bottom) + 'px');
-      var open = nav.classList.toggle('is-open');
-      document.body.classList.toggle('nav-open', open);
-      burger.setAttribute('aria-expanded', String(open));
-      if (open) { var firstLink = $('a, button', nav); firstLink && firstLink.focus(); }
-    });
+    burger.addEventListener('click', function () { if (navOpen()) closeNav(true); else openNav(); });
     nav.addEventListener('click', function (e) {
-      if (e.target.closest('a') || e.target.closest('[data-open-lead]')) {
-        nav.classList.remove('is-open'); document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded', 'false');
-      }
+      // Bấm link / nút tư vấn trong menu: đóng menu, focus sẽ theo trang mới hoặc popup tư vấn
+      if (e.target.closest('a') || e.target.closest('[data-open-lead]')) closeNav(false);
     });
+    // Xoay ngang / phóng to cửa sổ lên giao diện máy tính: đóng menu điện thoại để bỏ inert
+    window.addEventListener('resize', function () { if (window.innerWidth > 1180) closeNav(false); });
   }
   $$('.nav__caret').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
@@ -72,7 +89,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       $$('.modal.is-open').forEach(closeModal);
-      if (nav && nav.classList.contains('is-open')) { nav.classList.remove('is-open'); document.body.classList.remove('nav-open'); burger.setAttribute('aria-expanded', 'false'); burger.focus(); }
+      if (navOpen() && !$('.modal.is-open')) closeNav(true);
       var openItem = $('.nav__item.is-open');
       $$('.nav__item.is-open').forEach(function (i) { i.classList.remove('is-open'); $('.nav__caret', i).setAttribute('aria-expanded', 'false'); });
       if (openItem && openItem.contains(document.activeElement)) $('.nav__caret', openItem).focus();
@@ -80,8 +97,8 @@
       var sub = document.activeElement && document.activeElement.closest && document.activeElement.closest('.nav__sub');
       if (sub) { var c = $('.nav__caret', sub.parentElement); c && c.focus(); }
     }
-    if (e.key === 'Tab' && nav && nav.classList.contains('is-open') && !$('.modal.is-open')) {
-      var items = [burger].concat($$('a[href], button:not([disabled])', nav).filter(function (el) { return el.offsetParent !== null; }));
+    if (e.key === 'Tab' && navOpen() && !$('.modal.is-open')) {
+      var items = [burger].concat($$('a[href], button:not([disabled])', nav).filter(visible));
       var i0 = items[0]; var iN = items[items.length - 1];
       if (e.shiftKey && document.activeElement === i0) { e.preventDefault(); iN.focus(); }
       else if (!e.shiftKey && (document.activeElement === iN || items.indexOf(document.activeElement) === -1)) { e.preventDefault(); i0.focus(); }
@@ -154,6 +171,10 @@
       var svcField = $('[name="service"]', form);
       if (svcField && svcField.required && !data.service) errs.service = 'Vui lòng chọn dịch vụ.';
       if ('email' in data && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(data.email).trim())) errs.email = 'Email chưa đúng định dạng.';
+      // Form đánh giá: phải tự chọn số sao (không chọn sẵn) và viết đủ dài (giống kiểm tra phía máy chủ)
+      if ($('[name="rating"]', form) && !data.rating) errs.rating = 'Vui lòng chọn số sao.';
+      var contentField = $('[name="content"]', form);
+      if (contentField && contentField.required && String(data.content || '').trim().length < 15) errs.content = 'Bạn chia sẻ thêm một chút nhé (ít nhất 15 ký tự).';
       if (showErrors(form, errs)) return;
 
       // Bản xem trước tĩnh (GitHub Pages) không có máy chủ để nhận form

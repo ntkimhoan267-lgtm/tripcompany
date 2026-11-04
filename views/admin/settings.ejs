@@ -47,10 +47,18 @@
     <% if (googleReady) { %>
       <p>Đã cấu hình <code>GOOGLE_SCRIPT_URL</code>. Bấm nút dưới để kiểm tra kết nối và lấy link Google Sheet.</p>
       <form method="post" action="/admin/test-google"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Kiểm tra kết nối</button></form>
-      <p class="mt-2"><a class="btn btn--ghost" href="/admin/backup">Tải bản sao lưu dữ liệu</a> <span class="muted small">Nên tải mỗi tuần và lưu vào Google Drive.</span></p>
     <% } else { %>
       <p class="muted">Chưa kết nối. Người quản trị kỹ thuật làm theo hướng dẫn <code>docs/HUONG-DAN-GOOGLE-SHEET.md</code> (khoảng 5 phút). Trong lúc chờ, mọi đăng ký vẫn được lưu đầy đủ ở mục Khách tư vấn.</p>
     <% } %>
   </div>
+
+  <% if (isOwner) { %>
+  <div class="card">
+    <h2>Sao lưu dữ liệu</h2>
+    <p>Tải file <code>.zip</code> gồm database (khách tư vấn, người đăng ký, bài viết, tour, đánh giá, cài đặt) và ảnh đã tải lên. Mật khẩu đăng nhập không nằm trong bản sao lưu.</p>
+    <p><a class="btn btn--ghost" href="/admin/backup">Tải bản sao lưu dữ liệu</a> <span class="muted small">Nên tải mỗi tuần và lưu vào Google Drive. Cách khôi phục: <code>docs/HUONG-DAN-SAO-LUU-KHOI-PHUC.md</code>.</span></p>
+    <form method="post" action="/admin/uploads/cleanup" data-confirm="Xoá các ảnh đã tải lên nhưng không còn dùng ở bài viết / tour nào (chỉ ảnh cũ hơn 1 ngày)? Nên tải bản sao lưu trước."><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Dọn ảnh không còn dùng</button></form>
+  </div>
+  <% } %>
 </div>
 <%- include('_foot') %>

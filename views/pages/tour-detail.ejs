@@ -13,7 +13,7 @@
 <section class="section">
   <div class="container layout-side">
     <div class="stack">
-      <% if (tour.image) { %><img src="<%= tour.image %>" alt="<%= tour.title %>" style="width:100%;border-radius:var(--radius);aspect-ratio:16/9;object-fit:cover"><% } %>
+      <% if (tour.image) { %><%- h.picture(tour.image, { alt: tour.title, loading: 'eager', style: 'width:100%;border-radius:var(--radius);aspect-ratio:16/9;object-fit:cover', sizes: '(max-width: 980px) 92vw, 760px' }) %><% } %>
 
       <div class="grid grid--3">
         <div class="card"><div class="card__icon"><%- icon('clock') %></div><h3>Thời gian</h3><p><%= tour.duration || 'Liên hệ' %></p></div>

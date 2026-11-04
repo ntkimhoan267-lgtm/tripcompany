@@ -34,11 +34,14 @@ const withUpload = (field) => (req, res, next) => upload.single(field)(req, res,
   return res.redirect(req.originalUrl);
 });
 
+// Đường dẫn ảnh giữ lại khi sửa bài/tour: chỉ ảnh nội bộ, không có '..' (không trỏ ra ngoài thư mục ảnh)
+const SAFE_IMAGE_PATH = /^\/(uploads|img)\/(?!.*\.\.)[\w./-]+$/;
 async function saveImage(file) {
   if (!file) return null;
   const name = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.webp`;
   try {
-    await sharp(file.buffer, { failOn: 'error' })
+    // limitInputPixels: chặn ảnh "bom giải nén" (khai báo kích thước khổng lồ) làm cạn RAM máy chủ
+    await sharp(file.buffer, { failOn: 'error', limitInputPixels: 50e6 })
       .rotate() // xoay theo EXIF trước khi bỏ metadata
       .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
       .webp({ quality: 82 })
@@ -69,12 +72,15 @@ const pageOf = (v) => Math.min(1000, Math.max(1, parseInt(qs(v), 10) || 1));
 // ---------- Đăng nhập ----------
 // Chỉ đếm lần đăng nhập SAI (đăng nhập đúng không bị chặn); CSRF kiểm tra trước nên request vô danh không thể khoá tài khoản
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false, skipSuccessfulRequests: true });
-// Thêm giới hạn theo tên đăng nhập để không thể né bằng cách đổi IP
+// Thêm giới hạn theo TÊN ĐĂNG NHẬP (không kèm IP): kẻ dò mật khẩu đổi IP liên tục cũng chỉ được thử 10 lần/15 phút
+// cho mỗi tài khoản. Đánh đổi: người ngoài có thể cố tình nhập sai để tạm khoá một tài khoản trong 15 phút.
 const userLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: false, legacyHeaders: false, skipSuccessfulRequests: true,
-  keyGenerator: (req) => 'u:' + req.ip + ':' + qs(req.body && req.body.username, 60).trim().toLowerCase(),
+  keyGenerator: (req) => 'u:' + qs(req.body && req.body.username, 60).trim().toLowerCase(),
   validate: { keyGeneratorIpFallback: false },
 });
+// Hash giả: so sánh cả khi tài khoản không tồn tại để thời gian phản hồi không tiết lộ tên đăng nhập nào có thật
+const DUMMY_HASH = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), config.bcryptCost);
 
 router.get('/login', csrf, (req, res) => {
   res.render('admin/login', { error: null, next: qs(req.query.next, 300) || '/admin' });
@@ -84,8 +90,16 @@ router.post('/login', csrf, loginLimiter, userLimiter, (req, res) => {
   const rawNext = qs(req.body.next, 300);
   const nextUrl = /^\/admin(\/|$|\?)/.test(rawNext) ? rawNext : '/admin';
   const user = db.prepare('SELECT * FROM users WHERE username = ?').get(qs(req.body.username, 60).trim().toLowerCase());
-  if (!user || !bcrypt.compareSync(qs(req.body.password, 200), user.password_hash)) {
+  const password = qs(req.body.password, 200);
+  // Luôn chạy bcrypt (hash giả nếu không có tài khoản / hash trống sau khi khôi phục bản sao lưu)
+  const hash = user && user.password_hash ? user.password_hash : DUMMY_HASH;
+  const match = bcrypt.compareSync(password, hash);
+  if (!user || !user.password_hash || !match) {
     return res.status(401).render('admin/login', { error: 'Sai tên đăng nhập hoặc mật khẩu.', next: nextUrl });
+  }
+  // Mật khẩu băm theo độ khó cũ: băm lại theo độ khó hiện tại (không đổi mật khẩu, không đăng xuất thiết bị khác)
+  if (bcrypt.getRounds(user.password_hash) < config.bcryptCost) {
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(password, config.bcryptCost), user.id);
   }
   // Tạo phiên mới hoàn toàn (kể cả CSRF token) để chống session fixation
   req.session = { userId: user.id, sv: user.session_version, iat: Date.now(), csrf: crypto.randomBytes(24).toString('hex') };
@@ -217,68 +231,100 @@ router.get('/subscribers.csv', (req, res) => {
 const pendingRecipients = (newsletterId) => db.prepare(`SELECT s.email, s.token FROM subscribers s JOIN newsletters n ON n.id = ?
   WHERE s.status = 'active' AND n.batched = 1 AND s.created_at <= n.created_at
   AND NOT EXISTS (SELECT 1 FROM newsletter_sends ns WHERE ns.newsletter_id = n.id AND ns.email = s.email) ORDER BY s.id`).all(newsletterId);
-const sendingNow = new Set(); // chống bấm "Gửi tiếp" 2 lần cùng lúc
+// Khoá toàn cục: mỗi lúc chỉ một đợt gửi bản tin (kể cả bản tin khác nhau, kể cả "Gửi thử"), chống bấm 2 lần
+let newsletterBusy = false;
+const lifecycle = require('../lib/lifecycle');
 
 const newsletterTours = (ids) => (ids.length
   ? db.prepare(`SELECT * FROM tours WHERE id IN (${ids.map(() => '?').join(',')})`).all(...ids)
     .map((t) => ({ title: t.title, duration: t.duration, departure: t.departure, price: t.price, url: `${config.siteUrl}/tour/${t.slug}`, image: t.image ? (t.image.startsWith('http') ? t.image : config.siteUrl + t.image) : '' }))
   : []);
 
-async function sendBatch(newsletter) {
-  if (sendingNow.has(newsletter.id)) return { ok: false, error: 'Bản tin này đang được gửi, vui lòng đợi.', sentNow: 0, remaining: pendingRecipients(newsletter.id).length };
-  sendingNow.add(newsletter.id);
-  try { return await sendBatchUnlocked(newsletter); } finally { sendingNow.delete(newsletter.id); }
+const BUSY = { ok: false, error: 'Đang có một đợt gửi bản tin, vui lòng đợi đợt đó xong rồi thử lại.', sentNow: 0 };
+async function withNewsletterLock(fn) {
+  if (newsletterBusy) return { ...BUSY, busy: true };
+  if (lifecycle.shuttingDown) return { ok: false, error: 'Máy chủ đang khởi động lại, vui lòng thử lại sau 1 phút.', sentNow: 0 };
+  newsletterBusy = true;
+  try { return await fn(); } finally { newsletterBusy = false; }
 }
+const sendBatch = (newsletter) => withNewsletterLock(() => sendBatchUnlocked(newsletter));
+
 async function sendBatchUnlocked(newsletter) {
   const recipients = pendingRecipients(newsletter.id);
   if (!recipients.length) return { ok: true, sentNow: 0, remaining: 0 };
   let data = {};
   try { data = JSON.parse(newsletter.result || '{}') || {}; } catch { /* bản tin cũ lưu dạng chữ */ }
-  // Apps Script tự dừng sau ~4,5 phút; chờ lâu hơn một chút
+  // 1) Ghi "đang gửi" cho cả đợt TRƯỚC khi gọi Apps Script: lỗi giữa chừng cũng không gửi lại cho người có thể đã nhận
+  const mark = db.prepare("INSERT OR IGNORE INTO newsletter_sends (newsletter_id, email, status) VALUES (?, ?, 'sending')");
+  db.exec('BEGIN'); try { for (const r of recipients) mark.run(newsletter.id, r.email); db.exec('COMMIT'); } catch (e) { db.exec('ROLLBACK'); throw e; }
+  // 2) Gọi Apps Script (tự dừng sau ~4,5 phút; chờ lâu hơn một chút)
   const r = await google.callScript('newsletter', { subject: newsletter.subject, body: newsletter.body, tours: data.tours || [], recipients }, 330000);
-  const sent = Array.isArray(r.sent) ? r.sent.filter((e) => typeof e === 'string') : [];
-  const ins = db.prepare('INSERT OR IGNORE INTO newsletter_sends (newsletter_id, email) VALUES (?, ?)');
-  for (const email of sent) ins.run(newsletter.id, email);
-  return { ok: r.ok, error: r.error, sentNow: sent.length, remaining: pendingRecipients(newsletter.id).length };
+  const sent = new Set(Array.isArray(r.sent) ? r.sent.filter((e) => typeof e === 'string') : []);
+  // 3) Ai được xác nhận đã gửi -> 'sent'. Nếu Apps Script trả lời được (có danh sách sent) thì người chưa gửi chắc chắn
+  //    chưa nhận -> xoá dấu 'sending' để lần sau gửi tiếp. Không có câu trả lời (mạng lỗi/timeout) -> giữ 'sending' (chưa rõ).
+  const answered = Array.isArray(r.sent);
+  const setSent = db.prepare("UPDATE newsletter_sends SET status = 'sent', sent_at = datetime('now') WHERE newsletter_id = ? AND email = ?");
+  const unmark = db.prepare("DELETE FROM newsletter_sends WHERE newsletter_id = ? AND email = ? AND status = 'sending'");
+  db.exec('BEGIN');
+  try {
+    for (const rc of recipients) {
+      if (sent.has(rc.email)) setSent.run(newsletter.id, rc.email);
+      else if (answered) unmark.run(newsletter.id, rc.email);
+    }
+    db.exec('COMMIT');
+  } catch (e) { db.exec('ROLLBACK'); throw e; }
+  const unknown = answered ? 0 : recipients.length;
+  return { ok: r.ok, error: r.error, sentNow: sent.size, unknown, remaining: pendingRecipients(newsletter.id).length };
 }
 
 router.get('/newsletter', csrf, (req, res) => {
   const tours = db.prepare("SELECT * FROM tours WHERE status = 'published' ORDER BY featured DESC, sort").all();
-  const history = db.prepare(`SELECT n.*, (SELECT COUNT(*) FROM newsletter_sends s WHERE s.newsletter_id = n.id) AS sent
+  const history = db.prepare(`SELECT n.*, (SELECT COUNT(*) FROM newsletter_sends s WHERE s.newsletter_id = n.id AND s.status = 'sent') AS sent,
+    (SELECT COUNT(*) FROM newsletter_sends s WHERE s.newsletter_id = n.id AND s.status = 'sending') AS unknown
     FROM newsletters n ORDER BY id DESC LIMIT 20`).all()
     .map((n) => ({ ...n, remaining: pendingRecipients(n.id).length }));
   const active = db.prepare("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'active'").get().n;
-  res.render('admin/newsletter', { title: 'Gửi bản tin tháng', tours, history, active, testEmails: company.notifyEmails });
+  res.render('admin/newsletter', { title: 'Gửi bản tin tháng', tours, history, active, testEmails: company.notifyEmails, busy: newsletterBusy });
 });
 
 router.post('/newsletter', csrf, ah(async (req, res) => {
   const subject = qs(req.body.subject, 200).trim();
   const body = qs(req.body.body, 20000).trim();
   const tourIds = [].concat(req.body.tours || []).map(Number).filter((n) => Number.isInteger(n) && n > 0).slice(0, 12);
+  // Chỉ 'all' mới gửi cho toàn bộ người đăng ký; giá trị lạ (thiếu, mảng…) bị từ chối thay vì mặc định gửi tất cả
+  if (req.body.mode !== 'test' && req.body.mode !== 'all') { flash(req, 'error', 'Thao tác không hợp lệ, vui lòng thử lại.'); return res.redirect('/admin/newsletter'); }
   const testOnly = req.body.mode === 'test';
   if (!subject || !body) { flash(req, 'error', 'Vui lòng nhập tiêu đề và nội dung.'); return res.redirect('/admin/newsletter'); }
   if (!google.isConfigured()) { flash(req, 'error', 'Chưa cấu hình Google Apps Script nên chưa gửi được email.'); return res.redirect('/admin/newsletter'); }
   const tours = newsletterTours(tourIds);
 
   if (testOnly) {
-    const r = await google.callScript('newsletter', { subject, body, tours, recipients: company.notifyEmails.map((email) => ({ email, token: '' })) }, 120000);
+    const r = await withNewsletterLock(() => google.callScript('newsletter', { subject, body, tours, recipients: company.notifyEmails.map((email) => ({ email, token: '' })) }, 120000));
     flash(req, r.ok ? 'success' : 'error', r.ok ? `Đã gửi thử tới ${company.notifyEmails.join(', ')}.` : `Gửi thử thất bại: ${r.error}`);
     return res.redirect('/admin/newsletter');
   }
+  if (newsletterBusy) { flash(req, 'error', BUSY.error); return res.redirect('/admin/newsletter'); }
   const active = db.prepare("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'active'").get().n;
   if (!active) { flash(req, 'error', 'Chưa có người đăng ký nào để gửi.'); return res.redirect('/admin/newsletter'); }
   const id = db.prepare('INSERT INTO newsletters (subject, body, recipients, result, batched) VALUES (?, ?, ?, ?, 1)')
     .run(subject, body, active, JSON.stringify({ tours })).lastInsertRowid;
   const r = await sendBatch(db.prepare('SELECT * FROM newsletters WHERE id = ?').get(id));
-  flash(req, r.ok ? 'success' : 'error', `Đã gửi ${r.sentNow} email.` + (r.remaining ? ` Còn ${r.remaining} người chưa gửi (giới hạn Gmail) — bấm "Gửi tiếp" vào ngày mai.` : '') + (r.ok ? '' : ` Lỗi: ${r.error}`));
+  flash(req, r.ok ? 'success' : 'error', batchMessage(r, 'Đã gửi'));
   res.redirect('/admin/newsletter');
 }));
+
+function batchMessage(r, verb) {
+  return `${verb} ${r.sentNow} email.`
+    + (r.remaining ? ` Còn ${r.remaining} người chưa gửi (giới hạn Gmail) — bấm "Gửi tiếp" vào ngày mai.` : '')
+    + (r.unknown ? ` ${r.unknown} người chưa rõ đã nhận hay chưa (mất kết nối với Google) — hệ thống không tự gửi lại để tránh trùng; kiểm tra mục "Đã gửi" trong Gmail.` : '')
+    + (r.ok ? '' : ` Lỗi: ${r.error}`);
+}
 
 router.post('/newsletter/:id(\\d+)/continue', csrf, ah(async (req, res) => {
   const n = db.prepare('SELECT * FROM newsletters WHERE id = ?').get(req.params.id);
   if (!n) { flash(req, 'error', 'Không tìm thấy bản tin.'); return res.redirect('/admin/newsletter'); }
   const r = await sendBatch(n);
-  flash(req, r.ok ? 'success' : 'error', `Đã gửi thêm ${r.sentNow} email.` + (r.remaining ? ` Còn ${r.remaining} người.` : ' Đã gửi xong.') + (r.ok ? '' : ` Lỗi: ${r.error}`));
+  flash(req, r.ok ? 'success' : 'error', batchMessage(r, 'Đã gửi thêm') + (r.ok && !r.remaining ? ' Đã gửi xong.' : ''));
   res.redirect('/admin/newsletter');
 }));
 
@@ -311,7 +357,7 @@ router.post(['/posts/new', '/posts/:id(\\d+)'], withUpload('cover_file'), csrf, 
   const uploaded = await saveImage(req.file);
   if (req.file && !uploaded) { flash(req, 'error', 'Ảnh bìa không hợp lệ. Chỉ nhận ảnh JPG, PNG, WEBP.'); return res.redirect(req.originalUrl); }
   const keepCover = qs(b.cover, 300).trim();
-  const cover = uploaded || (b.remove_cover ? null : (/^\/(uploads|img)\/[\w./-]+$/.test(keepCover) ? keepCover : null));
+  const cover = uploaded || (b.remove_cover ? null : (SAFE_IMAGE_PATH.test(keepCover) ? keepCover : null));
   const status = b.status === 'published' ? 'published' : 'draft';
   const fields = [uniqueSlug('posts', slugify(qs(b.slug, 200) || title), 'bai-viet', id), title, qs(b.excerpt, 400), qs(b.content, 2 * 1024 * 1024), cover, qs(b.category, 50).trim(), status];
   if (id) {
@@ -362,7 +408,7 @@ router.post(['/tours/new', '/tours/:id(\\d+)'], withUpload('image_file'), csrf, 
   if (req.file && !uploaded) { flash(req, 'error', 'Ảnh tour không hợp lệ. Chỉ nhận ảnh JPG, PNG, WEBP.'); return res.redirect(req.originalUrl); }
   const price = qs(b.price, 20).replace(/\D/g, '');
   const keepImage = qs(b.image, 300).trim();
-  const image = uploaded || (b.remove_image ? null : (/^\/(uploads|img)\/[\w./-]+$/.test(keepImage) ? keepImage : null));
+  const image = uploaded || (b.remove_image ? null : (SAFE_IMAGE_PATH.test(keepImage) ? keepImage : null));
   const fields = [
     uniqueSlug('tours', slugify(qs(b.slug, 200) || title), 'tour', id), title, qs(b.destination, 100),
     TOUR_REGIONS[b.region] ? b.region : 'quoc-te', qs(b.duration, 50), qs(b.departure, 100),
@@ -433,7 +479,7 @@ const PHONE_KEYS = ['hotline', 'hotline_translation', 'zalo'];
 const URL_KEYS = ['facebook', 'messenger'];
 
 router.get('/settings', csrf, (req, res) => {
-  res.render('admin/settings', { title: 'Cài đặt website', s: getSettings(), parseVideo, notifyEmails: company.notifyEmails });
+  res.render('admin/settings', { title: 'Cài đặt website', s: getSettings(), parseVideo, notifyEmails: company.notifyEmails, isOwner: req.user.id === ownerId() });
 });
 
 router.post('/settings', csrf, (req, res) => {
@@ -461,22 +507,89 @@ router.post('/settings', csrf, (req, res) => {
 // Gửi lại các bản ghi chưa đồng bộ Google Sheet (Apps Script tự bỏ qua dòng đã có nên không bị trùng)
 router.post('/sync', csrf, ah(async (req, res) => {
   if (!google.isConfigured()) { flash(req, 'error', 'Chưa cấu hình Google Apps Script.'); return res.redirect('/admin'); }
-  let ok = 0; let fail = 0;
-  // resync = false: những bản ghi này chưa lên Sheet nên cần gửi cả email thông báo (Apps Script tự bỏ qua nếu dòng đã có)
-  for (const l of db.prepare('SELECT * FROM leads WHERE sheet_synced = 0 ORDER BY id LIMIT 20').all()) ((await google.syncLead(l, false)).ok ? ok++ : fail++);
-  for (const s of db.prepare('SELECT * FROM subscribers WHERE sheet_synced = 0 ORDER BY id LIMIT 20').all()) ((await google.syncSubscriber(s, false)).ok ? ok++ : fail++);
-  flash(req, fail ? 'error' : 'success', `Đồng bộ Google Sheet: ${ok} thành công${fail ? `, ${fail} lỗi` : ''}.`);
+  // Những bản ghi này chưa lên Sheet nên gửi cả email thông báo (Apps Script tự bỏ qua nếu dòng đã có)
+  const r = await google.syncPending();
+  flash(req, r.ok ? 'success' : 'error', r.busy ? r.error
+    : r.ok ? `Đồng bộ Google Sheet: ${r.synced} thành công.`
+      : `Đồng bộ Google Sheet: ${r.synced} thành công, dừng lại do lỗi: ${r.error}. Các bản ghi còn lại sẽ tự đồng bộ sau.`);
   res.redirect('/admin');
 }));
 
-// Tải bản sao lưu database (SQLite) — nên tải định kỳ, lưu nơi an toàn
+// ---------- Sao lưu ----------
+// File zip gồm trip.db + thư mục uploads/. Mật khẩu (password_hash) bị xoá khỏi bản sao: file sao lưu lọt ra ngoài
+// cũng không dò được mật khẩu; sau khi khôi phục đặt lại mật khẩu bằng scripts/reset-password.js.
+// Chỉ tài khoản chủ được tải (bản sao lưu chứa toàn bộ dữ liệu khách hàng).
+const BACKUP_README = [
+  'BẢN SAO LƯU WEBSITE TRIP',
+  '',
+  '- trip.db: database (khách tư vấn, người đăng ký, bài viết, tour, đánh giá, cài đặt).',
+  '- uploads/: ảnh tải lên từ Dashboard.',
+  '- Mật khẩu đăng nhập Dashboard KHÔNG có trong bản sao lưu.',
+  '',
+  'Cách khôi phục: xem docs/HUONG-DAN-SAO-LUU-KHOI-PHUC.md trong mã nguồn website.',
+  '',
+].join('\r\n');
+
 router.get('/backup', (req, res, next) => {
-  const fs = require('node:fs'); const os = require('node:os'); const path = require('node:path');
-  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'trip-backup-')), 'trip.db');
-  try { db.exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`); } catch (e) { return next(e); }
-  const stamp = new Date().toISOString().slice(0, 10);
-  res.set('Cache-Control', 'no-store');
-  res.download(file, `trip-backup-${stamp}.db`, () => fs.rm(path.dirname(file), { recursive: true, force: true }, () => {}));
+  if (req.user.id !== ownerId()) return res.status(403).send('Chỉ tài khoản chủ mới tải được bản sao lưu.');
+  const os = require('node:os');
+  const yazl = require('yazl');
+  const { DatabaseSync } = require('node:sqlite');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'trip-backup-'));
+  const cleanup = () => fs.rm(dir, { recursive: true, force: true }, () => {});
+  const file = path.join(dir, 'trip.db');
+  try {
+    db.exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`);
+    const copy = new DatabaseSync(file);
+    // VACUUM sau khi xoá để chuỗi hash cũ không còn sót trong trang trống của file
+    copy.exec("UPDATE users SET password_hash = ''; VACUUM;");
+    copy.close();
+  } catch (e) { cleanup(); return next(e); }
+
+  const zip = new yazl.ZipFile();
+  zip.addFile(file, 'trip.db');
+  if (fs.existsSync(config.uploadDir)) {
+    for (const f of fs.readdirSync(config.uploadDir, { withFileTypes: true })) {
+      if (f.isFile()) zip.addFile(path.join(config.uploadDir, f.name), `uploads/${f.name}`, { compress: false });
+    }
+  }
+  zip.addBuffer(Buffer.from(BACKUP_README, 'utf8'), 'DOC-TRUOC-KHI-KHOI-PHUC.txt');
+  zip.end();
+  res.set({
+    'Content-Type': 'application/zip',
+    'Content-Disposition': `attachment; filename="trip-backup-${new Date().toISOString().slice(0, 10)}.zip"`,
+    'Cache-Control': 'no-store',
+  });
+  res.on('close', cleanup);
+  zip.outputStream.on('error', (e) => { cleanup(); res.destroy(e); });
+  zip.outputStream.pipe(res);
+});
+
+// Dọn ảnh tải lên nhưng không còn dùng ở bài viết / tour / cài đặt nào (ảnh bị thay, bài bị xoá…).
+// Chỉ xoá ảnh cũ hơn 1 ngày: ảnh vừa chèn vào bài viết chưa lưu không bị xoá oan.
+function unusedUploads(minAgeMs = 24 * 3600e3) {
+  if (!fs.existsSync(config.uploadDir)) return [];
+  const used = new Set();
+  const texts = [
+    ...db.prepare('SELECT cover, content FROM posts').all().flatMap((r) => [r.cover, r.content]),
+    ...db.prepare('SELECT image, highlights, itinerary FROM tours').all().flatMap((r) => [r.image, r.highlights, r.itinerary]),
+    ...db.prepare('SELECT value FROM settings').all().map((r) => r.value),
+  ];
+  for (const t of texts) for (const m of String(t || '').matchAll(/\/uploads\/([\w.-]+)/g)) used.add(m[1]);
+  const now = Date.now();
+  return fs.readdirSync(config.uploadDir, { withFileTypes: true })
+    .filter((f) => f.isFile() && !used.has(f.name))
+    .map((f) => ({ name: f.name, stat: fs.statSync(path.join(config.uploadDir, f.name)) }))
+    .filter((f) => now - f.stat.mtimeMs > minAgeMs);
+}
+
+router.post('/uploads/cleanup', csrf, (req, res) => {
+  if (req.user.id !== ownerId()) { flash(req, 'error', 'Chỉ tài khoản chủ mới dọn được ảnh.'); return res.redirect('/admin/settings'); }
+  const files = unusedUploads();
+  let bytes = 0;
+  for (const f of files) { fs.rmSync(path.join(config.uploadDir, f.name), { force: true }); bytes += f.stat.size; }
+  flash(req, 'success', files.length ? `Đã xoá ${files.length} ảnh không còn dùng (${(bytes / 1048576).toFixed(1)} MB).` : 'Không có ảnh nào cần dọn.');
+  res.redirect('/admin/settings');
 });
 
 router.post('/test-google', csrf, ah(async (req, res) => {
@@ -502,7 +615,7 @@ router.post('/account/password', csrf, (req, res) => {
   else if (password !== confirm) flash(req, 'error', 'Xác nhận mật khẩu không khớp.');
   else {
     // Đổi mật khẩu thì đăng xuất mọi thiết bị khác, giữ phiên hiện tại
-    db.prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?').run(bcrypt.hashSync(password, 10), user.id);
+    db.prepare('UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?').run(bcrypt.hashSync(password, config.bcryptCost), user.id);
     req.session.sv = user.session_version + 1;
     req.session.iat = Date.now();
     flash(req, 'success', 'Đã đổi mật khẩu. Các thiết bị khác đã bị đăng xuất.');
@@ -518,7 +631,7 @@ router.post('/account/users', csrf, (req, res) => {
   else if (password.length < 8) flash(req, 'error', 'Mật khẩu tối thiểu 8 ký tự.');
   else if (db.prepare('SELECT id FROM users WHERE username = ?').get(username)) flash(req, 'error', 'Tên đăng nhập đã tồn tại.');
   else {
-    db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').run(username, bcrypt.hashSync(password, 10));
+    db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').run(username, bcrypt.hashSync(password, config.bcryptCost));
     flash(req, 'success', `Đã tạo tài khoản ${username}.`);
   }
   res.redirect('/admin/account');

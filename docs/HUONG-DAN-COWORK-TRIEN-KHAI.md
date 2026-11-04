@@ -73,7 +73,10 @@ Bước này giúp giới hạn chống spam đếm theo đúng từng khách, k
 2. Mở `https://<địa-chỉ>.onrender.com/__ip`. Mở thêm https://api.ipify.org để xem IP thật của máy tôi.
 3. So sánh với giá trị `"ip"` trong trang `/__ip`:
    - Nếu `"ip"` **trùng** IP thật thì đúng, không cần làm gì.
-   - Nếu **không trùng** mà IP thật nằm trong danh sách `"ips"`: đếm vị trí của IP thật tính từ cuối danh sách (cuối cùng là 1), rồi thêm biến `TRUST_PROXY` bằng số đó. Lưu, mở lại `/__ip` để kiểm tra.
+   - Nếu **không trùng**: xem chuỗi `"xff"` (các IP cách nhau bằng dấu phẩy). Tìm IP thật trong chuỗi đó và **đếm vị trí tính từ cuối chuỗi**: IP cuối cùng là 1, IP đứng trước nó là 2… Thêm biến `TRUST_PROXY` bằng số đó.
+     Ví dụ `"xff": "113.161.1.2, 10.0.0.5"` và IP thật là `113.161.1.2` → nó đứng thứ 2 tính từ cuối → `TRUST_PROXY` = `2`.
+     **Không đếm trong `"ips"`**: danh sách này phụ thuộc chính giá trị `TRUST_PROXY` hiện tại nên đếm ở đó sẽ ra số sai.
+     Lưu, mở lại `/__ip`: `"ip"` phải trùng IP thật. Nếu IP thật **không có** trong `"xff"`, dừng lại báo tôi.
 4. **Xoá biến `SHOW_CLIENT_IP`** → Save.
 
 ✅ Kiểm tra: `/__ip` giờ báo lỗi 404, và `"ip"` (lúc còn bật) đã trùng IP thật.

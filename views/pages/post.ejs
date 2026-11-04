@@ -9,7 +9,7 @@
 <section class="section">
   <div class="container layout-side">
     <article>
-      <% if (post.cover) { %><img src="<%= post.cover %>" alt="<%= post.title %>" style="width:100%;border-radius:var(--radius);margin-bottom:28px;aspect-ratio:16/9;object-fit:cover"><% } %>
+      <% if (post.cover) { %><%- h.picture(post.cover, { alt: post.title, loading: 'eager', style: 'width:100%;border-radius:var(--radius);margin-bottom:28px;aspect-ratio:16/9;object-fit:cover', sizes: '(max-width: 980px) 92vw, 760px' }) %><% } %>
       <% if (post.excerpt) { %><p class="lead"><%= post.excerpt %></p><% } %>
       <div class="prose"><%- html %></div>
 

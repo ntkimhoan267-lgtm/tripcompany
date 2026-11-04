@@ -33,7 +33,7 @@
       <%- include('../partials/stamp', { top: 'SCHENGEN · EUROPE · ', mid: 'EU', sub: 'APPROVED', cls: 'stamp--eu' }) %>
       <div class="porthole">
         <div class="porthole__glass">
-          <img class="porthole__thumb" src="/media/trip-thumb.jpg" alt="" width="720" height="960" fetchpriority="high">
+          <picture class="pic"><source type="image/webp" srcset="/media/trip-thumb-v2.webp"><img class="porthole__thumb" src="/media/trip-thumb-v2.jpg" alt="" width="720" height="960" fetchpriority="high"></picture>
           <% if (teaser) { %>
             <video class="porthole__teaser" src="<%= teaser.src %>" muted loop playsinline preload="none" aria-hidden="true"></video>
           <% } %>

@@ -10,7 +10,8 @@
     "test": "node --no-warnings=ExperimentalWarning --test test/*.test.js",
     "export:preview": "node --no-warnings=ExperimentalWarning scripts/export-static.js dist-preview /tripcompany",
     "images": "node scripts/build-images.js",
-    "flags": "node scripts/fetch-flags.js"
+    "flags": "node scripts/fetch-flags.js",
+    "test:browser": "node --no-warnings=ExperimentalWarning --test test/browser/*.browser.js"
   },
   "engines": {
     "node": ">=22.13"

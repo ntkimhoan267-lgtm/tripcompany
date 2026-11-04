@@ -24,11 +24,16 @@
     nav.classList.add('is-open'); document.body.classList.add('nav-open');
     burger.setAttribute('aria-expanded', 'true'); burger.setAttribute('aria-label', 'Đóng menu');
     behindNav().forEach(function (el) { el.inert = true; });
-    // Đợi menu hiện ra rồi mới focus mục đầu tiên đang nhìn thấy (mục ẩn không nhận focus)
-    requestAnimationFrame(function () {
+    // Focus mục đầu tiên đang nhìn thấy. Ở khung hình đầu của hiệu ứng trượt vào, trình duyệt có thể vẫn coi menu
+    // là "visibility: hidden" và lặng lẽ bỏ qua focus() -> thử lại khi hiệu ứng xong (và dự phòng bằng hẹn giờ).
+    var focusFirst = function () {
+      if (!navOpen() || nav.contains(document.activeElement)) return;
       var first = $$('a[href], button:not([disabled])', nav).filter(visible)[0];
       if (first) first.focus();
-    });
+    };
+    requestAnimationFrame(focusFirst);
+    nav.addEventListener('transitionend', focusFirst, { once: true });
+    setTimeout(focusFirst, 320);
   }
   function closeNav(returnFocus) {
     if (!navOpen()) return;
@@ -68,7 +73,9 @@
     requestAnimationFrame(function () { m.classList.add('is-open'); });
     document.body.style.overflow = 'hidden';
     var f = $('input:not(.hp), select', m) || $('button.modal__close', m);
-    setTimeout(function () { f && f.focus(); }, 60);
+    // Thử focus vài lần (trình duyệt bỏ qua focus() nếu popup chưa kịp hiện); dừng khi focus đã ở trong popup
+    var tryFocus = function () { if (f && m.classList.contains('is-open') && !m.contains(document.activeElement)) f.focus(); };
+    setTimeout(tryFocus, 60); setTimeout(tryFocus, 260);
   }
   function closeModal(m) {
     if (!m || !m.classList.contains('is-open')) return;
@@ -80,7 +87,8 @@
     document.body.style.overflow = '';
     if (m.id === 'news-modal') store.set('trip_news_seen', String(Date.now()));
     // Nút đã mở modal có thể nằm trong menu điện thoại vừa đóng (không nhận focus được) -> trả focus về nút menu
-    var back = lastFocus && lastFocus.offsetParent !== null ? lastFocus : $('#burger');
+    // (nút trong menu đã đóng vẫn chiếm chỗ nhưng visibility: hidden nên phải kiểm tra bằng visible(), không chỉ offsetParent)
+    var back = lastFocus && visible(lastFocus) && !(lastFocus.closest('#nav') && !navOpen()) ? lastFocus : $('#burger');
     back && back.focus && back.focus();
   }
   $$('.modal').forEach(function (m) {
@@ -99,9 +107,12 @@
     }
     if (e.key === 'Tab' && navOpen() && !$('.modal.is-open')) {
       var items = [burger].concat($$('a[href], button:not([disabled])', nav).filter(visible));
-      var i0 = items[0]; var iN = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === i0) { e.preventDefault(); iN.focus(); }
-      else if (!e.shiftKey && (document.activeElement === iN || items.indexOf(document.activeElement) === -1)) { e.preventDefault(); i0.focus(); }
+      // Tự chuyển focus theo vòng [nút menu, các mục menu]: thứ tự mặc định của trình duyệt đi từ nút menu
+      // ra phía sau trang (đang inert) và làm rơi focus ra ngoài.
+      e.preventDefault();
+      var idx = items.indexOf(document.activeElement);
+      var next = idx === -1 ? (e.shiftKey ? items.length - 1 : 0) : (idx + (e.shiftKey ? -1 : 1) + items.length) % items.length;
+      items[next].focus();
     }
     // Giữ focus trong popup đang mở
     var open = $('.modal.is-open');

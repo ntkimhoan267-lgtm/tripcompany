@@ -1362,3 +1362,8 @@ picture.pic { display: contents; }
 /* Thumbnail video là ảnh chân dung: hạ nút play xuống vùng cổ áo để không che khuôn mặt */
 .porthole__glass .porthole__play .porthole__btn { top: 64%; }
 .porthole__thumb { object-position: center top; }
+/* Popup & menu điện thoại: khi MỞ thì hiện ngay (visibility 0s) để focus() vào ô đầu tiên không bị trình duyệt bỏ qua;
+   khi ĐÓNG thì chờ hiệu ứng mờ xong mới ẩn hẳn */
+.modal { transition: opacity .2s, visibility 0s .2s; }
+.modal.is-open { transition: opacity .2s, visibility 0s; }
+@media (max-width: 1180px) { .nav.is-open { transition: transform .25s ease, visibility 0s; } }

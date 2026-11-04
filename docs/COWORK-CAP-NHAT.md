@@ -4,7 +4,7 @@
 
 --- BẮT ĐẦU ---
 
-Website TRIP vừa có thêm một đợt sửa lỗi và cải tiến. Code mới nhất nằm ở nhánh **`claude/quirky-hypatia-cgzq96`** (commit `bdb8c0e`) của repo `ntkimhoan267-lgtm/tripcompany`. Tất cả 52 test tự động đều đạt.
+Website TRIP vừa có thêm một đợt sửa lỗi và cải tiến. Code mới nhất nằm ở nhánh **`claude/quirky-hypatia-cgzq96`** (commit mới nhất; phần code nằm ở `bdb8c0e`, các commit sau đó chỉ là tài liệu) của repo `ntkimhoan267-lgtm/tripcompany`. Tất cả 52 test tự động đều đạt.
 
 Quy tắc giữ nguyên như trước: **không tự nhập hay đọc mật khẩu / mã bí mật** (dừng lại để tôi tự nhập), **không tự bấm thanh toán**, không xoá gì ngoài những gì ghi rõ dưới đây. Làm xong từng bước thì báo kết quả rồi mới làm bước sau.
 
@@ -27,7 +27,7 @@ Quy tắc giữ nguyên như trước: **không tự nhập hay đọc mật kh�
 1. Mở Render → dịch vụ `trip-website` → **Settings → Build & Deploy**: xem dịch vụ đang deploy từ **nhánh nào**.
    - Nếu là `claude/quirky-hypatia-cgzq96`: Render tự deploy khi có commit mới. Sang bước 2.
    - Nếu là `main`: tạo Pull Request từ `claude/quirky-hypatia-cgzq96` vào `main` trên GitHub, **dừng lại cho tôi xem rồi tôi bấm Merge**.
-2. Vào **Events**: deploy mới nhất phải ứng với commit **`bdb8c0e`** và trạng thái **Live**. Nếu chưa tự chạy, bấm **Manual Deploy → Deploy latest commit**.
+2. Vào **Events**: deploy mới nhất phải ứng với **commit mới nhất của nhánh** (so với mục Commits trên GitHub; tối thiểu phải là `bdb8c0e` hoặc mới hơn) và trạng thái **Live**. Nếu chưa tự chạy, bấm **Manual Deploy → Deploy latest commit**.
 3. Mở `https://<địa-chỉ-website>/healthz` (tripdn.com nếu đã gắn tên miền, hoặc địa chỉ `.onrender.com`): phải hiện **`ok`**.
 
 ### Bước 2: Cập nhật Apps Script (bắt buộc vì `Code.gs` đã đổi)

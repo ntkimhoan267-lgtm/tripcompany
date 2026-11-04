@@ -262,7 +262,14 @@
     var inputs = $$('input', box);
     var paint = function (n) { $$('label', box).forEach(function (l, i) { l.classList.toggle('on', i < n); }); };
     var current = function () { var c = $('input:checked', box); return c ? Number(c.value) : 0; };
-    inputs.forEach(function (inp) { inp.addEventListener('change', function () { paint(current()); }); });
+    inputs.forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        paint(current());
+        // Đã chọn sao: xoá thông báo "Vui lòng chọn số sao" ngay
+        var form = box.closest('form'); var err = form && $('[data-error="rating"]', form);
+        if (err) { err.textContent = ''; err.closest('.field').classList.remove('has-error'); inputs.forEach(function (i) { i.removeAttribute('aria-invalid'); }); }
+      });
+    });
     $$('label', box).forEach(function (l, i) {
       l.addEventListener('mouseenter', function () { paint(i + 1); });
       l.addEventListener('mouseleave', function () { paint(current()); });

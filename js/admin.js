@@ -31,15 +31,39 @@
     });
   });
 
+  // Form chỉ được gửi 1 lần (bản tin): khoá mọi nút sau lần bấm đầu, tránh bấm 2 lần gửi trùng.
+  // Đăng ký SAU các hộp xác nhận ở trên nên nếu người dùng bấm "Huỷ" thì không bị khoá.
+  // Khoá trong setTimeout: lúc đó trình duyệt đã lấy dữ liệu form, nên giá trị của nút vừa bấm (mode=test/all) vẫn được gửi.
+  $$('form[data-once]').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      if (e.defaultPrevented) return;
+      if (f.dataset.sent) { e.preventDefault(); return; }
+      f.dataset.sent = '1';
+      setTimeout(function () {
+        $$('button', f).forEach(function (b) { b.disabled = true; });
+        if (e.submitter) e.submitter.textContent = 'Đang gửi…';
+      }, 0);
+    });
+  });
+
   // Cập nhật trạng thái khách không cần tải lại trang
   $$('.js-lead-update').forEach(function (f) {
     f.addEventListener('submit', function (e) {
       e.preventDefault();
       var btn = $('button', f); var old = btn.textContent; btn.textContent = '…';
       fetch(f.action, { method: 'POST', headers: { 'x-requested-with': 'fetch', 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(new FormData(f)) })
-        .then(function (r) { btn.textContent = r.ok ? '✓ Đã lưu' : 'Lỗi'; })
-        .catch(function () { btn.textContent = 'Lỗi'; })
-        .finally(function () { setTimeout(function () { btn.textContent = old; }, 1500); });
+        .then(function (r) {
+          // Chỉ báo "Đã lưu" khi máy chủ xác nhận ok:true; bị chuyển hướng (hết phiên) hay lỗi đều không tính là đã lưu
+          if (r.status === 401) return { ok: false, expired: true };
+          if (r.redirected || !/json/.test(r.headers.get('content-type') || '')) return { ok: false };
+          return r.json().catch(function () { return { ok: false }; });
+        })
+        .then(function (res) {
+          if (res.expired) { btn.textContent = 'Hết phiên'; alert('Phiên đăng nhập đã hết hạn. Vui lòng tải lại trang và đăng nhập lại — thay đổi vừa rồi CHƯA được lưu.'); }
+          else btn.textContent = res.ok === true ? '✓ Đã lưu' : 'Lỗi, chưa lưu';
+        })
+        .catch(function () { btn.textContent = 'Lỗi, chưa lưu'; })
+        .finally(function () { setTimeout(function () { btn.textContent = old; }, 2000); });
     });
   });
 
@@ -65,8 +89,8 @@
       input.addEventListener('change', function () {
         if (!input.files[0]) return;
         var fd = new FormData(); fd.append('_csrf', csrf); fd.append('file', input.files[0]);
-        fetch('/admin/upload', { method: 'POST', body: fd }).then(function (r) { return r.json(); }).then(function (res) {
-          if (res.ok) insert('\n![', '](' + res.url + ')\n', 'mô tả ảnh'); else alert(res.error || 'Tải ảnh thất bại');
+        fetch('/admin/upload', { method: 'POST', headers: { 'x-requested-with': 'fetch' }, body: fd }).then(function (r) { return r.json(); }).then(function (res) {
+          if (res.ok === true) insert('\n![', '](' + res.url + ')\n', 'mô tả ảnh'); else alert(res.error || 'Tải ảnh thất bại');
         }).catch(function () { alert('Tải ảnh thất bại'); });
         input.value = '';
       });

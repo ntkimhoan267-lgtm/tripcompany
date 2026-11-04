@@ -35,9 +35,10 @@ h2 { font-size: 1.15rem; }
 .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
 .card + .card { margin-top: 18px; }
 .grid { display: grid; gap: 16px; }
-.grid--4 { grid-template-columns: repeat(4, 1fr); }
-.grid--2 { grid-template-columns: 1.6fr 1fr; }
-.grid--2e { grid-template-columns: 1fr 1fr; }
+/* minmax(0, …): cột được co nhỏ hơn nội dung (bảng, đoạn chữ dài) thay vì đẩy trang tràn ngang */
+.grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.grid--2 { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+.grid--2e { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .stat { display: flex; flex-direction: column; gap: 4px; }
 .stat__label { color: var(--muted); font-size: .85rem; }
 .stat__value { font-size: 1.9rem; font-weight: 800; color: var(--navy); line-height: 1.1; }
@@ -119,13 +120,13 @@ textarea.editor { min-height: 420px; font-family: ui-monospace, SFMono-Regular, 
 .login__card img { height: 52px; margin: 0 auto 18px; display: block; }
 .login__card h1 { text-align: center; font-size: 1.25rem; margin-bottom: 20px; }
 
-@media (max-width: 1100px) { .grid--4 { grid-template-columns: repeat(2, 1fr); } .grid--2 { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .grid--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid--2 { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 860px) {
   .layout { grid-template-columns: 1fr; }
   .side { position: fixed; z-index: 30; left: 0; top: 0; width: 260px; transform: translateX(-100%); transition: .25s; }
   .side.is-open { transform: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.4); }
   .btn.burger { display: inline-flex; }
-  .form-row, .form-row--3, .grid--2e { grid-template-columns: 1fr; }
+  .form-row, .form-row--3, .grid--2e { grid-template-columns: minmax(0, 1fr); }
 }
-@media (max-width: 520px) { .grid--4 { grid-template-columns: 1fr 1fr; } .stat__value { font-size: 1.5rem; } }
+@media (max-width: 520px) { .grid--4 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .stat__value { font-size: 1.5rem; } }
 .side nav a .badge { margin-left: auto; }

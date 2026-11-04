@@ -142,6 +142,32 @@ test('1. bản tin: Apps Script gửi được một phần -> phần còn lại
   assert.ok(sendsOf('Gửi một phần').every((r) => r.status === 'sent'));
 });
 
+test('1. bản tin: Apps Script trả lời lỗi (vd sai mã bí mật) -> người nhận không bị kẹt "chưa rõ", gửi tiếp được', async () => {
+  mock.mode = 'fail';
+  await newNewsletter('Apps Script báo lỗi');
+  mock.mode = 'ok';
+  assert.equal(sendsOf('Apps Script báo lỗi').length, 0, 'không ai bị giữ ở trạng thái "đang gửi"');
+  const id = db().prepare("SELECT id FROM newsletters WHERE subject = 'Apps Script báo lỗi'").get().id;
+  const csrf = await admin.csrf('/admin/newsletter');
+  await admin.form(`/admin/newsletter/${id}/continue`, { _csrf: csrf });
+  assert.ok(sendsOf('Apps Script báo lỗi').length >= 3 && sendsOf('Apps Script báo lỗi').every((r) => r.status === 'sent'));
+});
+
+test('1. bản tin: mỗi đợt chỉ đánh dấu tối đa 60 người; "Cho phép gửi lại" trả người "chưa rõ" về danh sách chờ', async () => {
+  addSubscribers(Array.from({ length: 70 }, (_, i) => `nhieu${i}@gmail.com`));
+  mock.mode = 'down';
+  await newNewsletter('Đợt lớn');
+  mock.mode = 'ok';
+  const rows = sendsOf('Đợt lớn');
+  assert.equal(rows.length, 60, 'chỉ 60 người của đợt bị "chưa rõ", số còn lại vẫn chờ gửi');
+  const id = db().prepare("SELECT id FROM newsletters WHERE subject = 'Đợt lớn'").get().id;
+  const csrf = await admin.csrf('/admin/newsletter');
+  await admin.form(`/admin/newsletter/${id}/release`, { _csrf: csrf });
+  assert.equal(sendsOf('Đợt lớn').length, 0);
+  await admin.form(`/admin/newsletter/${id}/continue`, { _csrf: csrf });
+  assert.equal(callsOf('newsletter').at(-1).data.recipients.length, 60);
+});
+
 async function freePort() {
   return new Promise((resolve) => { const s = net.createServer().listen(0, () => { const { port } = s.address(); s.close(() => resolve(port)); }); });
 }
@@ -237,6 +263,20 @@ test('2. sao lưu: zip gồm trip.db + uploads/, không có mật khẩu; khôi 
   } finally { fs.rmSync(restoreDir, { recursive: true, force: true }); }
 });
 
+test('2. khôi phục: file zip hỏng / không phải bản sao lưu -> báo lỗi rõ, dữ liệu hiện tại không đổi', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'trip-restore-bad-'));
+  try {
+    fs.writeFileSync(path.join(dir, 'trip.db'), 'du-lieu-hien-tai');
+    const bad = path.join(dir, 'bad.zip'); fs.writeFileSync(bad, 'khong phai zip');
+    let msg = '';
+    try { execFileSync(process.execPath, ['--no-warnings', 'scripts/restore-backup.js', bad], { cwd: ROOT, env: { ...process.env, DATA_DIR: dir }, stdio: 'pipe' }); }
+    catch (e) { msg = String(e.stderr); }
+    assert.match(msg, /KHÔNG khôi phục được/);
+    assert.equal(fs.readFileSync(path.join(dir, 'trip.db'), 'utf8'), 'du-lieu-hien-tai');
+    assert.deepEqual(fs.readdirSync(dir).sort(), ['bad.zip', 'trip.db'], 'không để lại thư mục tạm / file đổi tên');
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('2. sao lưu: chỉ tài khoản chủ tải được; nút nằm ngoài khối Google', async () => {
   let csrf = await admin.csrf('/admin/account');
   await admin.form('/admin/account/users', { _csrf: csrf, username: 'nhanvien2', password: 'matkhau456' });
@@ -276,6 +316,13 @@ test('3. form tư vấn gửi không qua JavaScript: Origin null + Sec-Fetch-Sit
   assert.equal(nullOnly.status, 403, 'Origin null không kèm Sec-Fetch-Site vẫn bị chặn');
   const evil = await urlencoded('/api/leads', { name: 'X Y', phone: '0905111222', service: 'Khác' }, { Origin: 'https://evil.example', 'Sec-Fetch-Site': 'same-origin', 'X-Forwarded-For': '10.3.0.4' });
   assert.equal(evil.status, 403);
+
+  // Referer "//evil.com" (đường dẫn bắt đầu bằng //) không thành link sang website khác; ?token= không bị lưu
+  const r1 = await urlencoded('/api/leads', { name: 'Khách Ref', phone: '0905111224', service: 'Khác' }, { Referer: base + '//evil.com/x', 'X-Forwarded-For': '10.3.0.6' });
+  assert.match(txt(await r1.text()), /href="\/"/);
+  assert.ok(!(await (await urlencoded('/api/leads', { name: 'Khách Ref2', phone: '0905111225', service: 'Khác' }, { Referer: base + '/\\evil.com', 'X-Forwarded-For': '10.3.0.7' })).text()).includes('evil.com'));
+  await urlencoded('/api/leads', { name: 'Khách Token', phone: '0905111226', service: 'Khác' }, { Referer: base + '/huy-dang-ky?token=bimat', 'X-Forwarded-For': '10.3.0.8' });
+  assert.equal(db().prepare("SELECT source_page FROM leads WHERE name = 'Khách Token'").get().source_page, '/huy-dang-ky');
 
   const json = await fetch(base + '/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': '10.3.0.5' }, body: JSON.stringify({ name: 'Khách JS', phone: '0905111223', service: 'Khác' }) });
   assert.equal((await json.json()).ok, true, 'form có JavaScript vẫn nhận JSON');
@@ -322,15 +369,17 @@ test('5. đánh giá: lần gửi lỗi không tính vào giới hạn; câu bá
 });
 
 // ---------------------------------------------------------------- 6. Đăng nhập
-test('6. giới hạn đăng nhập theo tên đăng nhập (đổi IP không né được)', async () => {
+test('6. giới hạn đăng nhập: IP + tên chặt (10/15 phút), chỉ theo tên rộng (100/giờ) để không khoá được tài khoản chủ', async () => {
   const c = new Client(base);
   const csrf = await c.csrf('/admin/login');
-  for (let i = 1; i <= 10; i++) {
-    const r = await c.form('/admin/login', { _csrf: csrf, username: 'khong-ton-tai', password: 'sai' + i }, { 'X-Forwarded-For': `10.6.0.${i}` });
-    assert.equal(r.status, 401);
-  }
-  const r = await c.form('/admin/login', { _csrf: csrf, username: 'khong-ton-tai', password: 'sai' }, { 'X-Forwarded-For': '10.6.1.99' });
-  assert.equal(r.status, 429);
+  const tryLogin = (ip, password) => c.form('/admin/login', { _csrf: csrf, username: 'nhanvien2', password }, { 'X-Forwarded-For': ip });
+  for (let i = 1; i <= 10; i++) assert.equal((await tryLogin('10.6.0.1', 'sai' + i)).status, 401);
+  assert.equal((await tryLogin('10.6.0.1', 'sai')).status, 429, 'cùng IP: bị chặn sau 10 lần sai');
+  // Kẻ xấu sai 10 lần từ nhiều IP khác nhau: chủ tài khoản ở IP khác vẫn đăng nhập được
+  for (let i = 2; i <= 11; i++) await tryLogin(`10.6.0.${i}`, 'sai');
+  assert.equal((await tryLogin('10.6.9.9', 'matkhau456')).status, 302, 'chủ tài khoản không bị khoá');
+  const src = fs.readFileSync(path.join(ROOT, 'src/routes/admin.js'), 'utf8');
+  assert.match(src, /limit: 100/, 'giới hạn theo tên đăng nhập (dò mật khẩu phân tán)');
 });
 
 test('6. bcrypt độ khó 12; hash cũ được băm lại khi đăng nhập; hash trống không đăng nhập được', async () => {

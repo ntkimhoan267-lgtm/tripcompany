@@ -72,11 +72,19 @@ const pageOf = (v) => Math.min(1000, Math.max(1, parseInt(qs(v), 10) || 1));
 // ---------- Đăng nhập ----------
 // Chỉ đếm lần đăng nhập SAI (đăng nhập đúng không bị chặn); CSRF kiểm tra trước nên request vô danh không thể khoá tài khoản
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-7', legacyHeaders: false, skipSuccessfulRequests: true });
-// Thêm giới hạn theo TÊN ĐĂNG NHẬP (không kèm IP): kẻ dò mật khẩu đổi IP liên tục cũng chỉ được thử 10 lần/15 phút
-// cho mỗi tài khoản. Đánh đổi: người ngoài có thể cố tình nhập sai để tạm khoá một tài khoản trong 15 phút.
-const userLimiter = rateLimit({
+// Hai lớp giới hạn theo tên đăng nhập (chỉ đếm lần SAI):
+// - IP + tên: 10 lần / 15 phút — chặn dò mật khẩu từ một nơi.
+// - Chỉ theo tên: 100 lần / giờ — chặn dò mật khẩu phân tán qua nhiều IP, nhưng đủ rộng để người ngoài
+//   không dễ khoá tài khoản chủ (trước đây 10 lần từ bất kỳ đâu là khoá được tài khoản admin vô thời hạn).
+const nameOf = (req) => qs(req.body && req.body.username, 60).trim().toLowerCase();
+const userIpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: false, legacyHeaders: false, skipSuccessfulRequests: true,
-  keyGenerator: (req) => 'u:' + qs(req.body && req.body.username, 60).trim().toLowerCase(),
+  keyGenerator: (req) => 'ui:' + req.ip + ':' + nameOf(req),
+  validate: { keyGeneratorIpFallback: false },
+});
+const userLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, limit: 100, standardHeaders: false, legacyHeaders: false, skipSuccessfulRequests: true,
+  keyGenerator: (req) => 'u:' + nameOf(req),
   validate: { keyGeneratorIpFallback: false },
 });
 // Hash giả: so sánh cả khi tài khoản không tồn tại để thời gian phản hồi không tiết lộ tên đăng nhập nào có thật
@@ -86,25 +94,30 @@ router.get('/login', csrf, (req, res) => {
   res.render('admin/login', { error: null, next: qs(req.query.next, 300) || '/admin' });
 });
 
-router.post('/login', csrf, loginLimiter, userLimiter, (req, res) => {
+// Giới hạn tổng số lần đăng nhập SAI trên toàn website (mỗi lần sai tốn ~0,3 giây CPU để so bcrypt)
+const globalLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: false, legacyHeaders: false, skipSuccessfulRequests: true,
+  keyGenerator: () => 'all', validate: { keyGeneratorIpFallback: false },
+});
+router.post('/login', csrf, globalLoginLimiter, loginLimiter, userIpLimiter, userLimiter, ah(async (req, res) => {
   const rawNext = qs(req.body.next, 300);
   const nextUrl = /^\/admin(\/|$|\?)/.test(rawNext) ? rawNext : '/admin';
   const user = db.prepare('SELECT * FROM users WHERE username = ?').get(qs(req.body.username, 60).trim().toLowerCase());
   const password = qs(req.body.password, 200);
   // Luôn chạy bcrypt (hash giả nếu không có tài khoản / hash trống sau khi khôi phục bản sao lưu)
   const hash = user && user.password_hash ? user.password_hash : DUMMY_HASH;
-  const match = bcrypt.compareSync(password, hash);
+  const match = await bcrypt.compare(password, hash); // bất đồng bộ: không chặn các request khác trong lúc so
   if (!user || !user.password_hash || !match) {
     return res.status(401).render('admin/login', { error: 'Sai tên đăng nhập hoặc mật khẩu.', next: nextUrl });
   }
   // Mật khẩu băm theo độ khó cũ: băm lại theo độ khó hiện tại (không đổi mật khẩu, không đăng xuất thiết bị khác)
   if (bcrypt.getRounds(user.password_hash) < config.bcryptCost) {
-    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(password, config.bcryptCost), user.id);
+    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(await bcrypt.hash(password, config.bcryptCost), user.id);
   }
   // Tạo phiên mới hoàn toàn (kể cả CSRF token) để chống session fixation
   req.session = { userId: user.id, sv: user.session_version, iat: Date.now(), csrf: crypto.randomBytes(24).toString('hex') };
   res.redirect(nextUrl);
-});
+}));
 
 router.post('/logout', requireAdmin, csrf, (req, res) => {
   // Tăng session_version: mọi cookie cũ của tài khoản này (kể cả bị sao chép) đều hết hiệu lực
@@ -249,8 +262,11 @@ async function withNewsletterLock(fn) {
 }
 const sendBatch = (newsletter) => withNewsletterLock(() => sendBatchUnlocked(newsletter));
 
+// Mỗi lần gọi Apps Script chỉ gửi tối đa ngần này người (khớp NEWSLETTER_BATCH trong Code.gs; Apps Script còn tự
+// giảm theo hạn mức Gmail). Chỉ đánh dấu "đang gửi" đúng những người trong đợt, không phải cả danh sách.
+const NEWSLETTER_BATCH = 60;
 async function sendBatchUnlocked(newsletter) {
-  const recipients = pendingRecipients(newsletter.id);
+  const recipients = pendingRecipients(newsletter.id).slice(0, NEWSLETTER_BATCH);
   if (!recipients.length) return { ok: true, sentNow: 0, remaining: 0 };
   let data = {};
   try { data = JSON.parse(newsletter.result || '{}') || {}; } catch { /* bản tin cũ lưu dạng chữ */ }
@@ -259,16 +275,19 @@ async function sendBatchUnlocked(newsletter) {
   db.exec('BEGIN'); try { for (const r of recipients) mark.run(newsletter.id, r.email); db.exec('COMMIT'); } catch (e) { db.exec('ROLLBACK'); throw e; }
   // 2) Gọi Apps Script (tự dừng sau ~4,5 phút; chờ lâu hơn một chút)
   const r = await google.callScript('newsletter', { subject: newsletter.subject, body: newsletter.body, tours: data.tours || [], recipients }, 330000);
-  const sent = new Set(Array.isArray(r.sent) ? r.sent.filter((e) => typeof e === 'string') : []);
-  // 3) Ai được xác nhận đã gửi -> 'sent'. Nếu Apps Script trả lời được (có danh sách sent) thì người chưa gửi chắc chắn
-  //    chưa nhận -> xoá dấu 'sending' để lần sau gửi tiếp. Không có câu trả lời (mạng lỗi/timeout) -> giữ 'sending' (chưa rõ).
-  const answered = Array.isArray(r.sent);
-  const setSent = db.prepare("UPDATE newsletter_sends SET status = 'sent', sent_at = datetime('now') WHERE newsletter_id = ? AND email = ?");
+  const list = (v) => new Set(Array.isArray(v) ? v.filter((e) => typeof e === 'string') : []);
+  const sent = list(r.sent); const skipped = list(r.skipped);
+  // 3) Apps Script TRẢ LỜI được (kể cả báo lỗi như sai mã bí mật, hết hạn mức): ai có trong "sent" -> 'sent',
+  //    email không hợp lệ ("skipped") -> 'skipped' (không gửi lại mãi), còn lại chắc chắn chưa nhận -> bỏ dấu để gửi tiếp.
+  //    KHÔNG nhận được câu trả lời (mất mạng, hết thời gian chờ, máy chủ tắt giữa chừng) -> giữ 'sending' = chưa rõ.
+  const answered = !r.transport;
+  const setStatus = db.prepare("UPDATE newsletter_sends SET status = ?, sent_at = datetime('now') WHERE newsletter_id = ? AND email = ?");
   const unmark = db.prepare("DELETE FROM newsletter_sends WHERE newsletter_id = ? AND email = ? AND status = 'sending'");
   db.exec('BEGIN');
   try {
     for (const rc of recipients) {
-      if (sent.has(rc.email)) setSent.run(newsletter.id, rc.email);
+      if (sent.has(rc.email)) setStatus.run('sent', newsletter.id, rc.email);
+      else if (skipped.has(rc.email)) setStatus.run('skipped', newsletter.id, rc.email);
       else if (answered) unmark.run(newsletter.id, rc.email);
     }
     db.exec('COMMIT');
@@ -319,6 +338,15 @@ function batchMessage(r, verb) {
     + (r.unknown ? ` ${r.unknown} người chưa rõ đã nhận hay chưa (mất kết nối với Google) — hệ thống không tự gửi lại để tránh trùng; kiểm tra mục "Đã gửi" trong Gmail.` : '')
     + (r.ok ? '' : ` Lỗi: ${r.error}`);
 }
+
+// Người nhận "chưa rõ" (mất kết nối giữa chừng): sau khi kiểm tra mục "Đã gửi" trong Gmail, quản trị viên có thể
+// cho phép gửi lại — CHẤP NHẬN rủi ro vài người nhận 2 lần.
+router.post('/newsletter/:id(\\d+)/release', csrf, (req, res) => {
+  if (newsletterBusy) { flash(req, 'error', BUSY.error); return res.redirect('/admin/newsletter'); }
+  const r = db.prepare("DELETE FROM newsletter_sends WHERE newsletter_id = ? AND status = 'sending'").run(req.params.id);
+  flash(req, 'success', `Đã chuyển ${r.changes} người "chưa rõ" về danh sách chờ gửi. Bấm "Gửi tiếp" để gửi.`);
+  res.redirect('/admin/newsletter');
+});
 
 router.post('/newsletter/:id(\\d+)/continue', csrf, ah(async (req, res) => {
   const n = db.prepare('SELECT * FROM newsletters WHERE id = ?').get(req.params.id);
@@ -561,6 +589,8 @@ router.get('/backup', (req, res, next) => {
     'Cache-Control': 'no-store',
   });
   res.on('close', cleanup);
+  // yazl báo lỗi đọc file (vd ảnh bị xoá trong lúc đang tải) trên chính ZipFile: phải bắt, nếu không cả máy chủ sập
+  zip.on('error', (e) => { console.error('[backup]', e.message); cleanup(); res.destroy(e); });
   zip.outputStream.on('error', (e) => { cleanup(); res.destroy(e); });
   zip.outputStream.pipe(res);
 });
@@ -574,6 +604,8 @@ function unusedUploads(minAgeMs = 24 * 3600e3) {
     ...db.prepare('SELECT cover, content FROM posts').all().flatMap((r) => [r.cover, r.content]),
     ...db.prepare('SELECT image, highlights, itinerary FROM tours').all().flatMap((r) => [r.image, r.highlights, r.itinerary]),
     ...db.prepare('SELECT value FROM settings').all().map((r) => r.value),
+    // Bản tin lưu ảnh tour (JSON) để "Gửi tiếp" về sau: ảnh đó vẫn phải còn
+    ...db.prepare('SELECT body, result FROM newsletters').all().flatMap((r) => [r.body, r.result]),
   ];
   for (const t of texts) for (const m of String(t || '').matchAll(/\/uploads\/([\w.-]+)/g)) used.add(m[1]);
   const now = Date.now();

@@ -210,20 +210,21 @@ function sendNewsletter(d, siteUrl) {
   var room = Math.min(NEWSLETTER_BATCH, MailApp.getRemainingDailyQuota() - MAIL_RESERVE);
   if (room <= 0) return { ok: false, error: 'Gmail đã hết hạn mức gửi hôm nay. Vui lòng bấm "Gửi tiếp" vào ngày mai.', sent: [] };
   var sent = [];
+  var skipped = []; // email sai định dạng: báo lại để website không đưa vào đợt sau nữa
   var deadline = Date.now() + 4.5 * 60 * 1000; // Apps Script giới hạn 6 phút mỗi lần chạy
   for (var i = 0; i < list.length && sent.length < room && Date.now() < deadline; i++) {
     var r = list[i];
-    if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i.test(String(r.email))) continue;
+    if (!/^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i.test(String(r.email))) { skipped.push(String(r.email)); continue; }
     var unsub = r.token ? siteUrl + '/huy-dang-ky?token=' + encodeURIComponent(r.token) : siteUrl;
     try {
       MailApp.sendEmail({ to: r.email, subject: oneLine(d.subject), htmlBody: newsletterHtml(d, siteUrl, unsub), name: SENDER_NAME, replyTo: REPLY_TO });
     } catch (err) {
       // Dừng lại nhưng vẫn báo danh sách đã gửi để website không gửi lại cho họ
-      return { ok: false, error: 'Gửi bị gián đoạn: ' + String((err && err.message) || err), sent: sent, remaining: list.length - sent.length };
+      return { ok: false, error: 'Gửi bị gián đoạn: ' + String((err && err.message) || err), sent: sent, skipped: skipped, remaining: list.length - sent.length };
     }
     sent.push(r.email);
   }
-  return { ok: true, sent: sent, remaining: list.length - sent.length };
+  return { ok: true, sent: sent, skipped: skipped, remaining: list.length - sent.length - skipped.length };
 }
 
 function newsletterHtml(d, siteUrl, unsub) {

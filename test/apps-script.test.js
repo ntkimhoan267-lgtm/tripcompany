@@ -88,3 +88,11 @@ test('7. bản tin hiện tên TRIP Đà Nẵng, khách trả lời về Gmail c
   assert.equal(state.mails[0].name, 'TRIP Đà Nẵng');
   assert.equal(state.mails[0].replyTo, 'triptranslate.com@gmail.com');
 });
+
+test('7. email sai định dạng được báo lại (skipped) để website không gửi lại mãi', () => {
+  const { ctx } = loadScript(100);
+  const r = ctx.sendNewsletter({ subject: 'Tour', body: 'x', recipients: [{ email: 'sai-dinh-dang', token: '' }, { email: 'dung@gmail.com', token: 't' }] }, 'https://tripdn.com');
+  assert.deepEqual([...r.skipped], ['sai-dinh-dang']);
+  assert.deepEqual([...r.sent], ['dung@gmail.com']);
+  assert.equal(r.remaining, 0);
+});

@@ -19,13 +19,17 @@ app.set('trust proxy', tp === undefined || tp === '' ? 1 : (/^\d+$/.test(tp) ? N
 app.disable('x-powered-by');
 
 // Kiểm tra sức khoẻ cho Render: đọc được database VÀ ghi được ổ đĩa dữ liệu (ổ đầy / mất ổ đĩa -> báo lỗi để Render cảnh báo)
+const diskProbe = { at: 0, ok: false };
 app.get('/healthz', (req, res) => {
   res.set('Cache-Control', 'no-store');
   try { require('./src/db').prepare('SELECT 1').get(); } catch (e) { return res.status(500).send('db error'); }
-  try {
-    const probe = path.join(config.dataDir, '.healthz');
-    require('node:fs').writeFileSync(probe, String(Date.now()));
-  } catch (e) { return res.status(500).send('disk error'); }
+  // Thử ghi ổ đĩa tối đa 30 giây/lần (trang công khai, không để bị gọi dồn dập làm ghi đĩa liên tục)
+  if (Date.now() - diskProbe.at > 30000) {
+    try { require('node:fs').writeFileSync(path.join(config.dataDir, '.healthz'), String(Date.now())); diskProbe.ok = true; }
+    catch (e) { diskProbe.ok = false; }
+    diskProbe.at = Date.now();
+  }
+  if (!diskProbe.ok) return res.status(500).send('disk error');
   res.send('ok');
 });
 
@@ -161,7 +165,7 @@ if (require.main === module) {
   let syncTimer = null;
   if (google.isConfigured()) {
     syncTimer = setInterval(() => {
-      google.syncPending({ olderThanMinutes: 2 })
+      google.syncPending({ olderThanMinutes: 2, timeoutMs: 30000 })
         .then((r) => { if (!r.ok && !r.busy) console.warn('[google] Tự đồng bộ dừng:', r.error); })
         .catch((e) => console.warn('[google] Tự đồng bộ lỗi:', e.message));
     }, 10 * 60 * 1000);

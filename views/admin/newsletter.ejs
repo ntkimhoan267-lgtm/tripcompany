@@ -30,7 +30,8 @@
       <table><thead><tr><th>Ngày</th><th>Tiêu đề</th><th>Đã gửi</th><th></th></tr></thead>
       <tbody><% history.forEach(function (n) { %><tr>
         <td class="small nowrap"><%= h.fmtDate(n.created_at, true) %></td><td><%= n.subject %></td>
-        <td class="small nowrap"><%= n.sent %> người<% if (n.remaining) { %><br><span class="muted">còn <%= n.remaining %></span><% } %><% if (n.unknown) { %><br><span class="muted" title="Mất kết nối với Google giữa chừng: không tự gửi lại để tránh khách nhận 2 lần">chưa rõ <%= n.unknown %></span><% } %></td>
+        <td class="small nowrap"><%= n.sent %> người<% if (n.remaining) { %><br><span class="muted">còn <%= n.remaining %></span><% } %><% if (n.unknown) { %><br><span class="muted" title="Mất kết nối với Google giữa chừng: không tự gửi lại để tránh khách nhận 2 lần">chưa rõ <%= n.unknown %></span>
+          <form method="post" action="/admin/newsletter/<%= n.id %>/release" data-confirm="Chỉ làm khi đã kiểm tra mục 'Đã gửi' trong Gmail: những người 'chưa rõ' sẽ được gửi lại, có thể vài người nhận 2 lần. Tiếp tục?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--ghost">Cho phép gửi lại</button></form><% } %></td>
         <td><% if (n.remaining) { %><form method="post" action="/admin/newsletter/<%= n.id %>/continue" data-once><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm">Gửi tiếp</button></form><% } else { %><span class="badge badge--published">Xong</span><% } %></td>
       </tr><% }) %></tbody></table>
     <% } else { %><p class="muted">Chưa gửi bản tin nào.</p><% } %>

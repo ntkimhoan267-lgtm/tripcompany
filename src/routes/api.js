@@ -19,7 +19,8 @@ const wantsJson = (req) => req.is('application/json') || req.accepts(['html', 'j
 function refererPath(req) {
   try {
     const u = new URL(req.get('referer') || '');
-    if (u.host === req.get('host') && !u.pathname.startsWith('/api/')) return u.pathname + u.search;
+    // Chỉ đường dẫn (bỏ ?query: có thể chứa mã huỷ đăng ký), và không nhận "//" hay "/\" (sẽ thành link sang website khác)
+    if (u.host === req.get('host') && !u.pathname.startsWith('/api/') && /^\/(?![\/\\])/.test(u.pathname)) return u.pathname;
   } catch { /* không có / không hợp lệ */ }
   return '';
 }

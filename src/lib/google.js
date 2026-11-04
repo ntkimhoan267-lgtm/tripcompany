@@ -32,10 +32,11 @@ async function callScript(action, data, timeoutMs = 30000) {
     const text = await res.text();
     let json;
     try { json = JSON.parse(text); } catch { json = null; }
-    if (!json || typeof json !== 'object') return { ok: false, error: `Phản hồi không hợp lệ (HTTP ${res.status})` };
+    // transport: true = không nhận được câu trả lời của Apps Script (không biết phía Google đã làm gì chưa)
+    if (!json || typeof json !== 'object') return { ok: false, transport: true, error: `Phản hồi không hợp lệ (HTTP ${res.status})` };
     return json;
   } catch (err) {
-    return { ok: false, error: err.name === 'AbortError' ? 'Hết thời gian chờ' : err.message };
+    return { ok: false, transport: true, error: err.name === 'AbortError' ? 'Hết thời gian chờ' : err.message };
   } finally {
     clearTimeout(timer);
   }

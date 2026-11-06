@@ -129,8 +129,21 @@ router.post('/logout', requireAdmin, csrf, (req, res) => {
 router.use(requireAdmin);
 router.use((req, res, next) => {
   res.locals.pendingReviews = db.prepare("SELECT COUNT(*) AS n FROM reviews WHERE status = 'pending'").get().n;
+  res.locals.isOwner = req.user.id === ownerId(); // menu / nút ẩn với nhân viên (khoá thật nằm ở requireOwner)
   next();
 });
+
+// Chỉ tài khoản chủ (tạo đầu tiên) được dùng các chức năng nhạy cảm: danh sách email, gửi bản tin, đánh giá,
+// cài đặt, đồng bộ Google, xuất CSV và xoá khách. Nhân viên chỉ xem / cập nhật khách tư vấn, quản lý tour và bài viết.
+const NOT_OWNER = 'Chỉ tài khoản chủ mới dùng được chức năng này.';
+const requireOwner = (req, res, next) => {
+  if (req.user.id === ownerId()) return next();
+  if (req.method === 'GET' || req.method === 'HEAD') return res.status(403).send(NOT_OWNER);
+  flash(req, 'error', NOT_OWNER);
+  res.redirect('/admin');
+};
+// Khoá theo tiền tố đường dẫn: route con thêm về sau cũng tự được khoá
+router.use(['/subscribers', '/subscribers.csv', '/newsletter', '/reviews', '/settings', '/sync', '/test-google', '/leads.csv'], requireOwner);
 
 // ---------- Tổng quan ----------
 router.get('/', csrf, (req, res) => {
@@ -192,7 +205,7 @@ router.post('/leads/:id(\\d+)', csrf, (req, res) => {
   res.redirect('/admin/leads');
 });
 
-router.post('/leads/:id(\\d+)/delete', csrf, (req, res) => {
+router.post('/leads/:id(\\d+)/delete', requireOwner, csrf, (req, res) => {
   const r = db.prepare('DELETE FROM leads WHERE id = ?').run(req.params.id);
   flash(req, r.changes ? 'success' : 'error', r.changes ? 'Đã xoá khách hàng.' : 'Không tìm thấy khách hàng.');
   res.redirect('/admin/leads');

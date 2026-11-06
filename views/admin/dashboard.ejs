@@ -3,7 +3,7 @@
 <div class="topline">
   <h1>Tổng quan</h1>
   <div class="actions">
-    <% if (googleReady && stats.unsynced) { %>
+    <% if (isOwner && googleReady && stats.unsynced) { %>
       <form method="post" action="/admin/sync"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--ghost">Đồng bộ <%= stats.unsynced %> bản ghi lên Google Sheet</button></form>
     <% } %>
     <a class="btn" href="/admin/posts/new">+ Viết bài</a>

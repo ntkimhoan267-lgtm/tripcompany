@@ -26,13 +26,14 @@
     ['/admin/settings', 'Cài đặt', 'info'],
     ['/admin/account', 'Tài khoản', 'shield'],
   ];
+  const ownerOnly = ['/admin/subscribers', '/admin/newsletter', '/admin/reviews', '/admin/settings'];
   const cur = path.replace(/\/$/, '') || '/admin';
 %>
 <div class="layout">
   <aside class="side" id="side">
     <div class="side__brand"><img src="/img/logo-icon-sm.png" alt=""><div>TRIP<small>Bảng quản trị</small></div></div>
     <nav>
-      <% nav.forEach(function ([href, label, ic]) { const active = href === '/admin' ? cur === '/admin' : cur.startsWith(href); %>
+      <% nav.forEach(function ([href, label, ic]) { if (ownerOnly.includes(href) && !(typeof isOwner !== 'undefined' && isOwner)) return; const active = href === '/admin' ? cur === '/admin' : cur.startsWith(href); %>
         <a href="<%= href %>" class="<%= active ? 'is-active' : '' %>"><%- icon(ic) %> <%= label %><% if (href === '/admin/reviews' && typeof pendingReviews !== 'undefined' && pendingReviews) { %><span class="badge badge--new"><%= pendingReviews %></span><% } %></a>
       <% }) %>
     </nav>

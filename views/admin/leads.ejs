@@ -2,7 +2,7 @@
 <% const qs = new URLSearchParams(Object.entries(q).filter(([, v]) => v)).toString(); %>
 <div class="topline">
   <h1>Khách tư vấn <span class="muted" style="font-size:1rem">(<%= total %>)</span></h1>
-  <a class="btn btn--ghost" href="/admin/leads.csv<%= qs ? '?' + qs : '' %>">⬇ Xuất CSV (Excel)</a>
+  <% if (isOwner) { %><a class="btn btn--ghost" href="/admin/leads.csv<%= qs ? '?' + qs : '' %>">⬇ Xuất CSV (Excel)</a><% } %>
 </div>
 
 <form class="card filters" method="get">
@@ -34,9 +34,9 @@
           </form>
         </td>
         <td>
-          <form method="post" action="/admin/leads/<%= l.id %>/delete" data-confirm="Xoá khách hàng <%= l.name %>?">
+          <% if (isOwner) { %><form method="post" action="/admin/leads/<%= l.id %>/delete" data-confirm="Xoá khách hàng <%= l.name %>?">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger" title="Xoá">✕</button>
-          </form>
+          </form><% } %>
         </td>
       </tr>
       <% }) %>

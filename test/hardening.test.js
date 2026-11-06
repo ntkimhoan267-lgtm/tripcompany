@@ -291,6 +291,60 @@ test('2. sao lưu: chỉ tài khoản chủ tải được; nút nằm ngoài kh
   csrf = await admin.csrf('/admin/account');
 });
 
+test('2. phân quyền: nhân viên không xuất / xoá dữ liệu khách, không gửi bản tin, không đổi cài đặt; vẫn làm được khách, tour, bài viết', async () => {
+  const staff = new Client(base);
+  assert.equal((await staff.login('nhanvien2', 'matkhau456', '10.200.0.3')).status, 302);
+  const lead = db().prepare("INSERT INTO leads (name, phone, service) VALUES ('Khách phân quyền', '0900000001', 'Visa Nhật Bản')").run().lastInsertRowid;
+  const hotlineBefore = (await (await admin.get('/admin/settings')).text()).match(/name="hotline"[^>]*value="([^"]*)"/)?.[1];
+  const pingsBefore = callsOf('ping').length;
+
+  // GET: bị chặn 403
+  for (const p of ['/admin/subscribers', '/admin/subscribers.csv', '/admin/leads.csv', '/admin/newsletter', '/admin/reviews', '/admin/settings']) {
+    assert.equal((await staff.get(p)).status, 403, `nhân viên vào ${p} phải bị chặn`);
+  }
+  // POST: bị chặn (chuyển về /admin kèm thông báo), dữ liệu không đổi, không gọi Google
+  const csrf = await staff.csrf('/admin/leads');
+  for (const [p, data] of [
+    [`/admin/leads/${lead}/delete`, {}],
+    ['/admin/sync', {}],
+    ['/admin/test-google', {}],
+    ['/admin/settings', { hotline: '0999999999' }],
+    ['/admin/newsletter', { mode: 'all', subject: 'x', body: 'x' }],
+    ['/admin/subscribers/1/delete', {}],
+  ]) {
+    const r = await staff.form(p, { _csrf: csrf, ...data });
+    assert.equal(r.status, 302, `POST ${p} bị chuyển hướng`);
+    assert.equal(r.headers.get('location'), '/admin', `POST ${p} không được thực hiện`);
+  }
+  assert.ok(db().prepare('SELECT id FROM leads WHERE id = ?').get(lead), 'khách không bị nhân viên xoá');
+  assert.equal(callsOf('ping').length, pingsBefore, 'nhân viên không gọi được "Kiểm tra kết nối"');
+  assert.equal((await (await admin.get('/admin/settings')).text()).match(/name="hotline"[^>]*value="([^"]*)"/)?.[1], hotlineBefore, 'hotline không bị nhân viên đổi');
+
+  // Nhân viên vẫn dùng được: khách tư vấn (xem + cập nhật), tour, bài viết, tài khoản; giao diện ẩn nút nhạy cảm
+  for (const p of ['/admin', '/admin/leads', '/admin/tours', '/admin/posts', '/admin/account']) {
+    assert.equal((await staff.get(p)).status, 200, `nhân viên vào được ${p}`);
+  }
+  const leadsHtml = await (await staff.get('/admin/leads')).text();
+  assert.ok(!leadsHtml.includes('/admin/leads.csv'), 'nút xuất CSV ẩn với nhân viên');
+  assert.ok(!leadsHtml.includes(`/admin/leads/${lead}/delete`), 'nút xoá khách ẩn với nhân viên');
+  for (const hidden of ['/admin/subscribers', '/admin/newsletter', '/admin/reviews', '/admin/settings']) {
+    assert.ok(!leadsHtml.includes(`href="${hidden}"`), `menu ẩn ${hidden} với nhân viên`);
+  }
+  const upd = await staff.form(`/admin/leads/${lead}`, { _csrf: csrf, status: 'contacting', admin_note: 'nhân viên ghi chú' });
+  assert.equal(upd.status, 302, 'nhân viên cập nhật được khách');
+  assert.equal(db().prepare('SELECT admin_note FROM leads WHERE id = ?').get(lead).admin_note, 'nhân viên ghi chú');
+
+  // Tài khoản chủ vẫn dùng được tất cả
+  for (const p of ['/admin/subscribers', '/admin/subscribers.csv', '/admin/leads.csv', '/admin/newsletter', '/admin/reviews', '/admin/settings']) {
+    assert.equal((await admin.get(p)).status, 200, `tài khoản chủ vào được ${p}`);
+  }
+  const ownerLeads = await (await admin.get('/admin/leads')).text();
+  assert.ok(ownerLeads.includes('/admin/leads.csv') && ownerLeads.includes(`/admin/leads/${lead}/delete`), 'chủ vẫn thấy nút xuất CSV và xoá khách');
+  const delCsrf = await admin.csrf('/admin/leads');
+  assert.equal((await admin.form(`/admin/leads/${lead}/delete`, { _csrf: delCsrf })).status, 302);
+  assert.equal(db().prepare('SELECT id FROM leads WHERE id = ?').get(lead), undefined, 'chủ xoá được khách');
+});
+
 // ---------------------------------------------------------------- 3. Form khi không có JavaScript
 const urlencoded = (p, data, headers = {}) => fetch(base + p, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'text/html', ...headers }, body: new URLSearchParams(data) });
 

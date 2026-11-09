@@ -43,7 +43,7 @@
           <span class="eyebrow">Bảng giá</span>
           <h2>Chọn loại <em><%= isEvisa ? 'E-visa' : 'visa' %></em> phù hợp</h2>
         </div>
-        <%- include('../partials/offer-bar', { service: page.leadService }) %>
+        <%- include('../partials/offer-bar', { service: page.leadService, groups: [isEvisa ? 'evisa' : page.id === 'trung-quoc' ? 'cn' : 'world'] }) %>
         <% if (isEvisa) { %>
           <%- include('../partials/price/evisa') %>
           <h3 class="ppanel__sub">Hỗ trợ tại sân bay (Fast Track)</h3>

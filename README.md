@@ -24,13 +24,17 @@ Website của **Công ty TNHH Dịch thuật và Dịch vụ Du lịch TRIP**. D
 - Quản lý khách tư vấn: đổi trạng thái, thêm ghi chú, xuất CSV.
 - Quản lý danh sách đăng ký nhận tin.
 - Gửi bản tin tháng.
-- Viết blog, quản lý tour.
+- Viết blog chuẩn SEO: mục lục "Nội dung chính" tự tạo, tiêu đề/mô tả Google, từ khoá chính, FAQ, hẹn giờ đăng,
+  4 giao diện bài viết, chấm điểm SEO và xem trước kết quả Google. Quản lý tour.
+- **Bảng giá & ưu đãi**: sửa giá mọi dịch vụ, bật/tắt ưu đãi "giảm 500.000đ khi để lại SĐT hoặc Gmail".
+- **Ảnh & video**: đổi ảnh, video nền của từng dịch vụ, trang visa, trang chủ.
 - Cài đặt và quản lý tài khoản nhân viên.
 
 **SEO**
 - Meta title, description và Open Graph cho từng trang.
-- `sitemap.xml`, `robots.txt`.
-- Dữ liệu có cấu trúc schema.org (TravelAgency).
+- `sitemap.xml` (có ngày cập nhật bài viết, tour), `robots.txt`.
+- Dữ liệu có cấu trúc schema.org: TravelAgency, BreadcrumbList; bài viết có BlogPosting và FAQPage.
+- Đổi đường dẫn bài viết đã đăng: link cũ tự chuyển hướng 301.
 
 ## Công nghệ
 
@@ -141,6 +145,11 @@ src/routes/public.js      Các trang website
 src/routes/api.js         API form tư vấn / nhận tin
 src/routes/admin.js       Dashboard
 src/lib/google.js         Gửi dữ liệu sang Google Apps Script
+src/lib/catalog.js        Bảng giá sửa được trong Dashboard (đè lên giá mặc định)
+src/lib/offer.js          Ưu đãi "giảm X khi để lại SĐT/Gmail", hiển thị giá
+src/lib/media.js          Ảnh & video sửa được trong Dashboard
+src/lib/toc.js            Mục lục bài viết, FAQ, giao diện bài viết
+src/data/articles/        Bài viết SEO thêm sẵn (tự đăng 1 lần khi khởi động)
 views/                    Giao diện (EJS)
 public/                   CSS, JS, ảnh, logo
 google-apps-script/       Code dán vào Google Apps Script
@@ -149,8 +158,10 @@ docs/                     Tài liệu
 
 ## Cập nhật bảng giá
 
-Bảng giá nằm trong file `src/data/services.js`. Khi đổi giá:
-1. Sửa con số trong file này.
-2. Commit và push. Render sẽ tự triển khai lại.
+Cách thường dùng: **Dashboard → Bảng giá & ưu đãi** (tài khoản chủ). Sửa xong bấm Lưu, website cập nhật ngay.
 
-**Chỉ nhập giá khách lẻ (Public).**
+Giá **mặc định** nằm trong `src/data/services.js`. Bảng nào đã sửa trong Dashboard sẽ dùng giá đã sửa
+(lưu trong database, khoá `catalog_v1`) thay vì giá trong file; tick "Khôi phục giá mặc định" để quay về giá trong file.
+
+**Chỉ nhập giá khách lẻ (Public), giá thật.** Khi bật ưu đãi, website tự cộng số tiền ưu đãi (mặc định 500.000đ / 20 USD)
+để làm giá niêm yết; khách để lại SĐT hoặc Gmail thì thấy giá thật.

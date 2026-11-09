@@ -1,8 +1,11 @@
 <%
-  // Dải thông báo ưu đãi "giảm X khi để lại SĐT/Gmail". Tham số: service (dịch vụ gửi kèm khi khách nhận ưu đãi)
+  // Dải thông báo ưu đãi "giảm X khi để lại SĐT/Gmail". Tham số: service (dịch vụ gửi kèm khi khách nhận ưu đãi),
+  // groups (các nhóm giá có trên trang; không nhóm nào đang bật ưu đãi thì không hiện dải)
   const osvc = typeof service !== 'undefined' ? service : '';
+  const ogroups = typeof groups !== 'undefined' && groups ? groups : null;
+  const oshow = offerCfg.enabled && (!ogroups || ogroups.some(function (g) { return offerCfg.groups.has(g); }));
 %>
-<% if (offerCfg.enabled) { %>
+<% if (oshow) { %>
 <div class="offer-bar" role="note">
   <span class="offer-bar__icon" aria-hidden="true">🎁</span>
   <p class="offer-bar__text offer-locked"><strong><%= offerCfg.label %></strong> cho các dịch vụ có biểu tượng 🎁 khi bạn để lại <strong>số điện thoại</strong> hoặc <strong>Gmail</strong>. Giá đang hiện là giá niêm yết.</p>

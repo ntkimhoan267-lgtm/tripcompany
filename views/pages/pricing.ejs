@@ -28,7 +28,7 @@
 
 <section class="section section--pricing">
   <div class="container">
-    <%- include('../partials/offer-bar') %>
+    <%- include('../partials/offer-bar', { groups: ['cn', 'world', 'translation', 'fees', 'evisa', 'passport', 'cars'] }) %>
     <nav class="ptabs" role="tablist" aria-label="Nhóm dịch vụ" data-tabs>
       <% tabs.forEach(function (t, i) { %>
         <a class="ptab" href="#<%= t.id %>" role="tab" id="tab-<%= t.id %>" aria-controls="<%= t.id %>" aria-selected="<%= i === 0 %>">

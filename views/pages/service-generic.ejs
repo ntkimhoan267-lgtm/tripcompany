@@ -32,7 +32,7 @@
           <div class="feature-trio__item"><span><%- icon('passport') %></span><h3>Nhận tận nơi</h3><p>Hỗ trợ chuyển phát hộ chiếu khi có kết quả.</p></div>
         </div>
         <div class="block-head mt-4"><span class="eyebrow">Bảng giá</span><h2>Phí dịch vụ <em>hộ chiếu</em></h2></div>
-        <%- include('../partials/offer-bar', { service: 'Hộ chiếu' }) %>
+        <%- include('../partials/offer-bar', { service: 'Hộ chiếu', groups: ['passport'] }) %>
         <%- include('../partials/price/options', { items: services.passport.rows.map(function (r) { return { title: r.type, time: r.time, priceHtml: price(r.price, 'vnd', 'passport', { service: 'Hộ chiếu' }), flag: 'vn' }; }), service: 'Hộ chiếu' }) %>
         <div class="notice mt-2"><%- icon('info') %><div><% services.passport.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
 
@@ -65,7 +65,7 @@
 
       <% } else if (svc.slug === 'thue-xe') { %>
         <div class="block-head"><span class="eyebrow"><%= services.carTransfer.area %></span><h2>Xe <em>đưa đón</em></h2></div>
-        <% if (offerCfg.groups.has('cars') || offerCfg.groups.has('selfdrive')) { %><%- include('../partials/offer-bar', { service: 'Thuê xe / Xe đưa đón' }) %><% } %>
+        <%- include('../partials/offer-bar', { service: 'Thuê xe / Xe đưa đón', groups: ['cars', 'selfdrive'] }) %>
         <%- include('../partials/price/cars') %>
         <div class="block-head mt-4"><span class="eyebrow">Giao xe tại Đà Nẵng</span><h2>Thuê xe <em>tự lái</em></h2></div>
         <div class="feature-trio">

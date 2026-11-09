@@ -14,7 +14,7 @@
 <section class="section">
   <div class="container">
     <%- include('../partials/stats', { variant: 'inline' }) %>
-    <div class="mt-3"><%- include('../partials/offer-bar', { service: 'Visa Trung Quốc' }) %></div>
+    <div class="mt-3"><%- include('../partials/offer-bar', { service: 'Visa Trung Quốc', groups: ['markets'] }) %></div>
     <div class="markets markets--4 mt-4">
       <% services.markets.forEach(function (m, i) { %>
         <a class="market market--<%= m.art %> reveal" href="/visa/<%= m.id %>">

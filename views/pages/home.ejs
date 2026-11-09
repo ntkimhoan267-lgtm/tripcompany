@@ -80,7 +80,7 @@
       <h2>Visa <em>Trung · Hàn · Nhật</em> & Châu Âu</h2>
       <p>Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản và phí dịch vụ (trừ khi có ghi chú riêng).</p>
     </div>
-    <%- include('../partials/offer-bar', { service: 'Visa Trung Quốc' }) %>
+    <%- include('../partials/offer-bar', { service: 'Visa Trung Quốc', groups: ['markets', 'translation'] }) %>
     <div class="markets markets--4">
       <% services.markets.forEach(function (m, i) { %>
         <a class="market market--<%= m.art %> reveal" href="/visa/<%= m.id %>">

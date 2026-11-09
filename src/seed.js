@@ -217,11 +217,15 @@ function seedArticles() {
   // không đụng tới ảnh / nội dung mà quản trị viên đã tự sửa trong Dashboard.
   if (!db.prepare("SELECT 1 FROM settings WHERE key = 'backfill_images_v2'").get()) {
     db.prepare("UPDATE tours SET image = '/img/tours/vinwonders-nam-hoi-an.jpg' WHERE slug = 'tour-vinwonders-nam-hoi-an' AND image = '/img/tours/hoi-an-dem.jpg'").run();
-    const a = require('./data/articles/lam-ho-chieu-nhanh');
-    // Bài chưa từng được sửa trong Dashboard (updated_at = created_at): cập nhật ảnh bìa và nội dung mới
-    db.prepare(`UPDATE posts SET cover = ?, cover_alt = ?, content = ? WHERE slug = ? AND cover = '/img/services/ho-chieu.jpg' AND updated_at = created_at`)
-      .run(a.cover, a.cover_alt, a.content, a.slug);
     db.prepare("INSERT INTO settings (key, value) VALUES ('backfill_images_v2', datetime('now'))").run();
+  }
+  // Bài "Làm hộ chiếu nhanh" đã đăng từ bản trước: cập nhật lên nội dung mới nhất nếu quản trị viên chưa từng sửa
+  // (updated_at = created_at). Bài đã sửa trong Dashboard thì giữ nguyên.
+  if (!db.prepare("SELECT 1 FROM settings WHERE key = 'article_lam_ho_chieu_v3'").get()) {
+    const a = require('./data/articles/lam-ho-chieu-nhanh');
+    db.prepare(`UPDATE posts SET cover = ?, cover_alt = ?, content = ?, faq = ?, excerpt = ?, seo_title = ?, meta_desc = ?
+      WHERE slug = ? AND updated_at = created_at`).run(a.cover, a.cover_alt, a.content, a.faq, a.excerpt, a.seo_title, a.meta_desc, a.slug);
+    db.prepare("INSERT INTO settings (key, value) VALUES ('article_lam_ho_chieu_v3', datetime('now'))").run();
   }
 
   for (const [flag, file] of SEO_ARTICLES) {

@@ -103,6 +103,10 @@ router.post('/subscribe', subscribeLimiter, (req, res) => {
 
   const existing = db.prepare('SELECT * FROM subscribers WHERE email = ?').get(email);
   setOfferCookie(res); // khách đã để lại email: hiện giá ưu đãi
+  if (existing && existing.status === 'offer') {
+    db.prepare("UPDATE subscribers SET status = 'active' WHERE id = ?").run(existing.id);
+    return reply(req, res, 200, { ok: true, message: SUBSCRIBE_OK });
+  }
   if (existing) {
     // Không tự kích hoạt lại email đã huỷ (tránh người khác đăng ký hộ); khách muốn nhận lại thì liên hệ TRIP
     return reply(req, res, 200, { ok: true, message: SUBSCRIBE_OK });
@@ -129,16 +133,28 @@ router.post('/offer', offerLimiter, (req, res) => {
   const service = leadServiceOptions.includes(clean(b.service, 100)) ? clean(b.service, 100) : 'Khác';
   const cfg = offerConfig(getSettings());
   const label = cfg.vnd ? `giảm ${vnd(cfg.vnd)}` : 'ưu đãi';
+  const wantsNews = b.newsletter === true || b.newsletter === '1' || b.newsletter === 'on';
   if (isValidVnPhone(contact)) {
-    const info = db.prepare('INSERT INTO leads (name, phone, service, note, source_page) VALUES (?, ?, ?, ?, ?)')
-      .run(name.length >= 2 ? name : 'Khách nhận ưu đãi', normalizePhone(contact), service, `[Ưu đãi] Khách nhận giá ${label} trên website.`, source);
-    google.syncLead(db.prepare('SELECT * FROM leads WHERE id = ?').get(info.lastInsertRowid)).catch((e) => console.error(e));
+    const phone = normalizePhone(contact);
+    // Cùng số đã nhận ưu đãi trong 24 giờ qua: không tạo thêm khách trùng (và không gửi thêm email báo)
+    const dup = db.prepare("SELECT id FROM leads WHERE phone = ? AND note LIKE '[Ưu đãi]%' AND created_at >= datetime('now', '-1 day')").get(phone);
+    if (!dup) {
+      const info = db.prepare('INSERT INTO leads (name, phone, service, note, source_page) VALUES (?, ?, ?, ?, ?)')
+        .run(name.length >= 2 ? name : 'Khách nhận ưu đãi', phone, service, `[Ưu đãi] Khách nhận giá ${label} trên website.`, source);
+      google.syncLead(db.prepare('SELECT * FROM leads WHERE id = ?').get(info.lastInsertRowid)).catch((e) => console.error(e));
+    }
   } else if (isValidEmail(contact)) {
     const email = contact.toLowerCase();
-    if (!db.prepare('SELECT id FROM subscribers WHERE email = ?').get(email)) {
-      const info = db.prepare('INSERT INTO subscribers (email, name, source_page, token) VALUES (?, ?, ?, ?)')
-        .run(email, name, `${source} (nhận ưu đãi${service !== 'Khác' ? ': ' + service : ''})`.slice(0, 200), crypto.randomBytes(16).toString('hex'));
+    // Chỉ đưa vào danh sách nhận bản tin khi khách tick đồng ý; không tick: lưu trạng thái 'offer' để TRIP liên hệ tư vấn
+    const status = wantsNews ? 'active' : 'offer';
+    const existing = db.prepare('SELECT id, status FROM subscribers WHERE email = ?').get(email);
+    if (!existing) {
+      const note = wantsNews ? 'nhận ưu đãi + đăng ký bản tin' : 'chỉ nhận ưu đãi, KHÔNG đăng ký bản tin';
+      const info = db.prepare('INSERT INTO subscribers (email, name, source_page, token, status) VALUES (?, ?, ?, ?, ?)')
+        .run(email, name, `${source} (${note}${service !== 'Khác' ? ': ' + service : ''})`.slice(0, 200), crypto.randomBytes(16).toString('hex'), status);
       google.syncSubscriber(db.prepare('SELECT * FROM subscribers WHERE id = ?').get(info.lastInsertRowid)).catch((e) => console.error(e));
+    } else if (wantsNews && existing.status === 'offer') {
+      db.prepare("UPDATE subscribers SET status = 'active' WHERE id = ?").run(existing.id);
     }
   } else {
     return reply(req, res, 400, { ok: false, errors: { contact: 'Vui lòng nhập số điện thoại (VD: 0935 191 394) hoặc Gmail hợp lệ.' } });

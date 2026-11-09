@@ -1471,3 +1471,6 @@ picture.pic { display: contents; }
 .prose th, .prose td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
 .prose th { background: var(--sky-50); color: var(--navy); font-weight: 700; }
 .prose tr:nth-child(even) td { background: #fbfdff; }
+.check-line { display: flex; gap: 8px; align-items: flex-start; font-size: .88rem; color: var(--muted); font-weight: 400; cursor: pointer; }
+.check-line input { margin-top: 3px; accent-color: var(--accent); }
+.h3-like { font-family: var(--serif); font-weight: 700; font-size: 1.15rem; color: var(--navy); margin: 0 0 6px; }

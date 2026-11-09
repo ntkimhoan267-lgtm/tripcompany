@@ -9,7 +9,7 @@
   visual: media('svc_hop-phap-hoa'),
   video: 'bg_hop-phap-hoa',
   stamp: { top: 'LEGALIZED · CONSULAR · ', mid: '✓', sub: 'TRIP', cls: 'stamp--hero stamp--eu' },
-  facts: [{ icon: 'wallet', label: 'Trọn gói từ', html: tr.legalization.length ? price(tr.legalization[0].price, 'vnd', 'legal', { service: 'Hợp pháp hoá lãnh sự' }) : 'Liên hệ' }, { icon: 'stamp', label: 'Gói giấy tờ kinh tế', value: 'Đã gồm tem đỏ' }],
+  facts: [{ icon: 'wallet', label: 'Trọn gói từ', html: price(h.minPrice(tr.legalization), 'vnd', 'legal', { service: 'Hợp pháp hoá lãnh sự' }) }, { icon: 'stamp', label: 'Gói giấy tờ kinh tế', value: 'Đã gồm tem đỏ' }],
 }) %>
 
 <section class="section">

@@ -3,6 +3,7 @@
 // popup ưu đãi) thì website gạch giá niêm yết và hiện giá thật. Trạng thái "đã nhận ưu đãi" lưu trong cookie
 // trip_offer (máy chủ đọc để hiện sẵn giá ưu đãi) và localStorage (trình duyệt).
 const { vnd, usd } = require('./helpers');
+const config = require('../config');
 
 const OFFER_COOKIE = 'trip_offer';
 const GROUPS = {
@@ -64,6 +65,7 @@ function makePricer(settings) {
 }
 
 const hasOfferCookie = (req) => /(?:^|;\s*)trip_offer=1(?:;|$)/.test(req.get('cookie') || '');
-const setOfferCookie = (res) => res.cookie(OFFER_COOKIE, '1', { maxAge: 180 * 24 * 3600e3, sameSite: 'lax', path: '/', httpOnly: false });
+// Cookie chỉ báo "đã nhận ưu đãi" (không chứa thông tin cá nhân); trình duyệt cần đọc được nên không httpOnly
+const setOfferCookie = (res) => res.cookie(OFFER_COOKIE, '1', { maxAge: 180 * 24 * 3600e3, sameSite: 'lax', path: '/', httpOnly: false, secure: config.isProd });
 
 module.exports = { GROUPS, DEFAULT_GROUPS, offerConfig, makePricer, hasOfferCookie, setOfferCookie, OFFER_COOKIE };

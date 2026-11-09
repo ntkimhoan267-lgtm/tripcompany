@@ -2,7 +2,12 @@ const db = require('../db');
 
 const vnd = (n) => (n == null ? '' : Number(n).toLocaleString('vi-VN').replace(/,/g, '.') + 'đ');
 const usd = (n) => (n == null ? '' : '$' + Number(n).toLocaleString('en-US').replace(/,/g, '.'));
-const money = (p) => (p == null ? 'Liên hệ' : p.vnd != null ? vnd(p.vnd) : p.usd != null ? usd(p.usd) : vnd(p));
+const money = (p) => (p == null ? 'Liên hệ' : p.vnd != null ? vnd(p.vnd) : p.usd != null ? usd(p.usd) : typeof p === 'object' ? 'Liên hệ' : vnd(p));
+// Giá thấp nhất trong bảng (giá "từ"); bảng trống / chỉ có giá "Liên hệ" -> null
+const minPrice = (rows, key = 'price') => {
+  const list = (Array.isArray(rows) ? rows : []).map((r) => r && r[key]).filter((n) => typeof n === 'number' && n > 0);
+  return list.length ? Math.min(...list) : null;
+};
 
 // 0935191394 -> 0935.191.394
 const phoneDisplay = (p) => String(p || '').replace(/\D/g, '').replace(/^(\d{4})(\d{3})(\d{3,4})$/, '$1.$2.$3');
@@ -117,6 +122,6 @@ function picture(src, o = {}) {
 module.exports = {
   picture, IMAGE_WIDTHS, escAttr,
   pageName,
-  vnd, usd, money, phoneDisplay, phoneTel, slugify, fmtDate,
+  vnd, usd, money, minPrice, phoneDisplay, phoneTel, slugify, fmtDate,
   getSettings, setSettings, parseVideo, isValidVnPhone, normalizePhone, isValidEmail,
 };

@@ -16,9 +16,13 @@ const decode = (s) => s
   .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   .replace(/&quot;/g, '"').replace(/&#0*39;/g, "'").replace(/&amp;/g, '&');
 
+// id đã dùng sẵn trên trang (khung trang, popup, mục FAQ): tiêu đề trong bài không được trùng
+const RESERVED_IDS = ['main', 'header', 'nav', 'burger', 'tu-van', 'cau-hoi-thuong-gap', 'lead-modal', 'news-modal', 'offer-modal',
+  'video-modal', 'video-modal-frame', 'lead-thanks', 'sub-1', 'sub-2', 'sub-3', 'lam-nhanh', 'bang-gia'];
+
 // html: HTML đã qua sanitize-html (thẻ h2/h3 không có thuộc tính)
 function buildToc(html) {
-  const used = new Set();
+  const used = new Set(RESERVED_IDS);
   const items = [];
   let h2 = 0;
   let h3 = 0;
@@ -50,8 +54,9 @@ function parseFaq(text) {
   }).filter(Boolean).slice(0, 20);
 }
 
-// Đếm số chữ (bỏ cú pháp Markdown đơn giản)
-const wordCount = (md) => String(md || '').replace(/!\[[^\]]*\]\([^)]*\)/g, ' ').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-  .replace(/[#>*_`|-]/g, ' ').split(/\s+/).filter(Boolean).length;
+// Chữ thuần từ HTML đã lọc (bỏ thẻ, giải mã ký tự đặc biệt cơ bản)
+const htmlText = (html) => decode(String(html || '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
+// Đếm số chữ trên HTML đã render (không dùng biểu thức phức tạp trên Markdown thô: tránh chậm với nội dung dài)
+const wordCount = (html) => { const t = htmlText(html); return t ? t.split(' ').length : 0; };
 
-module.exports = { buildToc, parseFaq, wordCount, LAYOUTS, THEMES };
+module.exports = { buildToc, parseFaq, wordCount, htmlText, LAYOUTS, THEMES };

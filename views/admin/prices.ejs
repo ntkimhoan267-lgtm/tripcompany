@@ -12,7 +12,7 @@
     if (f.type === 'image') return '<div class="img-cell" data-upload-box>' + (v ? '<img src="' + h.escAttr(v) + '" alt="">' : '') + '<input type="text" data-f="' + f.k + '" value="' + h.escAttr(val) + '" placeholder="/uploads/…">'
       + '<label class="btn btn--sm btn--ghost">Tải ảnh<input type="file" accept="image/*" data-upload-to="@cell" hidden></label><span class="upload-status small muted"></span></div>';
     const num = f.type === 'vnd' || f.type === 'num';
-    return '<input type="text" data-f="' + f.k + '" value="' + h.escAttr(val) + '"' + (num ? ' inputmode="decimal" class="num" placeholder="Liên hệ"' : '') + (f.type === 'code' ? ' maxlength="2" class="code"' : '') + (f.max ? ' maxlength="' + f.max + '"' : '') + '>';
+    return '<input type="text" data-f="' + f.k + '" value="' + h.escAttr(val) + '"' + (num ? ' inputmode="decimal" class="num" placeholder="Liên hệ"' : '') + (f.type === 'code' ? ' maxlength="2" class="code"' : '') + (f.max ? ' maxlength="' + f.max + '"' : '') + (f.required ? ' data-required' : '') + '>';
   };
 %>
 <div class="topline"><h1>Bảng giá & ưu đãi</h1><a class="btn btn--ghost" href="/bang-gia" target="_blank">Xem trang Bảng giá</a></div>
@@ -41,7 +41,7 @@
   <input type="hidden" name="payload" value="">
   <div class="card">
     <h2>Giá dịch vụ</h2>
-    <p class="hint" style="margin-top:0">Nhập <strong>giá thật</strong> (chưa cộng ưu đãi). Ô giá để trống = hiện "Liên hệ". Giá VNĐ gõ <code>2800000</code> hoặc <code>2.800.000</code> đều được. Tour sửa giá và ảnh ở mục <a href="/admin/tours">Tour</a>; ảnh/video các trang ở mục <a href="/admin/media">Ảnh & video</a>.</p>
+    <p class="hint" style="margin-top:0">Nhập <strong>giá thật</strong> (chưa cộng ưu đãi). Ô giá để trống = hiện "Liên hệ". Giá VNĐ gõ <code>2800000</code>, <code>2.800.000</code>, <code>2,8tr</code> hoặc <code>500k</code> đều được. Chỉ bảng nào khác giá mặc định mới hiện nhãn "Đã sửa". Tour sửa giá và ảnh ở mục <a href="/admin/tours">Tour</a>; ảnh/video các trang ở mục <a href="/admin/media">Ảnh & video</a>.</p>
     <nav class="tabs-nav"><% Object.entries(data.groups).forEach(function ([g, l]) { %><a href="#<%= g %>"><%= l %></a><% }) %></nav>
   </div>
 

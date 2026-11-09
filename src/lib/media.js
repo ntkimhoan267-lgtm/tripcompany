@@ -58,7 +58,7 @@ const SLOTS = [
 const SLOT_MAP = Object.fromEntries(SLOTS.map((s) => [s.key, s]));
 
 // Giá trị hợp lệ: ảnh/video nội bộ (không có '..') hoặc link https
-const SAFE_IMAGE = /^(\/(uploads|img|media)\/(?!.*\.\.)[\w./-]+\.(jpe?g|png|webp|gif|avif)|https:\/\/[^\s"'<>()]+)$/i;
+const SAFE_IMAGE = /^(\/(uploads|img|media)\/(?!.*\.\.)[\w./-]+\.(jpe?g|png|webp|gif|avif)|https:\/\/[^\s"'<>()\\]+\.(jpe?g|png|webp|gif|avif)(\?[^\s"'<>()\\]*)?)$/i;
 const SAFE_VIDEO = /^(\/(uploads|media)\/(?!.*\.\.)[\w./-]+\.(mp4|webm)|https:\/\/[\w\-./%~]+\.(mp4|webm))$/i;
 
 function mediaUrl(key, settings = getSettings()) {

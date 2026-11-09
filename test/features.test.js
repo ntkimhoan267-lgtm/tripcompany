@@ -138,13 +138,13 @@ test('dashboard bảng giá: sửa giá, thêm dòng, chặn dữ liệu sai, kh
 
   // thiếu ô bắt buộc -> báo lỗi, bảng đó không đổi
   csrf = await getCsrf('/admin/prices');
-  await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables: { cn: [{ type: '', price: '1' , detail: 'x' }] } }) });
+  await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables: { cn: [{ type: '', price: '3000000', detail: 'x' }] } }) });
   assert.match(flashOf(await adminHtml('/admin/prices')), /^error: .*thiếu (&#34;|")Loại visa/);
   assert.match(await text('/bang-gia'), /2\.700\.000đ/);
 
   // bảng cố định (4 thị trường) không được thêm/bớt dòng
   csrf = await getCsrf('/admin/prices');
-  await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables: { markets: [{ cur: 'vnd', amount: '1' }] } }) });
+  await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables: { markets: [{ cur: 'vnd', amount: '3000000' }] } }) });
   assert.match(flashOf(await adminHtml('/admin/prices')), /số dòng không được thay đổi/);
 
   // khôi phục mặc định
@@ -305,6 +305,121 @@ test('bài SEO làm hộ chiếu nhanh có sẵn, trong sitemap; trang hộ chi�
   assert.match(sitemap, /lam-ho-chieu-nhanh-khi-sap-bay<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
   const passport = await text('/dich-vu/ho-chieu');
   assert.equal((passport.match(/class="express__item/g) || []).length, 7);
-  assert.match(passport, /data-note="Cần làm hộ chiếu nhanh: lấy trong 1 ngày/);
+  assert.match(passport, /data-note="Cần làm hộ chiếu nhanh \(cần trong 1 ngày\)/);
+  assert.match(passport, /không cam kết thay cơ quan nhà nước/);
+  assert.doesNotMatch(passport, /1 ngày làm việc/);
   assert.match(passport, /\/blog\/lam-ho-chieu-nhanh-khi-sap-bay/);
+});
+
+// ---------- Lỗi do subagent kiểm tra phát hiện ----------
+test('bảng giá: giá gõ sai bị báo lỗi (không lưu thành số sai); hiểu 500k, 2,8tr', async () => {
+  await login();
+  const save = async (rows) => {
+    const csrf = await getCsrf('/admin/prices');
+    await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables: { cn: rows } }) });
+    return flashOf(await adminHtml('/admin/prices'));
+  };
+  for (const bad of ['abc', '-500000', '0', '1,5', '15']) {
+    assert.match(await save([{ type: 'Visa A', price: bad }]), /^error: /, `"${bad}" phải bị báo lỗi`);
+  }
+  assert.match(await text('/bang-gia'), /3\.300\.000đ<\/span><span class="op__deal">/, 'giá cũ giữ nguyên');
+  assert.match(await save([{ type: 'Visa A', price: '2,8tr' }, { type: 'Visa B', price: '500k' }]), /^success: /);
+  const html = await text('/bang-gia');
+  assert.match(html, /3\.300\.000đ<\/span><span class="op__deal"><span class="sr-only">, giá ưu đãi <\/span>2\.800\.000đ/);
+  assert.match(html, /1\.000\.000đ<\/span><span class="op__deal"><span class="sr-only">, giá ưu đãi <\/span>500\.000đ/);
+  // bảng giá "từ" không được để trống (trang chủ, trang Dịch vụ dùng)
+  assert.match(await save([]), /cần ít nhất 1 dòng/);
+  for (const u of ['/', '/dich-vu', '/dich-vu/dich-thuat', '/bang-gia']) assert.equal((await get(u)).status, 200, u);
+  // khôi phục
+  const csrf = await getCsrf('/admin/prices');
+  const body = new URLSearchParams({ _csrf: csrf, payload: '{"tables":{}}' }); body.append('reset', 'cn');
+  await fetch(base + '/admin/prices', { method: 'POST', redirect: 'manual', headers: { cookie, 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+});
+
+test('bảng giá: lưu cả trang mà không đổi gì -> không bảng nào bị đánh dấu "Đã sửa"', async () => {
+  await login();
+  // Gửi lại đúng giá mặc định của mọi bảng (như khi bấm Lưu mà không sửa gì)
+  const { editorData } = require('../src/lib/catalog');
+  const data = editorData();
+  const tables = {}; const texts = {};
+  for (const t of data.tables) tables[t.id] = t.rows.map((r) => Object.fromEntries(t.fields.map((fl) => [fl.k, r[fl.k] == null ? '' : String(r[fl.k])])));
+  for (const x of data.texts) texts[x.id] = x.value;
+  const csrf = await getCsrf('/admin/prices');
+  await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables, texts }) });
+  const html = await adminHtml('/admin/prices');
+  assert.match(flashOf(html), /^success: /);
+  assert.doesNotMatch(html, /badge--contacting">Đã sửa/);
+});
+
+test('bảng giá tràn: ô ảnh sai bị báo lỗi; ảnh & video sai không xoá giá trị cũ', async () => {
+  await login();
+  let csrf = await getCsrf('/admin/prices');
+  await form('/admin/prices', { _csrf: csrf, payload: JSON.stringify({ tables: { selfdrive: [{ car: 'Xe A', seats: '4 chỗ', price: '800000', image: '/uploads/evil.exe' }] } }) });
+  assert.match(flashOf(await adminHtml('/admin/prices')), /cần là file ảnh/);
+  csrf = await getCsrf('/admin/media');
+  await form('/admin/media', { _csrf: csrf, media_home_team: '/uploads/doi-ngu.webp' });
+  csrf = await getCsrf('/admin/media');
+  await form('/admin/media', { _csrf: csrf, media_home_team: 'https://x.com/a.exe' });
+  assert.match(flashOf(await adminHtml('/admin/media')), /đã giữ giá trị cũ/);
+  assert.match(await text('/'), /\/uploads\/doi-ngu\.webp/);
+  csrf = await getCsrf('/admin/media');
+  await form('/admin/media', { _csrf: csrf, media_home_team: '' });
+});
+
+test('ưu đãi: email chỉ nhận ưu đãi không vào danh sách gửi bản tin; số điện thoại không tạo khách trùng', async () => {
+  await postJson('/api/offer', { contact: 'chi-uu-dai@gmail.com' }, '10.1.0.50');
+  await postJson('/api/offer', { contact: 'uu-dai-va-tin@gmail.com', newsletter: '1' }, '10.1.0.50');
+  await postJson('/api/offer', { contact: '0912 345 678' }, '10.1.0.51');
+  await postJson('/api/offer', { contact: '0912345678' }, '10.1.0.51');
+  await login();
+  const subs = await adminHtml('/admin/subscribers');
+  const row = (email) => (subs.split('<tr>').find((r) => r.includes(email)) || '');
+  assert.match(row('chi-uu-dai@gmail.com'), /Chỉ nhận ưu đãi/);
+  assert.match(row('uu-dai-va-tin@gmail.com'), /Đang nhận/);
+  const leads = await adminHtml('/admin/leads?q=0912345678');
+  assert.equal((leads.match(/0912345678/g) || []).length >= 1, true);
+  const db = require('../src/db');
+  assert.equal(db.prepare("SELECT COUNT(*) AS n FROM leads WHERE phone = '0912345678'").get().n, 1);
+  // tự đăng ký nhận tin sau đó -> bật nhận tin
+  await postJson('/api/subscribe', { email: 'chi-uu-dai@gmail.com' }, '10.1.0.52');
+  assert.equal(db.prepare("SELECT status FROM subscribers WHERE email = 'chi-uu-dai@gmail.com'").get().status, 'active');
+});
+
+test('bài viết: "# " trong nội dung thành H2 (1 H1/trang); id không trùng khung trang; 1 BreadcrumbList; sai ngày giờ giữ nội dung', async () => {
+  await login();
+  await savePost(null, { title: 'Bài một H1', status: 'published', content: '# Main\nA\n## Câu hỏi thường gặp\nB', faq: 'Hỏi: X?\nĐáp: **Y** [z](/a)', layout: 'classic', toc: '1' });
+  const html = await text('/blog/bai-mot-h1');
+  assert.equal((html.match(/<h1[\s>]/g) || []).length, 1);
+  assert.match(html, /<h2 id="main-2">Main<\/h2>/);
+  assert.match(html, /<h2 id="cau-hoi-thuong-gap-2">/);
+  assert.equal((html.match(/"@type":"BreadcrumbList"/g) || []).length, 1);
+  assert.match(html, /"text":"Y z"/, 'câu trả lời FAQ trong schema là chữ thuần');
+  assert.match(html, /"@type":"Organization","name":"Đội ngũ TRIP"/);
+
+  // ngày giờ không có thật -> báo lỗi, form hiện lại với nội dung vừa gõ
+  const csrf = await getCsrf('/admin/posts/new');
+  const fd = new FormData();
+  fd.append('_csrf', csrf); fd.append('title', 'Bài giữ nội dung'); fd.append('content', 'Nội dung dài đã gõ'); fd.append('status', 'published'); fd.append('publish_at', '2026-13-45T99:99');
+  const r = await fetch(base + '/admin/posts/new', { method: 'POST', redirect: 'manual', headers: { cookie }, body: fd });
+  assert.equal(r.status, 400);
+  const page = (await r.text()).replace(/ /g, ' ');
+  assert.match(page, /Ngày giờ đăng không hợp lệ/);
+  assert.match(page, /Nội dung dài đã gõ/);
+
+  // ảnh bìa không phải ảnh -> báo lỗi, giữ nội dung
+  const csrf2 = await getCsrf('/admin/posts/new');
+  const fd2 = new FormData();
+  fd2.append('_csrf', csrf2); fd2.append('title', 'Bài ảnh sai'); fd2.append('content', 'Giữ tôi lại'); fd2.append('cover_file', new Blob(['<html></html>'], { type: 'text/html' }), 'a.png');
+  const r2 = await fetch(base + '/admin/posts/new', { method: 'POST', redirect: 'manual', headers: { cookie }, body: fd2 });
+  assert.equal(r2.status, 400);
+  assert.match(await r2.text(), /Giữ tôi lại/);
+});
+
+test('bài viết hẹn giờ: xoá ô ngày giờ đăng -> đăng ngay', async () => {
+  await login();
+  const future = new Date(Date.now() + 7 * 3600e3 + 3 * 86400e3).toISOString().slice(0, 16);
+  const loc = await savePost(null, { title: 'Bài hẹn rồi đăng ngay', status: 'published', stay: '1', content: 'x', publish_at: future });
+  assert.equal((await get('/blog/bai-hen-roi-dang-ngay')).status, 404);
+  await savePost(loc.split('/').pop(), { title: 'Bài hẹn rồi đăng ngay', status: 'published', content: 'x', publish_at: '' });
+  assert.equal((await get('/blog/bai-hen-roi-dang-ngay')).status, 200);
 });

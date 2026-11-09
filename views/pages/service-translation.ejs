@@ -11,7 +11,7 @@
   stamp: { top: 'CERTIFIED · TRANSLATION · ', mid: '译', sub: 'TRIP', cls: 'stamp--hero stamp--cn' },
   badge: { value: '6+', label: 'Ngôn ngữ' },
   facts: [
-    { icon: 'wallet', label: 'Dịch thuật từ', html: price(services.translation.languages[0].rows[0].price, 'vnd', 'translation', { service: 'Dịch thuật công chứng', suffix: '/trang' }) },
+    { icon: 'wallet', label: 'Dịch thuật từ', html: price(h.minPrice(services.translation.languages[0].rows), 'vnd', 'translation', { service: 'Dịch thuật công chứng', suffix: '/trang' }) },
     { icon: 'zap', label: 'Có gói', value: 'Hoả tốc' },
   ],
 }) %>

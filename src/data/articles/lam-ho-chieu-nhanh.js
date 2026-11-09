@@ -34,7 +34,7 @@ Trước đây, công dân Việt Nam phải có hộ chiếu còn hạn từ đ
 
 Mỗi quốc gia tự đặt yêu cầu về thời hạn hộ chiếu của người nhập cảnh:
 
-- **Phần lớn các nước**, kể cả nhiều điểm đến quen thuộc ở châu Á, yêu cầu hộ chiếu **còn hạn tối thiểu 6 tháng** tính từ ngày nhập cảnh.
+- **Nhiều nước**, kể cả nhiều điểm đến quen thuộc ở châu Á, yêu cầu hộ chiếu **còn hạn tối thiểu 6 tháng** tính từ ngày nhập cảnh.
 - **Khối Schengen (châu Âu)** yêu cầu hộ chiếu còn hạn **ít nhất 3 tháng sau ngày dự kiến rời khối** và được cấp trong vòng 10 năm.
 - Hồ sơ **xin visa** (Hàn Quốc, Nhật Bản, Trung Quốc, Mỹ, Úc, châu Âu…) hầu như luôn yêu cầu hộ chiếu còn hạn đủ dài và **còn trang trống** để dán visa.
 
@@ -64,6 +64,8 @@ Theo Điều 15 Luật Xuất cảnh, nhập cảnh của công dân Việt Nam 
 | Cục Quản lý xuất nhập cảnh (Bộ Công an) | Tối đa **5 ngày làm việc** |
 | Trường hợp cấp thiết nộp tại Cục Quản lý xuất nhập cảnh | Không quá **3 ngày làm việc** |
 
+**Nộp ở đâu?** Hộ chiếu cấp **lần đầu** nộp tại Công an cấp tỉnh (nơi thường trú, tạm trú hoặc nơi thuận lợi nếu có thẻ Căn cước); chỉ được nộp lần đầu tại Cục Quản lý xuất nhập cảnh khi thuộc trường hợp cấp thiết. Từ **lần thứ hai** trở đi, bạn có thể nộp tại Công an cấp tỉnh nơi thuận lợi hoặc tại Cục Quản lý xuất nhập cảnh.
+
 **Trường hợp cấp thiết** gồm: ra nước ngoài khám, chữa bệnh có giấy của bệnh viện; thân nhân ở nước ngoài bị tai nạn, bệnh nặng hoặc qua đời (có giấy tờ chứng minh); và các lý do nhân đạo, khẩn cấp khác do lãnh đạo Cục Quản lý xuất nhập cảnh quyết định.
 
 Cần nhớ thêm:
@@ -74,9 +76,9 @@ Cần nhớ thêm:
 
 ## Bảng thời gian làm hộ chiếu nhanh tại TRIP
 
-TRIP có các gói hỗ trợ làm hộ chiếu nhanh theo số ngày bạn cần. Mỗi gói có chi phí khác nhau tuỳ trường hợp (cấp mới, cấp lại do mất hoặc hỏng, trẻ em, có lý do cấp thiết hay không), nên TRIP **báo giá riêng sau khi xem hồ sơ**:
+TRIP có các gói hỗ trợ làm hộ chiếu nhanh theo **số ngày bạn cần có hộ chiếu** (tính tới ngày bay). Mỗi gói có chi phí khác nhau tuỳ trường hợp (cấp mới, cấp lại do mất hoặc hỏng, trẻ em, có lý do cấp thiết hay không), nên TRIP **báo giá riêng sau khi xem hồ sơ**:
 
-| Bạn cần có hộ chiếu trong | Chi phí |
+| Bạn cần có hộ chiếu trong (tính tới ngày bay) | Chi phí |
 |---|---|
 | 1 ngày | Liên hệ tư vấn |
 | 2 ngày | Liên hệ tư vấn |
@@ -86,7 +88,7 @@ TRIP có các gói hỗ trợ làm hộ chiếu nhanh theo số ngày bạn cầ
 | 6 ngày | Liên hệ tư vấn |
 | 7 ngày | Liên hệ tư vấn |
 
-Gửi cho TRIP **ngày bay dự kiến**, ảnh trang thông tin hộ chiếu cũ (nếu có) và Căn cước. Tư vấn viên sẽ cho bạn biết gói nào phù hợp, thời gian dự kiến và chi phí trọn gói **trước khi làm**. Xem thêm [dịch vụ làm hộ chiếu](/dich-vu/ho-chieu) và [bảng giá hộ chiếu](/bang-gia#ho-chieu).
+Gửi cho TRIP **ngày bay dự kiến**, ảnh trang thông tin hộ chiếu cũ (nếu có) và Căn cước. Tư vấn viên sẽ cho bạn biết **có kịp hay không**, phương án phù hợp quy định, thời gian dự kiến và chi phí trọn gói **trước khi làm**. Với nhu cầu chỉ còn 1–2 ngày, khả năng đáp ứng phụ thuộc vào việc bạn có thuộc trường hợp cấp thiết và có đủ giấy tờ hay không; TRIP sẽ nói rõ ngay từ đầu, **không hứa** thời gian thay cơ quan Quản lý xuất nhập cảnh. Xem thêm [dịch vụ làm hộ chiếu](/dich-vu/ho-chieu) và [bảng giá hộ chiếu](/bang-gia#ho-chieu).
 
 ## Giấy tờ cần chuẩn bị để làm hộ chiếu nhanh
 
@@ -109,7 +111,7 @@ Lệ phí nộp cho cơ quan Quản lý xuất nhập cảnh (theo Thông tư 25
 - **Cấp mới** hộ chiếu: 200.000 đồng/lần.
 - **Cấp lại do mất hoặc hư hỏng**: 400.000 đồng/lần.
 
-Từ **15/8/2026 đến hết 28/02/2027**, người làm thủ tục **trực tuyến toàn trình** qua tài khoản định danh điện tử (VNeID) **mức độ 2** và đáp ứng các điều kiện tích hợp thông tin theo Nghị quyết 66.22/2026/NQ-CP có thể được áp dụng **lệ phí 0 đồng**. Điều kiện khá cụ thể, nên hãy kiểm tra trên ứng dụng VNeID hoặc [Cổng dịch vụ công Bộ Công an](https://dichvucong.bocongan.gov.vn) trước khi nộp.
+Từ **15/8/2026 đến hết 28/02/2027**, người làm thủ tục **trực tuyến toàn trình** qua tài khoản định danh điện tử (VNeID) **mức độ 2** và đáp ứng các điều kiện tích hợp thông tin theo Nghị quyết 66.22/2026/NQ-CP có thể được áp dụng **lệ phí 0 đồng** ([theo báo Luật sư Việt Nam](https://lsvn.vn/tich-hop-vneid-the-nao-de-lam-ho-chieu-duoc-mien-le-phi-a175839.html)). Điều kiện khá cụ thể, nên hãy kiểm tra trên ứng dụng VNeID hoặc [Cổng dịch vụ công Bộ Công an](https://dichvucong.bocongan.gov.vn) trước khi nộp.
 
 Bạn cũng có thể chọn **hộ chiếu gắn chip** hoặc **không gắn chip** khi khai tờ khai; lệ phí như nhau.
 
@@ -144,7 +146,7 @@ Nếu chuyến bay của bạn đã gần, hãy [để lại thông tin](/lien-h
 Đáp: Về phía Việt Nam thì được: từ 15/8/2023 không còn điều kiện hộ chiếu phải còn hạn từ đủ 6 tháng khi xuất cảnh. Tuy nhiên nhiều nước yêu cầu hộ chiếu còn hạn tối thiểu 6 tháng khi nhập cảnh và hãng bay có thể từ chối làm thủ tục. Bạn nên làm hộ chiếu mới trước ngày bay.
 
 Hỏi: Làm hộ chiếu mất bao nhiêu ngày?
-Đáp: Theo Luật Xuất cảnh, nhập cảnh 2019: tối đa 8 ngày làm việc nếu nộp tại Công an cấp tỉnh, 5 ngày làm việc nếu nộp tại Cục Quản lý xuất nhập cảnh, và không quá 3 ngày làm việc trong trường hợp cấp thiết. Thời gian chuyển phát được tính riêng.
+Đáp: Theo Luật Xuất cảnh, nhập cảnh 2019: tối đa 8 ngày làm việc nếu nộp tại Công an cấp tỉnh, 5 ngày làm việc nếu nộp tại Cục Quản lý xuất nhập cảnh (hộ chiếu cấp lần đầu chỉ nộp tại Cục khi có lý do cấp thiết), và không quá 3 ngày làm việc trong trường hợp cấp thiết. Thời gian chuyển phát được tính riêng.
 
 Hỏi: Hộ chiếu sắp hết hạn có gia hạn được không?
 Đáp: Không. Hộ chiếu phổ thông không được gia hạn; bạn làm thủ tục cấp hộ chiếu mới và nộp kèm hộ chiếu cũ.
@@ -155,6 +157,6 @@ Hỏi: Hộ chiếu còn hạn có làm hộ chiếu mới được không?
 Hỏi: Mất hộ chiếu trước ngày bay phải làm gì?
 Đáp: Trình báo mất hộ chiếu trong vòng 48 giờ kể từ khi phát hiện, sau đó làm thủ tục cấp lại. Lệ phí cấp lại do mất là 400.000 đồng. Liên hệ TRIP để được tư vấn cách làm nhanh nhất theo ngày bay của bạn.
 
-Hỏi: Làm hộ chiếu nhanh ở Đà Nẵng tại TRIP giá bao nhiêu?
-Đáp: Chi phí các gói làm nhanh 1–7 ngày khác nhau tuỳ trường hợp (cấp mới, cấp lại, trẻ em, có lý do cấp thiết hay không). TRIP kiểm tra hồ sơ miễn phí và báo giá trọn gói trước khi làm.`,
+Hỏi: Chi phí làm hộ chiếu gồm những khoản nào?
+Đáp: Gồm lệ phí nhà nước (200.000 đồng cấp mới, 400.000 đồng cấp lại do mất hoặc hỏng; có thể 0 đồng khi làm trực tuyến qua VNeID đủ điều kiện trong thời gian áp dụng), phí chuyển phát nếu nhận hộ chiếu tại nhà, và phí dịch vụ nếu bạn nhờ đơn vị hỗ trợ làm thủ tục.`,
 };

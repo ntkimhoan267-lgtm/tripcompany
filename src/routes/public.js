@@ -9,7 +9,7 @@ const { getServices } = require('../lib/catalog');
 const company = require('../data/company');
 
 const router = express.Router();
-const { buildToc, parseFaq, wordCount, LAYOUTS } = require('../lib/toc');
+const { buildToc, parseFaq, wordCount, htmlText, LAYOUTS } = require('../lib/toc');
 const config = require('../config');
 // Bài viết đang hiển thị: đã xuất bản và tới giờ đăng (bài hẹn giờ chưa tới giờ thì chưa hiện)
 const LIVE = "status = 'published' AND published_at IS NOT NULL AND published_at <= datetime('now')";
@@ -17,7 +17,9 @@ const LIVE = "status = 'published' AND published_at IS NOT NULL AND published_at
 const isoOf = (d) => (d ? new Date(String(d).replace(' ', 'T') + 'Z').toISOString() : undefined);
 
 const renderMarkdown = (md) => sanitizeHtml(marked.parse(md || ''), {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2']),
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h2']),
+  // Mỗi trang chỉ 1 thẻ H1 (tiêu đề bài / tour): dòng "# ..." trong nội dung hiển thị thành H2
+  transformTags: { h1: 'h2' },
   allowedAttributes: { a: ['href', 'title', 'target', 'rel'], img: ['src', 'alt', 'title', 'loading'] },
 });
 
@@ -112,7 +114,7 @@ router.get('/dich-vu/:slug', (req, res, next) => {
 
 router.get('/bang-gia', (req, res) => {
   res.render('pages/pricing', {
-    meta: { title: 'Bảng giá dịch vụ TRIP', description: 'Bảng giá công khai, trọn gói tại TRIP Đà Nẵng: visa Trung Quốc và các nước, dịch thuật công chứng, hộ chiếu, E-visa Việt Nam, xe đưa đón.' },
+    meta: { title: 'Bảng giá visa, dịch thuật, hộ chiếu, xe đưa đón', description: 'Bảng giá công khai, trọn gói tại TRIP Đà Nẵng: visa Trung Quốc và các nước, dịch thuật công chứng, hộ chiếu, E-visa Việt Nam, xe đưa đón.' },
   });
 });
 
@@ -162,43 +164,44 @@ router.get('/blog/:slug', (req, res, next) => {
     return next();
   }
   const { html, toc } = buildToc(renderMarkdown(post.content));
-  const faq = parseFaq(post.faq).map((f) => ({ q: f.q, a: f.a, html: renderMarkdown(f.a) }));
+  const words = wordCount(html);
+  const faq = parseFaq(post.faq).map((f) => { const fh = renderMarkdown(f.a); return { q: f.q, html: fh, text: htmlText(fh) }; });
   const layout = Object.hasOwn(LAYOUTS, post.layout) ? post.layout : 'classic';
   const url = `${config.siteUrl}/blog/${post.slug}`;
   const image = post.cover ? (post.cover.startsWith('http') ? post.cover : config.siteUrl + post.cover) : `${config.siteUrl}/img/og-image.jpg`;
   const description = post.meta_desc || post.excerpt || '';
   const author = post.author || 'Đội ngũ TRIP';
+  // Tên nhóm / công ty ("Đội ngũ…", "…TRIP") là Organization; tên một người là Person
+  const authorIsOrg = !post.author || /TRIP|đội ngũ|ban biên tập|công ty/i.test(post.author);
+  const modified = post.updated_at > post.published_at ? post.updated_at : post.published_at;
   const jsonld = [{
     '@context': 'https://schema.org', '@type': 'BlogPosting',
-    headline: post.title.slice(0, 110), description, image: [image],
-    datePublished: isoOf(post.published_at), dateModified: isoOf(post.updated_at > post.published_at ? post.updated_at : post.published_at),
-    author: { '@type': post.author ? 'Person' : 'Organization', name: author, url: `${config.siteUrl}/gioi-thieu` },
+    headline: post.title.slice(0, 110), description: description || undefined, image: [image],
+    datePublished: isoOf(post.published_at), dateModified: isoOf(modified),
+    author: { '@type': authorIsOrg ? 'Organization' : 'Person', name: author, url: `${config.siteUrl}/gioi-thieu` },
     publisher: { '@type': 'Organization', name: 'TRIP Đà Nẵng', logo: { '@type': 'ImageObject', url: `${config.siteUrl}/img/logo-icon.png` } },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-    articleSection: post.category || undefined, keywords: post.focus_kw || undefined, wordCount: wordCount(post.content), inLanguage: 'vi-VN',
+    articleSection: post.category || undefined, keywords: post.focus_kw || undefined, wordCount: words, inLanguage: 'vi-VN',
+  }, {
+    // Một đường dẫn breadcrumb cho mọi bố cục: Trang chủ > Cẩm nang > Bài viết
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+    itemListElement: [['Trang chủ', '/'], ['Cẩm nang', '/blog'], [post.title, `/blog/${post.slug}`]]
+      .map(([name, href], i) => ({ '@type': 'ListItem', position: i + 1, name, item: config.siteUrl + href })),
   }];
-  // Bố cục Tạp chí / Tối giản không dùng page-hero (nơi in sẵn BreadcrumbList) -> thêm ở đây
-  if (layout === 'magazine' || layout === 'minimal') {
-    jsonld.push({
-      '@context': 'https://schema.org', '@type': 'BreadcrumbList',
-      itemListElement: [['Trang chủ', '/'], ['Cẩm nang', '/blog'], [post.title, `/blog/${post.slug}`]]
-        .map(([name, href], i) => ({ '@type': 'ListItem', position: i + 1, name, item: config.siteUrl + href })),
-    });
-  }
   if (faq.length) {
     jsonld.push({
       '@context': 'https://schema.org', '@type': 'FAQPage',
-      mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+      mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.text } })),
     });
   }
   res.render('pages/post', {
     meta: {
       title: post.seo_title || post.title, rawTitle: Boolean(post.seo_title), description, image: post.cover, type: 'article',
       robots: post.noindex ? 'noindex, follow' : undefined,
-      published: isoOf(post.published_at), modified: isoOf(post.updated_at), jsonld,
+      published: isoOf(post.published_at), modified: isoOf(modified), jsonld,
     },
     post, html, toc, faq, layout, author,
-    readMinutes: Math.max(1, Math.round(wordCount(post.content) / 220)),
+    readMinutes: Math.max(1, Math.round(words / 220)),
     related: db.prepare(`SELECT * FROM posts WHERE ${LIVE} AND id != ? ORDER BY (category = ?) DESC, published_at DESC LIMIT 3`).all(post.id, post.category || ''),
   });
 });

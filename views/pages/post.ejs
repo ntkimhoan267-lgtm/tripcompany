@@ -35,12 +35,13 @@
     heading: post.title,
     sub: [post.category, h.fmtDate(post.published_at)].filter(Boolean).join(' · '),
     actions: null,
+    noLd: true,
   }) %>
   <section class="section<%= theme %>">
     <% if (layout === 'guide') { %>
       <div class="container post-guide">
         <aside class="post-guide__toc"><% if (hasToc) { %><%- include('../partials/post-toc', { toc, faq, open: true }) %><% } %>
-          <div class="card mt-3"><h3>Cần làm gấp?</h3><p class="muted">Gửi giấy tờ qua Zalo, TRIP kiểm tra miễn phí.</p><button class="btn btn--accent btn--block" data-open-lead>Tư vấn miễn phí</button></div>
+          <div class="card mt-3"><p class="h3-like">Cần làm gấp?</p><p class="muted">Gửi giấy tờ qua Zalo, TRIP kiểm tra miễn phí.</p><button class="btn btn--accent btn--block" data-open-lead>Tư vấn miễn phí</button></div>
         </aside>
         <%- include('../partials/post-article', { showCover: true, showTocInline: false }) %>
       </div>

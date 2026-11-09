@@ -104,7 +104,7 @@
     // Bỏ dấu tiếng Việt để so khớp từ khoá ("làm hộ chiếu" = "lam ho chieu")
     var fold = function (s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ').trim(); };
     var slugify = function (s) { return fold(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80); };
-    var countWords = function (md) { return md.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[#>*_`|-]/g, ' ').split(/\s+/).filter(Boolean).length; };
+    var countWords = function (md) { return md.replace(/!\[[^\]\n]{0,300}\]\([^)\s]{0,500}\)/g, ' ').replace(/\[([^\]\n]{0,300})\]\([^)\s]{0,500}\)/g, '$1').replace(/[#>*_`|-]/g, ' ').split(/\s+/).filter(Boolean).length; };
 
     // Bộ đếm ký tự cạnh ô tiêu đề / mô tả Google
     $$('[data-count]').forEach(function (c) {
@@ -118,7 +118,8 @@
     });
 
     var run = function () {
-      var title = val('title'); var seoTitle = val('seo_title') || (title ? title + ' | TRIP Đà Nẵng' : '');
+      // Giống head.ejs: tiêu đề Google riêng giữ nguyên; không có thì thêm "| TRIP Đà Nẵng" (trừ khi đã có chữ TRIP)
+      var title = val('title'); var seoTitle = val('seo_title') || (title ? (/TRIP/.test(title) ? title : title + ' | TRIP Đà Nẵng') : '');
       var desc = val('meta_desc') || val('excerpt');
       var slug = val('slug') ? slugify(val('slug')) : slugify(title);
       var content = f('content').value; var kw = fold(val('focus_kw'));
@@ -131,9 +132,9 @@
       var heads = lines.filter(function (l) { return /^#{2,3}\s/.test(l); });
       var h2 = lines.filter(function (l) { return /^##\s/.test(l); }).length;
       var h1 = lines.filter(function (l) { return /^#\s/.test(l); }).length;
-      var imgs = content.match(/!\[[^\]]*\]\([^)]*\)/g) || [];
+      var imgs = content.match(/!\[[^\]\n]{0,300}\]\([^)\s]{0,500}\)/g) || [];
       var noAlt = imgs.filter(function (m) { return /^!\[\s*\]/.test(m); }).length;
-      var links = (content.match(/\]\(([^)\s]+)/g) || []).map(function (m) { return m.slice(2); }).filter(function (u, i, a) { return !/\.(jpe?g|png|webp|gif)$/i.test(u); });
+      var links = (content.match(/\]\(([^)\s]{1,500})/g) || []).map(function (m) { return m.slice(2); }).filter(function (u, i, a) { return !/\.(jpe?g|png|webp|gif)$/i.test(u); });
       var internal = links.filter(function (u) { return /^\/(?!\/)/.test(u) || /tripdn\.com/.test(u); }).length;
       var external = links.filter(function (u) { return /^https?:\/\//.test(u) && !/tripdn\.com/.test(u); }).length;
       var firstPara = fold(lines.filter(function (l) { return l.trim() && !/^#/.test(l); }).slice(0, 2).join(' ')) + ' ' + fold(val('excerpt'));
@@ -147,8 +148,8 @@
         [kw && fold(desc).indexOf(kw) > -1, 'Từ khoá có trong mô tả Google', 'Đưa từ khoá chính vào mô tả Google'],
         [kw && firstPara.indexOf(kw) > -1, 'Từ khoá xuất hiện ngay đoạn đầu', 'Nhắc từ khoá chính trong đoạn mở đầu'],
         [kw && heads.some(function (l) { return fold(l).indexOf(kw) > -1; }), 'Từ khoá có trong ít nhất 1 tiêu đề mục', 'Đưa từ khoá vào ít nhất 1 tiêu đề ## hoặc ###'],
-        [seoTitle.length >= 30 && seoTitle.length <= 65, 'Tiêu đề Google dài vừa đủ (' + seoTitle.length + ' ký tự)', 'Tiêu đề Google nên 30–60 ký tự (hiện ' + seoTitle.length + ')'],
-        [desc.length >= 120 && desc.length <= 165, 'Mô tả Google dài vừa đủ (' + desc.length + ' ký tự)', 'Mô tả Google nên 120–160 ký tự (hiện ' + desc.length + ')'],
+        [seoTitle.length >= 30 && seoTitle.length <= 60, 'Tiêu đề Google dài vừa đủ (' + seoTitle.length + ' ký tự)', 'Tiêu đề Google nên 30–60 ký tự (hiện ' + seoTitle.length + ')'],
+        [desc.length >= 120 && desc.length <= 160, 'Mô tả Google dài vừa đủ (' + desc.length + ' ký tự)', 'Mô tả Google nên 120–160 ký tự (hiện ' + desc.length + ')'],
         [words >= 800, 'Bài đủ dài: ' + words + ' chữ', 'Bài nên từ 800 chữ trở lên (hiện ' + words + ' chữ)'],
         [h2 >= 2, 'Có ' + h2 + ' mục H2 → có mục lục', 'Chia bài thành ít nhất 2 mục bằng ## (tạo mục lục)'],
         [!h1, 'Không có H1 thừa trong nội dung', 'Bỏ dòng bắt đầu bằng "# " (tiêu đề bài đã là H1), dùng ## thay thế'],
@@ -199,7 +200,33 @@
       var up = e.target.closest('[data-up-row]');
       if (up) { var r = up.closest('tr'); var prev = r.previousElementSibling; if (prev && !prev.hasAttribute('data-template')) r.parentNode.insertBefore(r, prev); }
     });
-    priceForm.addEventListener('submit', function () {
+    // Kiểm tra ngay trên trình duyệt (giống máy chủ) để khỏi mất phần đã gõ khi có ô sai
+    var PRICE_RE = /^(\d+|\d{1,3}([.,]\d{3})+|\d+([.,]\d+)?(k|nghìn|ngàn|tr|triệu|m)|\d+[.,]\d{1,2})$/i;
+    var checkPrices = function () {
+      var bad = [];
+      $$('.is-invalid', priceForm).forEach(function (el) { el.classList.remove('is-invalid'); });
+      $$('table[data-table] tbody tr:not([data-template])', priceForm).forEach(function (tr) {
+        var inputs = $$('input[data-f]', tr);
+        if (!inputs.some(function (i) { return i.value.trim(); })) return; // dòng trống: bỏ qua như máy chủ
+        inputs.forEach(function (i) {
+          var v = i.value.trim().replace(/\s+/g, '').replace(/(đ|vnđ|vnd|usd)$/i, '').replace(/^\$/, '');
+          if (i.classList.contains('num') && v && (!PRICE_RE.test(v) || /^0+([.,]0+)?$/.test(v))) bad.push(i);
+          if (i.hasAttribute('data-required') && !i.value.trim()) bad.push(i);
+        });
+      });
+      bad.forEach(function (i) { i.classList.add('is-invalid'); });
+      if (bad.length) {
+        bad[0].focus(); bad[0].scrollIntoView({ block: 'center' });
+        alert('Có ' + bad.length + ' ô chưa đúng (viền đỏ). Giá gõ dạng 2800000, 2.800.000 hoặc 2,8tr; để trống nếu muốn hiện "Liên hệ". Ô bắt buộc không được để trống.');
+        return false;
+      }
+      return true;
+    };
+    // Giữ vị trí cuộn sau khi lưu (trang tải lại)
+    try { var y = sessionStorage.getItem('trip_price_scroll'); if (y) { sessionStorage.removeItem('trip_price_scroll'); window.scrollTo(0, Number(y)); } } catch (err) { /* bỏ qua */ }
+    priceForm.addEventListener('submit', function (e) {
+      if (!checkPrices()) { e.preventDefault(); return; }
+      try { sessionStorage.setItem('trip_price_scroll', String(window.scrollY)); } catch (err) { /* bỏ qua */ }
       var payload = { tables: {}, texts: {}, reset: [] };
       $$('table[data-table]', priceForm).forEach(function (t) { payload.tables[t.getAttribute('data-table')] = readTable(t); });
       $$('[data-text]', priceForm).forEach(function (el) { payload.texts[el.getAttribute('data-text')] = el.value; });
@@ -230,6 +257,17 @@
       .catch(function () { say(''); alert('Tải lên thất bại'); })
       .finally(function () { input.value = ''; });
   });
+  // Ô ảnh trong bảng giá (tuyến xe…): cập nhật ảnh nhỏ khi tải lên / sửa đường dẫn (cả dòng vừa thêm)
+  document.addEventListener('input', function (e) {
+    var cell = e.target.closest && e.target.closest('.img-cell');
+    if (!cell || !e.target.matches('[data-f]')) return;
+    var img = cell.querySelector('img');
+    var url = e.target.value.trim();
+    if (!url) { if (img) img.remove(); return; }
+    if (!img) { img = document.createElement('img'); img.alt = ''; cell.insertBefore(img, cell.firstChild); }
+    img.src = url;
+  });
+
   // Xem trước ảnh/video ngay khi đổi đường dẫn
   $$('[data-preview-for]').forEach(function (box) {
     var input = document.getElementById(box.getAttribute('data-preview-for'));

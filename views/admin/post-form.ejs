@@ -55,11 +55,7 @@
           <p class="hint">JPG/PNG/WEBP tối đa 8MB, tỉ lệ 16:9 đẹp nhất.</p>
         </div>
         <div><label for="cover_alt">Mô tả ảnh bìa (alt)</label><input type="text" id="cover_alt" name="cover_alt" value="<%= post.cover_alt || '' %>" maxlength="200" placeholder="VD: Hộ chiếu Việt Nam đặt trên vé máy bay"><p class="hint">Mô tả nội dung ảnh cho Google Hình ảnh và người khiếm thị.</p></div>
-        <div class="actions">
-          <button class="btn" type="submit">Lưu bài viết</button>
-          <button class="btn btn--ghost" type="submit" name="stay" value="1">Lưu & tiếp tục sửa</button>
-          <% if (post.id && post.status === 'published') { %><a class="btn btn--ghost" href="/blog/<%= post.slug %>" target="_blank">Xem</a><% } %>
-        </div>
+        <% if (scheduled) { %><p class="hint">Bài đang <strong>hẹn giờ</strong>: tự hiện trên website lúc <%= h.fmtDate(post.published_at, true) %>. Xoá ô "Ngày giờ đăng" rồi Lưu để đăng ngay.</p><% } %>
       </div>
 
       <div class="card form">
@@ -85,6 +81,11 @@
         <label class="check"><input type="checkbox" name="toc" value="1"<%= post.toc == null || post.toc ? ' checked' : '' %>> Hiện mục lục "Nội dung chính" (khi bài có từ 2 mục H2/H3)</label>
       </div>
     </div>
+  </div>
+  <div class="sticky-save">
+    <button class="btn" type="submit">Lưu bài viết</button>
+    <button class="btn btn--ghost" type="submit" name="stay" value="1">Lưu & tiếp tục sửa</button>
+    <% if (post.id && post.status === 'published' && !scheduled) { %><a class="btn btn--ghost" href="/blog/<%= post.slug %>" target="_blank">Xem bài</a><% } %>
   </div>
 </form>
 <%- include('_foot') %>

@@ -9,7 +9,7 @@
       <span class="express__days"><%- icon('zap') %><%= r.label %></span>
       <% if (r.time) { %><small class="express__time"><%= r.time %></small><% } %>
       <strong class="express__price"><% if (r.price != null) { %><%- price(r.price, 'vnd', 'passport', { service: 'Hộ chiếu' }) %><% } else { %>Liên hệ tư vấn<% } %></strong>
-      <button class="btn btn--sm <%= i === 0 ? 'btn--accent' : 'btn--ghost' %>" type="button" data-open-lead data-service="Hộ chiếu" data-note="Cần làm hộ chiếu nhanh: <%= r.label.toLowerCase() %>. Ngày bay dự kiến: ">Tư vấn ngay</button>
+      <button class="btn btn--sm <%= i === 0 ? 'btn--accent' : 'btn--ghost' %>" type="button" data-open-lead data-service="Hộ chiếu" data-note="Cần làm hộ chiếu nhanh (<%= r.label.toLowerCase() %>). Ngày bay dự kiến: ">Tư vấn ngay</button>
     </article>
   <% }) %>
 </div>

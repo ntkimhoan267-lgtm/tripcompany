@@ -39,6 +39,7 @@
               <div class="media-card__row">
                 <input type="text" id="<%= pid %>" name="<%= pid %>" value="<%= pcur %>" placeholder="<%= slot.poster || 'Ảnh hiện khi video chưa chạy' %>">
                 <label class="btn btn--sm btn--ghost">Tải ảnh<input type="file" accept="image/*" data-upload-to="<%= pid %>" hidden></label>
+                <% if (pcur) { %><button type="button" class="btn btn--sm btn--ghost" data-clear="<%= pid %>" title="Dùng lại ảnh chờ mặc định">Mặc định</button><% } %>
               </div>
               <span class="upload-status small muted"></span>
             </div>

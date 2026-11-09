@@ -3,7 +3,7 @@
   const coverAlt = post.cover_alt || post.title;
   const showToc = post.toc && (toc.length >= 2 || (toc.length && faq.length));
 %>
-<article<%= typeof narrow !== 'undefined' && narrow ? ' class="post-narrow"' : '' %>>
+<article<%- typeof narrow !== 'undefined' && narrow ? ' class="post-narrow"' : '' %>>
   <% if (typeof showMeta === 'undefined' || showMeta) { %>
   <div class="post-meta">
     <span><%- icon('users') %> <%= author %></span>

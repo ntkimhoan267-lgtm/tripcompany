@@ -22,14 +22,14 @@
         <h3>Dịch vụ Visa</h3>
         <p>Visa trọn gói <%= new Set(services.worldVisa.map(function (v) { return v.code; })).size + 1 %> quốc gia & vùng lãnh thổ: Trung Quốc, Hàn, Nhật, Châu Âu, Mỹ, Úc, Canada và E-visa Việt Nam.</p>
         <ul class="pillar__flags"><% ['cn', 'kr', 'jp', 'eu', 'us', 'au'].forEach(function (c) { %><li><img src="<%= flag(c) %>" alt="" width="36" height="36" loading="lazy"></li><% }) %></ul>
-        <div class="pillar__price"><div><small>Visa Trung Quốc từ</small><strong><%- price(services.chinaVisa.rows[0].price, 'vnd', 'cn', { inLink: true }) %></strong></div><span class="btn btn--white">Xem visa <%- icon('arrow') %></span></div>
+        <div class="pillar__price"><div><small>Visa Trung Quốc từ</small><strong><%- price(h.minPrice(services.chinaVisa.rows), 'vnd', 'cn', { inLink: true }) %></strong></div><span class="btn btn--white">Xem visa <%- icon('arrow') %></span></div>
       </a>
       <a class="pillar pillar--photo pillar--alt reveal" href="/dich-vu/dich-thuat" style="--img:url('<%= media('svc_dich-thuat') %>')">
         <span class="pillar__tag">✦ Thế mạnh</span>
         <h3>Dịch thuật công chứng</h3>
         <p>Anh, Trung, Hàn, Nhật, Thái, Lào. Công chứng dấu công ty, dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự.</p>
         <ul class="pillar__langs"><li>EN</li><li>中</li><li>한</li><li>日</li><li>ไทย</li><li>ລາວ</li></ul>
-        <div class="pillar__price"><div><small>Dịch thuật từ</small><strong><%- price(services.translation.languages[0].rows[0].price, 'vnd', 'translation', { inLink: true, suffix: '/trang' }) %></strong></div><span class="btn btn--white">Xem dịch thuật <%- icon('arrow') %></span></div>
+        <div class="pillar__price"><div><small>Dịch thuật từ</small><strong><%- price(h.minPrice(services.translation.languages[0].rows), 'vnd', 'translation', { inLink: true, suffix: '/trang' }) %></strong></div><span class="btn btn--white">Xem dịch thuật <%- icon('arrow') %></span></div>
       </a>
     </div>
   </div>

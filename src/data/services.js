@@ -212,17 +212,17 @@ const translation = {
 
 const passport = {
   rows: [{ type: 'Hộ chiếu phổ thông', time: '8–10 ngày làm việc', price: 500000 }],
-  // Làm nhanh: giá khác nhau theo số ngày; price null = "Liên hệ tư vấn" (sửa trong Dashboard → Bảng giá)
+  // Làm nhanh: theo số ngày khách cần có hộ chiếu; price null = "Liên hệ tư vấn" (sửa trong Dashboard → Bảng giá)
   express: [
-    { label: 'Lấy trong 1 ngày', time: '1 ngày làm việc', price: null },
-    { label: 'Lấy trong 2 ngày', time: '2 ngày làm việc', price: null },
-    { label: 'Lấy trong 3 ngày', time: '3 ngày làm việc', price: null },
-    { label: 'Lấy trong 4 ngày', time: '4 ngày làm việc', price: null },
-    { label: 'Lấy trong 5 ngày', time: '5 ngày làm việc', price: null },
-    { label: 'Lấy trong 6 ngày', time: '6 ngày làm việc', price: null },
-    { label: 'Lấy trong 7 ngày', time: '7 ngày làm việc', price: null },
+    { label: 'Cần trong 1 ngày', time: '', price: null },
+    { label: 'Cần trong 2 ngày', time: '', price: null },
+    { label: 'Cần trong 3 ngày', time: '', price: null },
+    { label: 'Cần trong 4 ngày', time: '', price: null },
+    { label: 'Cần trong 5 ngày', time: '', price: null },
+    { label: 'Cần trong 6 ngày', time: '', price: null },
+    { label: 'Cần trong 7 ngày', time: '', price: null },
   ],
-  expressNote: 'Thời gian và chi phí làm nhanh tuỳ trường hợp (cấp mới, cấp lại, mất hộ chiếu, trẻ em…) và lịch tiếp nhận của cơ quan Quản lý xuất nhập cảnh. Gửi ngày bay dự kiến để TRIP tư vấn phương án nhanh nhất cho bạn.',
+  expressNote: 'Chọn số ngày bạn cần có hộ chiếu (tính tới ngày bay). TRIP chuẩn bị và nộp hồ sơ ngay, tư vấn phương án nhanh nhất theo đúng quy định (kể cả trường hợp cấp thiết) và báo trước khả năng đáp ứng, chi phí. Thời gian cấp hộ chiếu do cơ quan Quản lý xuất nhập cảnh quyết định; TRIP không cam kết thay cơ quan nhà nước.',
   notes: [
     'Mất hộ chiếu, cấp lại: cộng thêm 100.000đ.',
     'Giá chưa bao gồm phí chuyển phát hộ chiếu. Chuyển phát hoả tốc HCM – Đà Nẵng: 1–2 ngày 130.000đ; trong ngày 330.000đ.',

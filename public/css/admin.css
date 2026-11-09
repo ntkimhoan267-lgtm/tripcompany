@@ -194,3 +194,9 @@ textarea.editor { min-height: 420px; font-family: ui-monospace, SFMono-Regular, 
 .media-card__row input { flex: 1; min-width: 0; }
 .media-card label.btn, .img-cell label.btn { margin: 0; font-size: .82rem; }
 .edit-table input[maxlength="120"], .edit-table input[maxlength="160"], .edit-table input[maxlength="200"] { min-width: 230px; }
+/* Phần tử con của lưới không được nở theo bảng rộng: bảng tự cuộn ngang trong khung .table-wrap */
+.form > *, .grid > * { min-width: 0; }
+.edit-table .is-invalid, .form .is-invalid { border-color: var(--err) !important; box-shadow: 0 0 0 3px rgba(214,69,69,.15) !important; }
+.sticky-save .hint { margin: 0; }
+@media (max-width: 860px) { .sticky-save { flex-wrap: wrap; } }
+.forbidden { max-width: 520px; margin: 12vh auto; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 28px; text-align: center; }

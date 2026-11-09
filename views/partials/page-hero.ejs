@@ -11,7 +11,9 @@
   const vkey = typeof video !== 'undefined' ? video : 'montage';
   const vslot = vkey === false ? null : (['cn', 'kr', 'jp', 'eu'].includes(vkey) ? 'market_' + vkey : (typeof vkey === 'string' && vkey.indexOf('bg_') === 0 ? vkey : 'home_hero'));
   const vsrc = vslot ? (media(vslot) || media('home_hero')) : null;
-  const vposter = vslot ? (media(vslot) ? (mediaPoster(vslot) || mediaPoster('home_hero')) : mediaPoster('home_hero')) : '';
+  // Ảnh chờ: của chính video; video riêng chưa có ảnh chờ thì dùng ảnh của trang (khớp nội dung hơn video chung)
+  const vposter = vslot ? (media(vslot) ? (mediaPoster(vslot) || (vslot.indexOf('bg_') === 0 && vis) || mediaPoster('home_hero')) : mediaPoster('home_hero')) : '';
+  const withLd = typeof noLd === 'undefined' || !noLd;
 %>
 <section class="page-hero<%= hasBg ? ' page-hero--photo' : '' %><%= vis ? ' page-hero--split' : '' %><%= vsrc ? ' page-hero--video' : '' %>"<% if (hasBg) { %> style="--bg:url('<%= bg %>')"<% } %>>
   <% if (vsrc) { %>
@@ -22,12 +24,12 @@
   <div class="sparkles"><i style="top:18%;left:70%;--s:12px"></i><i style="top:40%;left:88%;--s:9px;--d:-1s"></i><i style="top:12%;left:52%;--s:7px;--d:-2s"></i></div>
   <div class="container page-hero__grid">
     <div class="page-hero__text">
-      <script type="application/ld+json"><%- JSON.stringify({
+      <% if (withLd) { %><script type="application/ld+json"><%- JSON.stringify({
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [{ name: 'Trang chủ', href: '/' }].concat(crumbs || []).map(function (c, i, all) {
           return { '@type': 'ListItem', position: i + 1, name: c.label || c.name, item: siteUrl + (c.href || (i === all.length - 1 ? path : '/')) };
         }),
-      }).replace(/</g, '\\u003c') %></script>
+      }).replace(/</g, '\\u003c') %></script><% } %>
       <ol class="breadcrumb" aria-label="Breadcrumb">
         <li><a href="/">Trang chủ</a></li>
         <% (crumbs || []).forEach(function (c) { %><li><% if (c.href) { %><a href="<%= c.href %>"><%= c.label %></a><% } else { %><%= c.label %><% } %></li><% }) %>

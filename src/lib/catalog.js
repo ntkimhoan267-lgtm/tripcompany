@@ -10,8 +10,8 @@ const CATALOG_KEY = 'catalog_v1';
 const cloneData = (v) => JSON.parse(JSON.stringify(v));
 const MAX_ROWS = 80;
 
-// Đường dẫn ảnh hợp lệ: ảnh nội bộ (không có '..') hoặc link https
-const SAFE_MEDIA = /^(\/(uploads|img|media)\/(?!.*\.\.)[\w./-]+|https:\/\/[^\s"'<>()]+)$/;
+// Đường dẫn ảnh hợp lệ (ảnh nội bộ không có '..', hoặc link https tới file ảnh): dùng chung với Ảnh & video
+const { SAFE_IMAGE } = require('./media');
 
 const REGIONS = { 'chau-a': 'Châu Á', 'chau-au': 'Châu Âu', 'chau-my': 'Châu Mỹ', 'chau-uc': 'Úc & New Zealand' };
 const CURRENCIES = { vnd: 'VNĐ', usd: 'USD' };
@@ -23,7 +23,7 @@ const T = (k, label, type = 'text', extra = {}) => ({ k, label, type, ...extra }
 // fixed: không thêm/xoá dòng (chỉ sửa).
 const TABLES = [
   {
-    id: 'cn', group: 'visa', title: 'Visa Trung Quốc (VNĐ)', offer: 'cn',
+    id: 'cn', group: 'visa', title: 'Visa Trung Quốc (VNĐ)', offer: 'cn', minRows: 1,
     fields: [T('type', 'Loại visa', 'text', { max: 120, required: true }), T('detail', 'Chi tiết', 'text', { max: 120 }), T('time', 'Thời gian', 'text', { max: 60 }), T('price', 'Giá (VNĐ)', 'vnd')],
     get: (s) => s.chinaVisa.rows, set: (s, rows) => { s.chinaVisa.rows = rows; },
   },
@@ -49,7 +49,8 @@ const TABLES = [
       s.markets = s.markets.map((m, i) => {
         const r = rows[i];
         if (!r) return m;
-        return { ...m, from: r.amount == null ? m.from : { [r.cur === 'vnd' ? 'vnd' : 'usd']: r.amount }, time: r.time || m.time, blurb: r.blurb || m.blurb };
+        // Giá trống = "Liên hệ"; thời gian / mô tả để trống thì giữ chữ mặc định
+        return { ...m, from: r.amount == null ? {} : { [r.cur === 'vnd' ? 'vnd' : 'usd']: r.amount }, time: r.time || m.time, blurb: r.blurb || m.blurb };
       });
     },
   },
@@ -59,17 +60,17 @@ const TABLES = [
     get: (s) => s.evisa.rows, set: (s, rows) => { s.evisa.rows = rows; },
   },
   {
-    id: 'tr_anh', group: 'translation', title: 'Dịch thuật Tiếng Anh (VNĐ/trang)', offer: 'translation',
+    id: 'tr_anh', group: 'translation', minRows: 1, title: 'Dịch thuật Tiếng Anh (VNĐ/trang)', offer: 'translation',
     fields: [T('level', 'Gói dịch', 'text', { max: 120, required: true }), T('price', 'Giá (VNĐ)', 'vnd')],
     get: (s) => lang(s, 'anh').rows, set: (s, rows) => { lang(s, 'anh').rows = rows; },
   },
   {
-    id: 'tr_thn', group: 'translation', title: 'Dịch thuật Trung · Hàn · Nhật (VNĐ/trang)', offer: 'translation',
+    id: 'tr_thn', group: 'translation', minRows: 1, title: 'Dịch thuật Trung · Hàn · Nhật (VNĐ/trang)', offer: 'translation',
     fields: [T('level', 'Gói dịch', 'text', { max: 120, required: true }), T('price', 'Giá (VNĐ)', 'vnd')],
     get: (s) => lang(s, 'trung-han-nhat').rows, set: (s, rows) => { lang(s, 'trung-han-nhat').rows = rows; },
   },
   {
-    id: 'tr_tl', group: 'translation', title: 'Dịch thuật Thái · Lào (VNĐ/trang)', offer: 'translation',
+    id: 'tr_tl', group: 'translation', minRows: 1, title: 'Dịch thuật Thái · Lào (VNĐ/trang)', offer: 'translation',
     fields: [T('level', 'Gói dịch', 'text', { max: 120, required: true }), T('price', 'Giá (VNĐ)', 'vnd')],
     get: (s) => lang(s, 'thai-lao').rows, set: (s, rows) => { lang(s, 'thai-lao').rows = rows; },
   },
@@ -146,53 +147,86 @@ function getServices() {
 
 // ----- Kiểm tra dữ liệu gửi lên từ Dashboard -----
 const str = (v, max) => (typeof v === 'string' || typeof v === 'number' ? String(v) : '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max);
-function num(v, { int = true, max = 1e10 } = {}) {
-  const raw = str(v, 30).replace(/\s/g, '');
-  if (!raw) return null;
-  // "2.800.000" / "2,800,000" -> 2800000 (dấu chấm/phẩy ngăn cách hàng nghìn); USD cho phép số lẻ "12.5" / "12,5"
-  const thousands = /^\d{1,3}([.,]\d{3})+$/.test(raw);
-  const cleaned = int || thousands ? raw.replace(/[.,]/g, '') : raw.replace(/,/g, '.');
-  const n = Number(cleaned.replace(/[^\d.]/g, ''));
-  if (!Number.isFinite(n) || n < 0) return null;
-  return Math.min(int ? Math.round(n) : Math.round(n * 100) / 100, max);
+
+// Đọc giá người dùng gõ. Trả về { value } (null = để trống = "Liên hệ") hoặc { error }.
+// Nhận: 2800000 · 2.800.000 · 2,800,000 · 500k · 2,8tr · 2.8 triệu · (USD) 120 · 12.5 · 12,5
+// Không đoán khi không chắc: "abc", "-500000", "0", "1,5" (VNĐ) bị báo lỗi thay vì lưu thành số sai.
+function parsePrice(v, cur = 'vnd') {
+  const raw = str(v, 40).toLowerCase().replace(/\s+/g, '').replace(/(đ|vnđ|vnd|usd|\$)$/, '').replace(/^\$/, '');
+  if (!raw) return { value: null };
+  let n = null;
+  const unit = /^(\d+(?:[.,]\d+)?)(k|nghìn|ngàn|tr|triệu|m)$/.exec(raw);
+  if (unit && cur === 'vnd') {
+    n = Number(unit[1].replace(',', '.')) * (unit[2] === 'k' || unit[2] === 'nghìn' || unit[2] === 'ngàn' ? 1e3 : 1e6);
+  } else if (/^\d+$/.test(raw) || /^\d{1,3}([.,]\d{3})+$/.test(raw)) {
+    n = Number(raw.replace(/[.,]/g, ''));
+  } else if (cur === 'usd' && /^\d+[.,]\d{1,2}$/.test(raw)) {
+    n = Number(raw.replace(',', '.'));
+  }
+  if (n == null || !Number.isFinite(n)) return { error: `"${str(v, 30)}" không phải số tiền hợp lệ (VD: 2800000, 2.800.000 hoặc 2,8tr)` };
+  if (n <= 0) return { error: 'giá phải lớn hơn 0 (để trống nếu muốn hiện "Liên hệ")' };
+  if (cur === 'vnd' && n < 1000) return { error: `${n}đ quá nhỏ, có thể gõ thiếu số 0 (VD: 2800000 hoặc 2,8tr)` };
+  return { value: Math.min(cur === 'usd' ? Math.round(n * 100) / 100 : Math.round(n), 1e10) };
 }
 
+// Trả về { row } hoặc { error }
 function cleanRow(t, r) {
   const out = {};
   for (const f of t.fields) {
     const v = r[f.k];
     if (f.type === 'readonly') continue;
-    if (f.type === 'vnd') out[f.k] = num(v);
-    else if (f.type === 'num') out[f.k] = num(v, { int: false, max: 1e10 });
-    else if (f.type === 'select') out[f.k] = Object.hasOwn(f.options, v) ? v : Object.keys(f.options)[0];
-    else if (f.type === 'code') out[f.k] = /^[a-z]{2}$/.test(str(v, 2).toLowerCase()) ? str(v, 2).toLowerCase() : '';
-    else if (f.type === 'image') { const p = str(v, 400); out[f.k] = SAFE_MEDIA.test(p) ? p : ''; }
-    else out[f.k] = str(v, f.max || 200);
+    if (f.type === 'vnd' || f.type === 'num') {
+      // Ô "num" đi kèm ô tiền tệ (cur) trong cùng dòng: VNĐ hay USD
+      const cur = f.type === 'vnd' ? 'vnd' : (r.cur === 'vnd' ? 'vnd' : 'usd');
+      const p = parsePrice(v, cur);
+      if (p.error) return { error: `ô "${f.label}": ${p.error}` };
+      out[f.k] = p.value;
+    } else if (f.type === 'select') out[f.k] = Object.hasOwn(f.options, v) ? v : Object.keys(f.options)[0];
+    else if (f.type === 'code') {
+      const c = str(v, 5).toLowerCase();
+      if (c && !/^[a-z]{2}$/.test(c)) return { error: `ô "${f.label}" cần đúng 2 chữ cái (VD: kr, jp, fr)` };
+      out[f.k] = c;
+    } else if (f.type === 'image') {
+      const p = str(v, 400);
+      if (p && !SAFE_IMAGE.test(p)) return { error: `ô "${f.label}" cần là file ảnh .jpg/.png/.webp (bấm "Tải ảnh" hoặc dán link https tới ảnh)` };
+      out[f.k] = p;
+    } else out[f.k] = str(v, f.max || 200);
   }
-  return out;
+  return { row: out };
 }
 
-// Trả về { rows, error } — bỏ dòng trống, báo lỗi nếu thiếu ô bắt buộc
+// Trả về { rows } hoặc { error } — bỏ dòng trống, báo lỗi rõ dòng nào, ô nào
 function cleanTable(t, rows) {
-  if (!Array.isArray(rows)) return { error: 'Dữ liệu không hợp lệ.' };
+  if (!Array.isArray(rows)) return { error: `${t.title}: dữ liệu không hợp lệ.` };
   const cleaned = [];
+  let line = 0;
   for (const r of rows.slice(0, MAX_ROWS)) {
     if (!r || typeof r !== 'object') continue;
+    line += 1;
     const c = cleanRow(t, r);
-    const empty = t.fields.every((f) => f.type === 'readonly' || f.type === 'select' || c[f.k] == null || c[f.k] === '');
+    if (c.error) return { error: `${t.title}, dòng ${line}: ${c.error}.` };
+    const row = c.row;
+    const empty = t.fields.every((f) => f.type === 'readonly' || f.type === 'select' || row[f.k] == null || row[f.k] === '');
     if (empty && !t.fixed) continue;
-    const missing = t.fields.find((f) => f.required && !c[f.k]);
-    if (missing && !t.fixed) return { error: `${t.title}: dòng ${cleaned.length + 1} thiếu "${missing.label}".` };
-    cleaned.push(c);
+    const missing = t.fields.find((f) => f.required && !row[f.k]);
+    if (missing && !t.fixed) return { error: `${t.title}, dòng ${line}: thiếu "${missing.label}".` };
+    cleaned.push(row);
   }
-  if (t.fixed) {
-    const current = t.get(cloneData(base));
-    if (cleaned.length !== current.length) return { error: `${t.title}: số dòng không được thay đổi.` };
-  }
+  if (t.fixed && cleaned.length !== t.get(cloneData(base)).length) return { error: `${t.title}: số dòng không được thay đổi.` };
+  if (t.minRows && cleaned.length < t.minRows) return { error: `${t.title}: cần ít nhất ${t.minRows} dòng (trang chủ và trang dịch vụ dùng giá "từ" của bảng này).` };
   return { rows: cleaned };
 }
 
+// Giá trị mặc định (trong services.js) của 1 bảng, đã chuẩn hoá giống dữ liệu gửi lên -> so sánh "có sửa hay không"
+const defaultRows = (t) => {
+  const s = cloneData(base);
+  return t.get(s).map((r) => { const c = cleanRow(t, r); return c.row || r; });
+};
+const textValue = (x, v) => (x.lines ? String(v ?? '').split(/\r?\n/).map((l) => str(l, 400)).filter(Boolean).slice(0, 20) : str(String(v ?? '').replace(/\r/g, ''), 2000));
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
 // payload: { tables: { id: rows }, texts: { id: string }, reset: [id] }
+// Chỉ lưu bảng/đoạn chữ KHÁC giá mặc định: bảng giữ nguyên mặc định vẫn tự cập nhật khi services.js đổi.
 function saveOverrides(payload) {
   const o = readOverrides();
   const errors = [];
@@ -201,17 +235,19 @@ function saveOverrides(payload) {
     if (!Object.hasOwn(tables, t.id)) continue;
     const r = cleanTable(t, tables[t.id]);
     if (r.error) { errors.push(r.error); continue; }
-    // Bảng "markets" lưu theo dạng { cur, amount }; các bảng khác lưu đúng dạng dữ liệu (đã tách tiền tệ ở world)
-    o.tables[t.id] = r.rows;
+    if (same(r.rows, defaultRows(t))) delete o.tables[t.id];
+    else o.tables[t.id] = r.rows;
   }
   const texts = payload && typeof payload.texts === 'object' && payload.texts ? payload.texts : {};
   for (const x of TEXTS) {
     if (!Object.hasOwn(texts, x.id)) continue;
-    const v = str(String(texts[x.id] ?? '').replace(/\r/g, ''), 2000);
-    o.texts[x.id] = x.lines ? String(texts[x.id] ?? '').split(/\r?\n/).map((l) => str(l, 400)).filter(Boolean).slice(0, 20) : v;
+    const v = textValue(x, texts[x.id]);
+    const def = textValue(x, x.lines ? (x.get(cloneData(base)) || []).join('\n') : x.get(cloneData(base)));
+    if (same(v, def)) delete o.texts[x.id];
+    else o.texts[x.id] = v;
   }
   for (const id of Array.isArray(payload && payload.reset) ? payload.reset : []) {
-    delete o.tables[id]; delete o.texts[id];
+    if (typeof id === 'string') { delete o.tables[id]; delete o.texts[id]; }
   }
   setSettings({ [CATALOG_KEY]: JSON.stringify(o) });
   return { errors };
@@ -228,4 +264,4 @@ function editorData() {
   };
 }
 
-module.exports = { getServices, saveOverrides, editorData, TABLES, TEXTS, CATALOG_KEY, SAFE_MEDIA };
+module.exports = { getServices, saveOverrides, editorData, parsePrice, TABLES, TEXTS, CATALOG_KEY };

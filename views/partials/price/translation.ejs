@@ -1,13 +1,13 @@
 <% const tr = services.translation; const deco = { anh: 'EN', 'trung-han-nhat': '中 한 日', 'thai-lao': 'ไทย ລາວ' }; %>
 <div class="plans">
-  <% tr.languages.filter(function (l) { return l.rows.length && l.rows[0].price != null; }).forEach(function (l, i) { %>
+  <% tr.languages.filter(function (l) { return h.minPrice(l.rows) != null; }).forEach(function (l, i) { %>
     <article class="plan<%= i === 1 ? ' plan--hot' : '' %>">
       <header class="plan__head">
         <span class="plan__deco" aria-hidden="true"><%= deco[l.id] || '' %></span>
         <% if (i === 1) { %><span class="plan__ribbon">Thế mạnh</span><% } %>
         <h3><%= l.label %></h3>
         <p><%= l.pair %></p>
-        <div class="plan__from"><small>Chỉ từ</small><strong><%- price(l.rows[0].price, 'vnd', 'translation', { service: 'Dịch thuật công chứng' }) %></strong><small>/<%= tr.unit %></small></div>
+        <div class="plan__from"><small>Chỉ từ</small><strong><%- price(h.minPrice(l.rows), 'vnd', 'translation', { service: 'Dịch thuật công chứng' }) %></strong><small>/<%= tr.unit %></small></div>
       </header>
       <ul class="plan__list">
         <% l.rows.forEach(function (r) { %><li><span><%- icon('check-circle') %><%= r.level %></span><b><%- price(r.price, 'vnd', 'translation', { service: 'Dịch thuật công chứng' }) %></b></li><% }) %>

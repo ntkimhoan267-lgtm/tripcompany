@@ -1,0 +1,12 @@
+<%
+  // Dải thông báo ưu đãi "giảm X khi để lại SĐT/Gmail". Tham số: service (dịch vụ gửi kèm khi khách nhận ưu đãi)
+  const osvc = typeof service !== 'undefined' ? service : '';
+%>
+<% if (offerCfg.enabled) { %>
+<div class="offer-bar" role="note">
+  <span class="offer-bar__icon" aria-hidden="true">🎁</span>
+  <p class="offer-bar__text offer-locked"><strong><%= offerCfg.label %></strong> cho các dịch vụ có biểu tượng 🎁 khi bạn để lại <strong>số điện thoại</strong> hoặc <strong>Gmail</strong>. Giá đang hiện là giá niêm yết.</p>
+  <p class="offer-bar__text offer-unlocked"><strong>Bạn đã nhận ưu đãi!</strong> Giá bên dưới đã trừ <%= offerCfg.label.replace(/^Giảm /, '') %>. Tư vấn viên TRIP sẽ áp dụng khi báo giá cho bạn.</p>
+  <button class="btn btn--accent btn--sm offer-locked" type="button" data-open-offer<% if (osvc) { %> data-service="<%= osvc %>"<% } %>>Nhận giá ưu đãi</button>
+</div>
+<% } %>

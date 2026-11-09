@@ -3,7 +3,8 @@
   crumbs: [{ label: 'Tour du lịch' }],
   heading: 'Tour du lịch',
   headingEm: 'khởi hành từ Đà Nẵng',
-  visual: '/img/tours/ba-na.jpg',
+  visual: media('page_tours'),
+  video: 'bg_tours',
   stamp: { top: 'DA NANG · HOI AN · HUE · ', mid: 'TOUR', sub: 'TRIP', cls: 'stamp--hero stamp--eu' },
   sub: 'Tour nước ngoài kèm hỗ trợ visa trọn gói, tour trong nước và tour trong ngày Đà Nẵng – Hội An – Huế.',
   actions: { service: 'Tour du lịch' },
@@ -18,6 +19,7 @@
       </nav>
       <span class="muted">Tìm thấy <strong><%= tours.length %></strong> tour</span>
     </div>
+    <% if (tours.some(function (t) { return t.price; })) { %><%- include('../partials/offer-bar', { service: 'Tour du lịch' }) %><% } %>
     <% if (tours.length) { %>
       <div class="grid grid--3"><% tours.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %></div>
     <% } else { %>

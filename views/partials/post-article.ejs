@@ -1,0 +1,39 @@
+<%
+  // Thân bài viết dùng chung cho mọi bố cục. Tham số: showCover, showTocInline, narrow
+  const coverAlt = post.cover_alt || post.title;
+  const showToc = post.toc && (toc.length >= 2 || (toc.length && faq.length));
+%>
+<article<%= typeof narrow !== 'undefined' && narrow ? ' class="post-narrow"' : '' %>>
+  <% if (typeof showMeta === 'undefined' || showMeta) { %>
+  <div class="post-meta">
+    <span><%- icon('users') %> <%= author %></span>
+    <span><%- icon('calendar') %> Đăng <%= h.fmtDate(post.published_at) %></span>
+    <% if (post.updated_at && h.fmtDate(post.updated_at) !== h.fmtDate(post.published_at) && post.updated_at > post.published_at) { %><span><%- icon('check-circle') %> Cập nhật <%= h.fmtDate(post.updated_at) %></span><% } %>
+    <span><%- icon('clock') %> <%= readMinutes %> phút đọc</span>
+  </div>
+  <% } %>
+  <% if (showCover && post.cover) { %><%- h.picture(post.cover, { alt: coverAlt, loading: 'eager', fetchpriority: 'high', style: 'width:100%;border-radius:var(--radius);margin-bottom:28px;aspect-ratio:16/9;object-fit:cover', sizes: '(max-width: 980px) 92vw, 760px' }) %><% } %>
+  <% if (post.excerpt) { %><p class="lead"><%= post.excerpt %></p><% } %>
+  <% if (showToc && showTocInline) { %><%- include('post-toc', { toc, faq, open: true }) %><% } %>
+  <div class="prose"><%- html %></div>
+
+  <% if (faq.length) { %>
+    <section class="faq" aria-labelledby="cau-hoi-thuong-gap">
+      <h2 id="cau-hoi-thuong-gap">Câu hỏi thường gặp</h2>
+      <% faq.forEach(function (f, i) { %>
+        <details<%= i === 0 ? ' open' : '' %>><summary><%= f.q %></summary><div class="prose"><%- f.html %></div></details>
+      <% }) %>
+    </section>
+  <% } %>
+
+  <div class="card post-cta" style="background:var(--sky-50);border:0">
+    <h3>Cần TRIP hỗ trợ hồ sơ của bạn?</h3>
+    <p>Tư vấn miễn phí, kiểm tra hồ sơ và báo giá trọn gói.</p>
+    <div class="flex mt-2"><button class="btn btn--accent" data-open-lead<% if (post.category === 'Dịch thuật') { %> data-service="Dịch thuật công chứng"<% } %>>Tư vấn miễn phí</button><a class="btn btn--ghost" href="tel:<%= h.phoneTel(settings.hotline) %>"><%= h.phoneDisplay(settings.hotline) %></a></div>
+  </div>
+
+  <% if (related.length) { %>
+    <h2 class="mt-4">Bài viết liên quan</h2>
+    <div class="grid grid--2"><% related.slice(0, 2).forEach(function (p) { %><%- include('post-card', { p }) %><% }) %></div>
+  <% } %>
+</article>

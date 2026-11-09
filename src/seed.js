@@ -17,6 +17,11 @@ const DEFAULT_SETTINGS = {
   hero_teaser: '/media/trip-teaser.mp4',
   popup_newsletter_enabled: '1',
   popup_newsletter_delay: '45',
+  // Ưu đãi: giá niêm yết = giá thật + 500.000đ; khách để lại SĐT/Gmail thì thấy giá thật (Dashboard → Ưu đãi)
+  offer_enabled: '1',
+  offer_vnd: '500000',
+  offer_usd: '20',
+  offer_groups: require('./lib/offer').DEFAULT_GROUPS.join(','),
 };
 
 const POSTS = [
@@ -143,7 +148,12 @@ const TOURS = [
     highlights: 'Công viên chủ đề\nRiver Safari\nBiểu diễn thực cảnh' },
 ];
 
-function seed() {
+// [khoá đánh dấu đã thêm, file bài viết]
+const SEO_ARTICLES = [
+  ['seed_post_lam_ho_chieu_nhanh_v1', './data/articles/lam-ho-chieu-nhanh'],
+];
+
+function seedBase() {
   // Tài khoản admin
   const userCount = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
   if (userCount === 0) {
@@ -199,6 +209,26 @@ function seed() {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
     TOURS.forEach((t, i) => ins.run(t.slug, t.title, t.destination, t.region, t.duration, t.departure, t.price, t.image || null, t.highlights, t.featured || 0, i));
   }
+}
+
+// Bài viết SEO mới bổ sung theo từng đợt: thêm 1 lần (kể cả database đang chạy), không tạo lại nếu đã xoá trong Dashboard
+function seedArticles() {
+  for (const [flag, file] of SEO_ARTICLES) {
+    if (db.prepare('SELECT 1 FROM settings WHERE key = ?').get(flag)) continue;
+    const a = require(file);
+    if (!db.prepare('SELECT 1 FROM posts WHERE slug = ?').get(a.slug)) {
+      db.prepare(`INSERT INTO posts (slug, title, excerpt, content, cover, category, status, published_at,
+        seo_title, meta_desc, focus_kw, cover_alt, author, faq, layout, theme, toc, noindex)
+        VALUES (?, ?, ?, ?, ?, ?, 'published', datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, 1, 0)`)
+        .run(a.slug, a.title, a.excerpt, a.content, a.cover, a.category, a.seo_title, a.meta_desc, a.focus_kw, a.cover_alt, a.author, a.faq, a.layout, a.theme);
+    }
+    db.prepare("INSERT INTO settings (key, value) VALUES (?, datetime('now'))").run(flag);
+  }
+}
+
+function seed() {
+  seedBase();
+  seedArticles();
 }
 
 module.exports = { seed, DEFAULT_SETTINGS };

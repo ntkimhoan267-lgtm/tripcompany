@@ -2,7 +2,7 @@
 <% const video = h.parseVideo(settings.hero_video); const teaser = h.parseVideo(settings.hero_teaser); %>
 
 <section class="hero hero--video">
-  <video class="hero__bg" data-src="/media/hero-montage.mp4" poster="/media/hero-montage.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+  <video class="hero__bg" data-src="<%= media('home_hero') %>" poster="<%= mediaPoster('home_hero') %>" muted loop playsinline preload="none" aria-hidden="true"></video>
   <div class="hero__shade"></div>
   <div class="container">
     <div>
@@ -80,11 +80,12 @@
       <h2>Visa <em>Trung · Hàn · Nhật</em> & Châu Âu</h2>
       <p>Giá trọn gói đã gồm phí lãnh sự, dịch thuật công chứng giấy tờ cơ bản và phí dịch vụ (trừ khi có ghi chú riêng).</p>
     </div>
+    <%- include('../partials/offer-bar', { service: 'Visa Trung Quốc' }) %>
     <div class="markets markets--4">
       <% services.markets.forEach(function (m, i) { %>
         <a class="market market--<%= m.art %> reveal" href="/visa/<%= m.id %>">
           <div class="market__art">
-            <video class="js-inview" src="/media/markets/<%= m.art %>.mp4" poster="/media/markets/<%= m.art %>.jpg" muted loop playsinline preload="none" aria-hidden="true"></video>
+            <video class="js-inview" src="<%= media('market_' + m.art) %>" poster="<%= mediaPoster('market_' + m.art) %>" muted loop playsinline preload="none" aria-hidden="true"></video>
             <span class="market__native"><%= m.native %></span>
             <% if (i < 3) { %><span class="market__badge">✦ Thế mạnh</span><% } %>
           </div>
@@ -92,7 +93,7 @@
             <span class="market__en">Visa <%= m.en %></span>
             <h3><%= m.country %></h3>
             <div class="market__foot">
-              <div><small>Trọn gói từ</small><strong><%= h.money(m.from) %></strong><span class="time"><%- icon('clock') %> <%= m.time %></span></div>
+              <div><small>Trọn gói từ</small><strong><%- price.from(m.from, 'markets', { inLink: true }) %></strong><span class="time"><%- icon('clock') %> <%= m.time %></span></div>
               <span class="market__go"><%- icon('arrow') %></span>
             </div>
           </div>
@@ -107,7 +108,7 @@
         <h3>Bản dịch <em>chuẩn</em>, có dấu, lấy nhanh</h3>
         <p>Anh · Trung · Hàn · Nhật · Thái · Lào. Công chứng dấu công ty, dấu tư pháp, hợp pháp hoá lãnh sự.</p>
       </div>
-      <div class="feature-band__price"><small>Dịch thuật từ</small><strong><%= h.vnd(services.translation.languages[0].rows[0].price) %></strong><small>/trang</small></div>
+      <div class="feature-band__price"><small>Dịch thuật từ</small><strong><%- price(services.translation.languages[0].rows[0].price, 'vnd', 'translation', { inLink: true }) %></strong><small>/trang</small></div>
       <span class="market__go"><%- icon('arrow') %></span>
     </a>
 
@@ -150,7 +151,7 @@
 <section class="section section--soft">
   <div class="container why">
     <figure class="photo-frame photo-frame--tilt reveal">
-      <%- h.picture('/img/team/team.jpg', { alt: 'Đội ngũ nhân viên TRIP tại văn phòng Đà Nẵng', width: 1400, height: 1050, sizes: '(max-width: 860px) 92vw, 560px' }) %>
+      <%- h.picture(media('home_team'), { alt: 'Đội ngũ nhân viên TRIP tại văn phòng Đà Nẵng', width: 1400, height: 1050, sizes: '(max-width: 860px) 92vw, 560px' }) %>
       <figcaption class="photo-caption"><img src="/img/logo-icon-sm.png" alt="" width="40" height="40"><span><strong>Đội ngũ TRIP</strong>Văn phòng 35 Cao Thắng, Đà Nẵng</span></figcaption>
     </figure>
     <div class="reveal">

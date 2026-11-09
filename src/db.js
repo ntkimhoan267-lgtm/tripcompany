@@ -118,4 +118,18 @@ if (!hasColumn('newsletters', 'batched')) db.exec('ALTER TABLE newsletters ADD C
 // Dòng 'sending' còn lại (lỗi mạng, server tắt giữa chừng) = chưa rõ đã nhận hay chưa -> không tự gửi lại để tránh trùng.
 if (!hasColumn('newsletter_sends', 'status')) db.exec("ALTER TABLE newsletter_sends ADD COLUMN status TEXT NOT NULL DEFAULT 'sent'");
 
+// Bài viết chuẩn SEO: tiêu đề SEO, mô tả Google, từ khoá chính, alt ảnh bìa, tác giả, FAQ, bố cục, màu nhấn, mục lục, noindex
+const POST_COLUMNS = {
+  seo_title: 'TEXT', meta_desc: 'TEXT', focus_kw: 'TEXT', cover_alt: 'TEXT', author: 'TEXT', faq: 'TEXT',
+  layout: "TEXT NOT NULL DEFAULT 'classic'", theme: "TEXT NOT NULL DEFAULT 'sky'",
+  toc: 'INTEGER NOT NULL DEFAULT 1', noindex: 'INTEGER NOT NULL DEFAULT 0',
+};
+for (const [col, type] of Object.entries(POST_COLUMNS)) if (!hasColumn('posts', col)) db.exec(`ALTER TABLE posts ADD COLUMN ${col} ${type}`);
+// Đổi đường dẫn bài viết: giữ đường dẫn cũ để chuyển hướng 301 (không mất thứ hạng Google, không lỗi link đã chia sẻ)
+db.exec(`CREATE TABLE IF NOT EXISTS post_redirects (
+  old_slug TEXT PRIMARY KEY,
+  post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);`);
+
 module.exports = db;

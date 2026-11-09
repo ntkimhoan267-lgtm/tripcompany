@@ -7,19 +7,27 @@
     g.items.push(v);
   });
   const regionLabel = { 'chau-a': 'Châu Á', 'chau-au': 'Châu Âu', 'chau-my': 'Châu Mỹ', 'chau-uc': 'Úc & New Zealand' };
+  const leadOf = function (v) {
+    if (v.code === 'kr') return 'Visa Hàn Quốc';
+    if (v.code === 'jp') return 'Visa Nhật Bản';
+    if (v.code === 'cn') return 'Visa Trung Quốc';
+    if (v.region === 'chau-au') return 'Visa Châu Âu (Schengen, Anh)';
+    if (['us', 'ca', 'au'].includes(v.code)) return 'Visa Mỹ / Úc / Canada';
+    return 'Visa nước khác';
+  };
 %>
 <div class="ccards">
   <% groups.forEach(function (g) { %>
     <article class="ccard" data-region="<%= g.region %>">
       <header class="ccard__head">
-        <img src="<%= flag(g.code) %>" alt="" width="48" height="48" loading="lazy">
+        <% if (g.code) { %><img src="<%= flag(g.code) %>" alt="" width="48" height="48" loading="lazy"><% } %>
         <div><h3><%= g.country %></h3><small><%= regionLabel[g.region] || '' %></small></div>
       </header>
       <ul class="ccard__list">
         <% g.items.forEach(function (v) { %>
           <li>
             <div><strong><%= v.type %></strong><span><%- icon('clock') %><%= v.time %></span><% if (v.note) { %><em><%= v.note %></em><% } %></div>
-            <b class="ccard__price"><%= v.vnd ? h.vnd(v.vnd) : h.usd(v.usd) %></b>
+            <b class="ccard__price"><%- v.vnd != null ? price(v.vnd, 'vnd', 'world', { service: leadOf(v) }) : price(v.usd, 'usd', 'world', { service: leadOf(v) }) %></b>
           </li>
         <% }) %>
       </ul>

@@ -140,6 +140,39 @@
   </div>
 </div>
 
+<% if (offerCfg.enabled) { %>
+<!-- Popup nhận giá ưu đãi -->
+<div class="modal modal--offer" id="offer-modal" role="dialog" aria-modal="true" aria-labelledby="offer-modal-title" hidden>
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__dialog">
+    <button class="modal__close" data-close aria-label="Đóng"><%- icon('x') %></button>
+    <div class="modal__head">
+      <span class="offer-pill">🎁 <%= offerCfg.label %></span>
+      <h3 id="offer-modal-title">Nhận giá ưu đãi ngay</h3>
+      <p>Để lại <strong>số điện thoại</strong> hoặc <strong>Gmail</strong>, website hiện ngay giá đã giảm cho mọi dịch vụ có biểu tượng 🎁. Tư vấn viên TRIP áp dụng ưu đãi khi báo giá cho bạn.</p>
+    </div>
+    <div class="modal__body">
+      <form class="js-offer-form form-grid" action="/api/offer" method="post" novalidate>
+        <div class="field">
+          <label for="offer-contact">Số điện thoại hoặc Gmail <span class="req">*</span></label>
+          <input class="input" id="offer-contact" name="contact" autocomplete="tel" inputmode="email" placeholder="0935 191 394 hoặc ban@gmail.com" required maxlength="200">
+          <span class="field__error" data-error="contact"></span>
+        </div>
+        <div class="field">
+          <label for="offer-name">Tên của bạn <span class="muted">(không bắt buộc)</span></label>
+          <input class="input" id="offer-name" name="name" autocomplete="name" maxlength="100">
+        </div>
+        <input type="hidden" name="service" value="">
+        <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn btn--accent btn--block" type="submit">🎁 Xem giá ưu đãi</button>
+        <div class="form-msg" role="status" aria-live="polite"></div>
+        <p class="form-privacy"><%- icon('shield') %> Thông tin chỉ dùng để TRIP liên hệ tư vấn, không chia sẻ cho bên thứ ba.</p>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>
+
 <!-- Popup video -->
 <div class="modal modal--video" id="video-modal" role="dialog" aria-modal="true" aria-label="Video giới thiệu TRIP" hidden>
   <div class="modal__backdrop" data-close></div>

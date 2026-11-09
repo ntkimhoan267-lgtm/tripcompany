@@ -115,7 +115,7 @@ function picture(src, o = {}) {
 }
 
 module.exports = {
-  picture, IMAGE_WIDTHS,
+  picture, IMAGE_WIDTHS, escAttr,
   pageName,
   vnd, usd, money, phoneDisplay, phoneTel, slugify, fmtDate,
   getSettings, setSettings, parseVideo, isValidVnPhone, normalizePhone, isValidEmail,

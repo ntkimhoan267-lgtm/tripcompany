@@ -1,38 +1,63 @@
 <%- include('../partials/head') %>
-<%- include('../partials/page-hero', {
-  crumbs: [{ label: 'Cẩm nang', href: '/blog' }, { label: post.category || 'Bài viết' }],
-  heading: post.title,
-  sub: h.fmtDate(post.published_at) + (post.category ? ' · ' + post.category : ''),
-  actions: null,
-}) %>
+<%
+  // Bố cục chọn trong Dashboard → Bài viết: classic | guide | magazine | minimal
+  const crumbs = [{ label: 'Cẩm nang', href: '/blog' }, { label: post.category || 'Bài viết', href: post.category ? '/blog?chu_de=' + encodeURIComponent(post.category) : '/blog' }, { label: post.title }];
+  const theme = post.theme === 'accent' ? ' post--accent' : post.theme === 'navy' ? ' post--navy' : '';
+  const hasToc = post.toc && (toc.length >= 2 || (toc.length && faq.length));
+%>
+<% if (layout === 'magazine') { %>
+  <header class="post-cover">
+    <% if (post.cover) { %><div class="post-cover__img"><%- h.picture(post.cover, { alt: post.cover_alt || post.title, fetchpriority: 'high', sizes: '100vw' }) %></div><% } %>
+    <div class="container">
+      <ol class="breadcrumb" aria-label="Breadcrumb"><li><a href="/">Trang chủ</a></li><li><a href="/blog">Cẩm nang</a></li><% if (post.category) { %><li><a href="/blog?chu_de=<%= encodeURIComponent(post.category) %>"><%= post.category %></a></li><% } %></ol>
+      <h1><%= post.title %></h1>
+      <div class="post-meta"><span><%- icon('users') %> <%= author %></span><span><%- icon('calendar') %> <%= h.fmtDate(post.published_at) %></span><span><%- icon('clock') %> <%= readMinutes %> phút đọc</span></div>
+    </div>
+  </header>
+  <section class="section<%= theme %>">
+    <div class="container"><%- include('../partials/post-article', { showCover: false, showTocInline: true, narrow: true, showMeta: false }) %></div>
+  </section>
 
-<section class="section">
-  <div class="container layout-side">
-    <article>
-      <% if (post.cover) { %><%- h.picture(post.cover, { alt: post.title, loading: 'eager', style: 'width:100%;border-radius:var(--radius);margin-bottom:28px;aspect-ratio:16/9;object-fit:cover', sizes: '(max-width: 980px) 92vw, 760px' }) %><% } %>
-      <% if (post.excerpt) { %><p class="lead"><%= post.excerpt %></p><% } %>
-      <div class="prose"><%- html %></div>
+<% } else if (layout === 'minimal') { %>
+  <header class="post-plain<%= theme %>">
+    <div class="container post-narrow">
+      <ol class="breadcrumb" aria-label="Breadcrumb"><li><a href="/">Trang chủ</a></li><li><a href="/blog">Cẩm nang</a></li><% if (post.category) { %><li><a href="/blog?chu_de=<%= encodeURIComponent(post.category) %>"><%= post.category %></a></li><% } %></ol>
+      <h1><%= post.title %></h1>
+    </div>
+  </header>
+  <section class="section<%= theme %>" style="padding-top:24px">
+    <div class="container"><%- include('../partials/post-article', { showCover: true, showTocInline: true, narrow: true }) %></div>
+  </section>
 
-      <div class="card mt-4" style="background:var(--sky-50);border:0">
-        <h3>Cần TRIP hỗ trợ hồ sơ của bạn?</h3>
-        <p>Tư vấn miễn phí, kiểm tra hồ sơ và báo giá trọn gói.</p>
-        <div class="flex mt-2"><button class="btn btn--accent" data-open-lead>Tư vấn miễn phí</button><a class="btn btn--ghost" href="tel:<%= h.phoneTel(settings.hotline) %>"><%= h.phoneDisplay(settings.hotline) %></a></div>
+<% } else { %>
+  <%- include('../partials/page-hero', {
+    crumbs: crumbs.slice(0, 2),
+    heading: post.title,
+    sub: [post.category, h.fmtDate(post.published_at)].filter(Boolean).join(' · '),
+    actions: null,
+  }) %>
+  <section class="section<%= theme %>">
+    <% if (layout === 'guide') { %>
+      <div class="container post-guide">
+        <aside class="post-guide__toc"><% if (hasToc) { %><%- include('../partials/post-toc', { toc, faq, open: true }) %><% } %>
+          <div class="card mt-3"><h3>Cần làm gấp?</h3><p class="muted">Gửi giấy tờ qua Zalo, TRIP kiểm tra miễn phí.</p><button class="btn btn--accent btn--block" data-open-lead>Tư vấn miễn phí</button></div>
+        </aside>
+        <%- include('../partials/post-article', { showCover: true, showTocInline: false }) %>
       </div>
-
-      <% if (related.length) { %>
-        <h2 class="mt-4">Bài viết khác</h2>
-        <div class="grid grid--2"><% related.slice(0, 2).forEach(function (p) { %><%- include('../partials/post-card', { p }) %><% }) %></div>
-      <% } %>
-    </article>
-    <aside class="sidebar">
-      <%- include('../partials/consult-box', { people: [] }) %>
-      <div class="card">
-        <h3>Nhận tin mỗi tháng</h3>
-        <p class="muted">Lịch tour, ưu đãi và cập nhật chính sách visa mới.</p>
-        <button class="btn btn--navy btn--block mt-2" data-open-news><%- icon('mail') %> Đăng ký nhận tin</button>
+    <% } else { %>
+      <div class="container layout-side">
+        <%- include('../partials/post-article', { showCover: true, showTocInline: true }) %>
+        <aside class="sidebar">
+          <%- include('../partials/consult-box', { people: [] }) %>
+          <div class="card">
+            <h3>Nhận tin mỗi tháng</h3>
+            <p class="muted">Lịch tour, ưu đãi và cập nhật chính sách visa mới.</p>
+            <button class="btn btn--navy btn--block mt-2" data-open-news><%- icon('mail') %> Đăng ký nhận tin</button>
+          </div>
+        </aside>
       </div>
-    </aside>
-  </div>
-</section>
+    <% } %>
+  </section>
+<% } %>
 
 <%- include('../partials/footer') %>

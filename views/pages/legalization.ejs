@@ -6,9 +6,10 @@
   headingEm: 'Chứng nhận lãnh sự',
   sub: 'Giấy tờ Việt Nam dùng ở nước ngoài (và ngược lại) thường phải được chứng nhận hoặc hợp pháp hoá lãnh sự. TRIP làm trọn gói, kèm dịch thuật công chứng.',
   actions: { service: 'Hợp pháp hoá lãnh sự', phone: settings.hotline_translation },
-  visual: '/img/services/hop-phap-hoa.jpg',
+  visual: media('svc_hop-phap-hoa'),
+  video: 'bg_hop-phap-hoa',
   stamp: { top: 'LEGALIZED · CONSULAR · ', mid: '✓', sub: 'TRIP', cls: 'stamp--hero stamp--eu' },
-  facts: [{ icon: 'wallet', label: 'Trọn gói từ', value: h.vnd(tr.legalization[0].price) }, { icon: 'stamp', label: 'Gói giấy tờ kinh tế', value: 'Đã gồm tem đỏ' }],
+  facts: [{ icon: 'wallet', label: 'Trọn gói từ', html: tr.legalization.length ? price(tr.legalization[0].price, 'vnd', 'legal', { service: 'Hợp pháp hoá lãnh sự' }) : 'Liên hệ' }, { icon: 'stamp', label: 'Gói giấy tờ kinh tế', value: 'Đã gồm tem đỏ' }],
 }) %>
 
 <section class="section">
@@ -22,7 +23,8 @@
 
       <div>
         <div class="block-head"><span class="eyebrow">Bảng giá</span><h2>Chứng nhận lãnh sự <em>Trung Quốc</em></h2></div>
-        <%- include('../partials/price/options', { items: tr.legalization.map(function (x) { return { title: x.name, tag: x.detail, price: h.vnd(x.price), flag: 'cn' }; }), service: 'Hợp pháp hoá lãnh sự' }) %>
+        <%- include('../partials/offer-bar', { service: 'Hợp pháp hoá lãnh sự' }) %>
+        <%- include('../partials/price/options', { items: tr.legalization.map(function (x) { return { title: x.name, tag: x.detail, priceHtml: price(x.price, 'vnd', 'legal', { service: 'Hợp pháp hoá lãnh sự' }), flag: 'cn' }; }), service: 'Hợp pháp hoá lãnh sự' }) %>
         <p class="ppanel__note"><%- icon('info') %>Hợp pháp hoá lãnh sự cho các nước khác: vui lòng liên hệ để được báo giá theo loại giấy tờ và quốc gia sử dụng.</p>
       </div>
 

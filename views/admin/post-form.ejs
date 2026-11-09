@@ -1,39 +1,88 @@
 <%- include('_head') %>
 <div class="topline"><h1><%= title %></h1><a href="/admin/posts">← Danh sách bài viết</a></div>
-<form class="form" method="post" enctype="multipart/form-data" action="<%= post.id ? '/admin/posts/' + post.id : '/admin/posts/new' %>">
+<form class="form" method="post" enctype="multipart/form-data" action="<%= post.id ? '/admin/posts/' + post.id : '/admin/posts/new' %>" id="post-form">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <div class="grid grid--2">
-    <div class="card form">
-      <div><label for="title">Tiêu đề *</label><input type="text" id="title" name="title" value="<%= post.title || '' %>" required maxlength="200"></div>
-      <div><label for="excerpt">Mô tả ngắn <span class="hint">(hiển thị ở danh sách & Google, ~160 ký tự)</span></label><textarea id="excerpt" name="excerpt" maxlength="400" style="min-height:70px"><%= post.excerpt || '' %></textarea></div>
-      <div>
-        <label for="content">Nội dung</label>
-        <div class="actions" style="margin-bottom:8px">
-          <button type="button" class="btn btn--sm btn--ghost" data-md="## " title="Tiêu đề lớn">H2</button>
-          <button type="button" class="btn btn--sm btn--ghost" data-md="### " title="Tiêu đề nhỏ">H3</button>
-          <button type="button" class="btn btn--sm btn--ghost" data-md-wrap="**" title="In đậm"><b>B</b></button>
-          <button type="button" class="btn btn--sm btn--ghost" data-md="- " title="Danh sách">• Danh sách</button>
-          <button type="button" class="btn btn--sm btn--ghost" data-md="> " title="Trích dẫn">❝ Trích dẫn</button>
-          <button type="button" class="btn btn--sm btn--ghost" data-md-link>🔗 Link</button>
-          <label class="btn btn--sm btn--ghost" style="margin:0">🖼 Chèn ảnh<input type="file" accept="image/*" data-md-image hidden></label>
+    <div class="form" style="align-content:start">
+      <div class="card form">
+        <div><label for="title">Tiêu đề bài viết (H1) *</label><input type="text" id="title" name="title" value="<%= post.title || '' %>" required maxlength="200"></div>
+        <div><label for="excerpt">Đoạn mở đầu <span class="hint">(hiện dưới tiêu đề, ở danh sách bài và dùng làm mô tả Google nếu để trống ô "Mô tả Google")</span></label><textarea id="excerpt" name="excerpt" maxlength="400" style="min-height:70px"><%= post.excerpt || '' %></textarea></div>
+        <div>
+          <label for="content">Nội dung</label>
+          <div class="actions" style="margin-bottom:8px">
+            <button type="button" class="btn btn--sm btn--ghost" data-md="## " title="Tiêu đề mục (hiện trong mục lục)">H2</button>
+            <button type="button" class="btn btn--sm btn--ghost" data-md="### " title="Tiêu đề mục con (hiện trong mục lục)">H3</button>
+            <button type="button" class="btn btn--sm btn--ghost" data-md-wrap="**" title="In đậm"><b>B</b></button>
+            <button type="button" class="btn btn--sm btn--ghost" data-md="- " title="Danh sách">• Danh sách</button>
+            <button type="button" class="btn btn--sm btn--ghost" data-md="> " title="Trích dẫn">❝ Trích dẫn</button>
+            <button type="button" class="btn btn--sm btn--ghost" data-md-link>🔗 Link</button>
+            <label class="btn btn--sm btn--ghost" style="margin:0">🖼 Chèn ảnh<input type="file" accept="image/*" data-md-image hidden></label>
+          </div>
+          <textarea class="editor" id="content" name="content"><%= post.content || '' %></textarea>
+          <p class="hint">Định dạng Markdown: <code>## Tiêu đề mục</code>, <code>### Mục con</code>, <code>**đậm**</code>, <code>- danh sách</code>, <code>[chữ](https://link)</code>, <code>![mô tả ảnh](link ảnh)</code>. Các dòng <code>##</code> / <code>###</code> tự tạo <strong>mục lục "Nội dung chính"</strong> ở đầu bài. Không dùng <code>#</code> (một dấu) vì tiêu đề bài đã là H1.</p>
         </div>
-        <textarea class="editor" id="content" name="content"><%= post.content || '' %></textarea>
-        <p class="hint">Định dạng Markdown: <code>## Tiêu đề</code>, <code>**đậm**</code>, <code>- danh sách</code>, <code>[chữ](https://link)</code>.</p>
+        <div>
+          <label for="faq">Câu hỏi thường gặp (FAQ) <span class="hint">— không bắt buộc, giúp Google hiểu bài tốt hơn</span></label>
+          <textarea id="faq" name="faq" style="min-height:140px" placeholder="Hỏi: Hộ chiếu còn 5 tháng có đi Thái Lan được không?&#10;Đáp: Thái Lan yêu cầu hộ chiếu còn hạn tối thiểu 6 tháng…&#10;&#10;Hỏi: Câu hỏi thứ hai?&#10;Đáp: Câu trả lời…"><%= post.faq || '' %></textarea>
+          <p class="hint">Mỗi câu hỏi một khối, các khối cách nhau bằng <strong>1 dòng trống</strong>. Dòng đầu là câu hỏi, các dòng sau là câu trả lời.</p>
+        </div>
+      </div>
+
+      <div class="card" id="seo-box">
+        <h2>Kiểm tra SEO <span class="seo-score" data-seo-score>–</span></h2>
+        <p class="hint" style="margin-top:0">Cập nhật ngay khi bạn gõ. Xanh = đạt, cam = nên sửa.</p>
+        <div class="serp" aria-label="Xem trước trên Google">
+          <div class="serp__url"><img src="/img/favicon.png" alt="" width="18" height="18"> <span>tripdn.com › blog › <span data-serp-slug></span></span></div>
+          <div class="serp__title" data-serp-title></div>
+          <div class="serp__desc" data-serp-desc></div>
+        </div>
+        <ul class="seo-checks" data-seo-checks></ul>
       </div>
     </div>
-    <div>
+
+    <div class="form" style="align-content:start">
       <div class="card form">
         <div><label for="status">Trạng thái</label>
           <select id="status" name="status"><option value="draft"<%= post.status !== 'published' ? ' selected' : '' %>>Bản nháp</option><option value="published"<%= post.status === 'published' ? ' selected' : '' %>>Xuất bản</option></select></div>
-        <div><label for="category">Chủ đề</label><input type="text" id="category" name="category" value="<%= post.category || '' %>" list="cats" placeholder="Visa, Dịch thuật, Du lịch…"><datalist id="cats"><option>Visa</option><option>Dịch thuật</option><option>Du lịch</option><option>Tin tức</option></datalist></div>
-        <div><label for="slug">Đường dẫn (slug)</label><input type="text" id="slug" name="slug" value="<%= post.slug || '' %>" placeholder="tự tạo từ tiêu đề"></div>
+        <div><label for="publish_at">Ngày giờ đăng <span class="hint">(giờ Việt Nam)</span></label><input type="datetime-local" id="publish_at" name="publish_at" value="<%= publishAt %>">
+          <p class="hint">Để trống = đăng ngay khi chọn "Xuất bản". Chọn thời điểm trong tương lai để <strong>hẹn giờ</strong>: bài tự hiện đúng giờ đó.</p></div>
+        <div><label for="category">Chủ đề</label><input type="text" id="category" name="category" value="<%= post.category || '' %>" list="cats" placeholder="Visa, Dịch thuật, Du lịch…"><datalist id="cats"><option>Visa</option><option>Hộ chiếu</option><option>Dịch thuật</option><option>Du lịch</option><option>Tin tức</option></datalist></div>
+        <div><label for="author">Tác giả</label><input type="text" id="author" name="author" value="<%= post.author || '' %>" maxlength="80" placeholder="Đội ngũ TRIP"><p class="hint">Tên người viết / chuyên viên phụ trách. Google đánh giá cao bài có tác giả rõ ràng.</p></div>
         <div>
           <label for="cover_file">Ảnh bìa</label>
           <% if (post.cover) { %><img class="cover-preview" src="<%= post.cover %>" alt=""><label class="check small"><input type="checkbox" name="remove_cover" value="1"> Xoá ảnh bìa</label><input type="hidden" name="cover" value="<%= post.cover %>"><% } %>
           <input type="file" id="cover_file" name="cover_file" accept="image/*">
-          <p class="hint">JPG/PNG/WEBP tối đa 5MB, tỉ lệ 16:9 đẹp nhất.</p>
+          <p class="hint">JPG/PNG/WEBP tối đa 8MB, tỉ lệ 16:9 đẹp nhất.</p>
         </div>
-        <div class="actions"><button class="btn" type="submit">Lưu bài viết</button><% if (post.id && post.status === 'published') { %><a class="btn btn--ghost" href="/blog/<%= post.slug %>" target="_blank">Xem</a><% } %></div>
+        <div><label for="cover_alt">Mô tả ảnh bìa (alt)</label><input type="text" id="cover_alt" name="cover_alt" value="<%= post.cover_alt || '' %>" maxlength="200" placeholder="VD: Hộ chiếu Việt Nam đặt trên vé máy bay"><p class="hint">Mô tả nội dung ảnh cho Google Hình ảnh và người khiếm thị.</p></div>
+        <div class="actions">
+          <button class="btn" type="submit">Lưu bài viết</button>
+          <button class="btn btn--ghost" type="submit" name="stay" value="1">Lưu & tiếp tục sửa</button>
+          <% if (post.id && post.status === 'published') { %><a class="btn btn--ghost" href="/blog/<%= post.slug %>" target="_blank">Xem</a><% } %>
+        </div>
+      </div>
+
+      <div class="card form">
+        <h2>SEO trên Google</h2>
+        <div><label for="focus_kw">Từ khoá chính</label><input type="text" id="focus_kw" name="focus_kw" value="<%= post.focus_kw || '' %>" maxlength="100" placeholder="VD: làm hộ chiếu nhanh"><p class="hint">Cụm từ khách hay gõ trên Google mà bài này muốn lên top. Dùng để chấm điểm SEO bên trái.</p></div>
+        <div><label for="seo_title">Tiêu đề hiện trên Google <span class="hint" data-count="seo_title" data-min="30" data-max="60"></span></label><input type="text" id="seo_title" name="seo_title" value="<%= post.seo_title || '' %>" maxlength="120" placeholder="Để trống = dùng tiêu đề bài + | TRIP Đà Nẵng"></div>
+        <div><label for="meta_desc">Mô tả hiện trên Google <span class="hint" data-count="meta_desc" data-min="120" data-max="160"></span></label><textarea id="meta_desc" name="meta_desc" maxlength="320" style="min-height:80px" placeholder="Để trống = dùng đoạn mở đầu"><%= post.meta_desc || '' %></textarea></div>
+        <div><label for="slug">Đường dẫn (slug)</label><input type="text" id="slug" name="slug" value="<%= post.slug || '' %>" placeholder="tự tạo từ tiêu đề"><p class="hint">Ngắn, không dấu, có từ khoá. Đổi đường dẫn của bài đã đăng: link cũ tự chuyển hướng 301 sang link mới.</p></div>
+        <label class="check"><input type="checkbox" name="noindex" value="1"<%= post.noindex ? ' checked' : '' %>> Ẩn bài khỏi Google (noindex)</label>
+      </div>
+
+      <div class="card form">
+        <h2>Giao diện bài viết</h2>
+        <div class="layout-pick">
+          <% Object.entries(LAYOUTS).forEach(function ([k, l]) { %>
+            <label class="layout-pick__item"><input type="radio" name="layout" value="<%= k %>"<%= (post.layout || 'classic') === k ? ' checked' : '' %>>
+              <span class="layout-pick__thumb layout-pick__thumb--<%= k %>" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span><strong><%= l.label %></strong><small><%= l.hint %></small></span></label>
+          <% }) %>
+        </div>
+        <div><label for="theme">Màu nhấn (mục lục, trích dẫn)</label>
+          <select id="theme" name="theme"><% Object.entries(THEMES).forEach(function ([k, v]) { %><option value="<%= k %>"<%= (post.theme || 'sky') === k ? ' selected' : '' %>><%= v %></option><% }) %></select></div>
+        <label class="check"><input type="checkbox" name="toc" value="1"<%= post.toc == null || post.toc ? ' checked' : '' %>> Hiện mục lục "Nội dung chính" (khi bài có từ 2 mục H2/H3)</label>
       </div>
     </div>
   </div>

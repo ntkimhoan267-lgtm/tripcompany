@@ -1,6 +1,6 @@
 <a class="card post-card reveal" href="/blog/<%= p.slug %>">
   <div class="post-card__media">
-    <% if (p.cover) { %><%- h.picture(p.cover, { alt: p.title, width: 1200, height: 800, sizes: '(max-width: 640px) 100vw, 400px' }) %>
+    <% if (p.cover) { %><%- h.picture(p.cover, { alt: p.cover_alt || p.title, width: 1200, height: 800, sizes: '(max-width: 640px) 100vw, 400px' }) %>
     <% } else { %><div class="ph"><%- icon(p.category === 'Dịch thuật' ? 'lang' : p.category === 'Visa' ? 'passport' : 'plane') %></div><% } %>
   </div>
   <div class="post-card__body">

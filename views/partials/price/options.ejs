@@ -1,5 +1,5 @@
 <%
-  // Thẻ giá dạng "vé": items [{ title, tag, time, price, note, flag, popular }], service (dịch vụ gửi kèm form tư vấn)
+  // Thẻ giá dạng "vé": items [{ title, tag, time, price (chữ) | priceHtml (HTML từ price()), note, flag, popular }], service (dịch vụ gửi kèm form tư vấn)
   const svc = typeof service !== 'undefined' ? service : '';
 %>
 <div class="pcards">
@@ -16,8 +16,8 @@
       </div>
       <% if (it.note) { %><p class="pcard__note"><%- icon('info') %><%= it.note %></p><% } %>
       <div class="pcard__bottom">
-        <div class="pcard__price"><small>Trọn gói</small><strong><%= it.price %></strong></div>
-        <button class="pcard__cta" type="button" data-open-lead<% if (svc) { %> data-service="<%= svc %>"<% } %> aria-label="Tư vấn: <%= it.title %>"><%- icon('arrow') %></button>
+        <div class="pcard__price"><small><%= it.priceLabel || 'Trọn gói' %></small><strong><% if (it.priceHtml) { %><%- it.priceHtml %><% } else { %><%= it.price %><% } %></strong></div>
+        <button class="pcard__cta" type="button" data-open-lead<% if (svc) { %> data-service="<%= svc %>"<% } %><% if (it.leadNote) { %> data-note="<%= it.leadNote %>"<% } %> aria-label="Tư vấn: <%= it.title %>"><%- icon('arrow') %></button>
       </div>
     </article>
   <% }) %>

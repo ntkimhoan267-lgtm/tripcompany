@@ -13,6 +13,7 @@ const company = require('../data/company');
 const { csrf, requireAdmin, ah } = require('../lib/security');
 const { slugify, setSettings, getSettings, fmtDate, parseVideo } = require('../lib/helpers');
 const { leadServiceOptions } = require('../data/services');
+const { LAYOUTS, THEMES } = require('../lib/toc');
 
 const router = express.Router();
 
@@ -143,7 +144,8 @@ const requireOwner = (req, res, next) => {
   res.redirect('/admin');
 };
 // Khoá theo tiền tố đường dẫn: route con thêm về sau cũng tự được khoá
-router.use(['/subscribers', '/subscribers.csv', '/newsletter', '/reviews', '/settings', '/sync', '/test-google', '/leads.csv'], requireOwner);
+router.use(['/subscribers', '/subscribers.csv', '/newsletter', '/reviews', '/settings', '/sync', '/test-google', '/leads.csv',
+  '/prices', '/offer', '/media', '/upload-video'], requireOwner);
 
 // ---------- Tổng quan ----------
 router.get('/', csrf, (req, res) => {
@@ -378,15 +380,25 @@ function uniqueSlug(table, base, fallback, id) {
 }
 
 router.get('/posts', csrf, (req, res) => {
-  const posts = db.prepare('SELECT * FROM posts ORDER BY COALESCE(published_at, created_at) DESC').all();
-  res.render('admin/posts', { title: 'Bài viết', posts });
+  const posts = db.prepare("SELECT *, (status = 'published' AND published_at > datetime('now')) AS scheduled FROM posts ORDER BY COALESCE(published_at, created_at) DESC").all();
+  res.render('admin/posts', { title: 'Bài viết', posts, LAYOUTS });
 });
 
-router.get('/posts/new', csrf, (req, res) => res.render('admin/post-form', { title: 'Viết bài mới', post: { status: 'draft' } }));
+// Giờ đăng: SQLite lưu UTC ('2026-11-09 03:00:00'); ô nhập dùng giờ Việt Nam ('2026-11-09T10:00')
+const toLocalInput = (utc) => (utc ? new Date(new Date(String(utc).replace(' ', 'T') + 'Z').getTime() + 7 * 3600e3).toISOString().slice(0, 16) : '');
+function fromLocalInput(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(String(v || ''));
+  if (!m) return null;
+  const t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) - 7 * 3600e3;
+  return Number.isFinite(t) ? new Date(t).toISOString().slice(0, 19).replace('T', ' ') : null;
+}
+const postFormLocals = (post) => ({ post, LAYOUTS, THEMES, publishAt: toLocalInput(post.published_at), siteUrl: config.siteUrl });
+
+router.get('/posts/new', csrf, (req, res) => res.render('admin/post-form', { title: 'Viết bài mới', ...postFormLocals({ status: 'draft', toc: 1, layout: 'classic', theme: 'sky' }) }));
 router.get('/posts/:id(\\d+)', csrf, (req, res, next) => {
   const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
   if (!post) return next();
-  res.render('admin/post-form', { title: 'Sửa bài viết', post });
+  res.render('admin/post-form', { title: 'Sửa bài viết', ...postFormLocals(post) });
 });
 
 router.post(['/posts/new', '/posts/:id(\\d+)'], withUpload('cover_file'), csrf, ah(async (req, res) => {
@@ -400,17 +412,44 @@ router.post(['/posts/new', '/posts/:id(\\d+)'], withUpload('cover_file'), csrf, 
   const keepCover = qs(b.cover, 300).trim();
   const cover = uploaded || (b.remove_cover ? null : (SAFE_IMAGE_PATH.test(keepCover) ? keepCover : null));
   const status = b.status === 'published' ? 'published' : 'draft';
-  const fields = [uniqueSlug('posts', slugify(qs(b.slug, 200) || title), 'bai-viet', id), title, qs(b.excerpt, 400), qs(b.content, 2 * 1024 * 1024), cover, qs(b.category, 50).trim(), status];
-  if (id) {
-    db.prepare(`UPDATE posts SET slug=?, title=?, excerpt=?, content=?, cover=?, category=?, status=?,
-      published_at = CASE WHEN ? = 'published' AND published_at IS NULL THEN datetime('now') ELSE published_at END,
-      updated_at = datetime('now') WHERE id = ?`).run(...fields, status, id);
-  } else {
-    db.prepare(`INSERT INTO posts (slug, title, excerpt, content, cover, category, status, published_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN datetime('now') END)`).run(...fields, status);
-  }
-  flash(req, 'success', status === 'published' ? 'Đã lưu và xuất bản bài viết.' : 'Đã lưu bản nháp.');
-  res.redirect('/admin/posts');
+  const slug = uniqueSlug('posts', slugify(qs(b.slug, 200) || title), 'bai-viet', id);
+  const fields = [slug, title, qs(b.excerpt, 400), qs(b.content, 2 * 1024 * 1024), cover, qs(b.category, 50).trim(), status];
+  // Trường SEO & giao diện
+  const seo = [
+    qs(b.seo_title, 120).trim(), qs(b.meta_desc, 320).trim(), qs(b.focus_kw, 100).trim(), qs(b.cover_alt, 200).trim(),
+    qs(b.author, 80).trim(), qs(b.faq, 20000).replace(/\r/g, '').trim(),
+    Object.hasOwn(LAYOUTS, b.layout) ? b.layout : 'classic', Object.hasOwn(THEMES, b.theme) ? b.theme : 'sky',
+    b.toc ? 1 : 0, b.noindex ? 1 : 0,
+  ];
+  // Hẹn giờ đăng (giờ Việt Nam). Trống = đăng ngay khi xuất bản lần đầu.
+  const publishAt = fromLocalInput(qs(b.publish_at, 20));
+  const old = id ? db.prepare('SELECT slug, status, published_at FROM posts WHERE id = ?').get(id) : null;
+  let postId = id;
+  db.exec('BEGIN');
+  try {
+    if (id) {
+      db.prepare(`UPDATE posts SET slug=?, title=?, excerpt=?, content=?, cover=?, category=?, status=?,
+        seo_title=?, meta_desc=?, focus_kw=?, cover_alt=?, author=?, faq=?, layout=?, theme=?, toc=?, noindex=?,
+        published_at = CASE WHEN ? = 'published' THEN COALESCE(?, published_at, datetime('now')) ELSE COALESCE(?, published_at) END,
+        updated_at = datetime('now') WHERE id = ?`).run(...fields, ...seo, status, publishAt, publishAt, id);
+      // Đổi đường dẫn bài đã đăng: giữ đường dẫn cũ để chuyển hướng 301
+      if (old && old.slug !== slug && old.published_at) {
+        db.prepare('INSERT INTO post_redirects (old_slug, post_id) VALUES (?, ?) ON CONFLICT(old_slug) DO UPDATE SET post_id = excluded.post_id').run(old.slug, id);
+      }
+    } else {
+      postId = db.prepare(`INSERT INTO posts (slug, title, excerpt, content, cover, category, status,
+        seo_title, meta_desc, focus_kw, cover_alt, author, faq, layout, theme, toc, noindex, published_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN COALESCE(?, datetime('now')) ELSE ? END)`)
+        .run(...fields, ...seo, status, publishAt, publishAt).lastInsertRowid;
+    }
+    // Đường dẫn mới không còn là "đường dẫn cũ" của bài nào (tránh chuyển hướng vòng)
+    db.prepare('DELETE FROM post_redirects WHERE old_slug = ?').run(slug);
+    db.exec('COMMIT');
+  } catch (e) { db.exec('ROLLBACK'); throw e; }
+  const saved = db.prepare("SELECT published_at > datetime('now') AS future, published_at FROM posts WHERE id = ?").get(postId);
+  flash(req, 'success', status !== 'published' ? 'Đã lưu bản nháp.'
+    : saved.future ? `Đã lưu. Bài sẽ tự hiện trên website lúc ${fmtDate(saved.published_at, true)}.` : 'Đã lưu và xuất bản bài viết.');
+  res.redirect(b.stay ? `/admin/posts/${postId}` : '/admin/posts');
 }));
 
 router.post('/posts/:id(\\d+)/delete', csrf, (req, res) => {
@@ -471,6 +510,78 @@ router.post('/tours/:id(\\d+)/delete', csrf, (req, res) => {
   const r = db.prepare('DELETE FROM tours WHERE id = ?').run(req.params.id);
   flash(req, r.changes ? 'success' : 'error', r.changes ? 'Đã xoá tour.' : 'Không tìm thấy tour.');
   res.redirect('/admin/tours');
+});
+
+// ---------- Bảng giá (sửa giá mọi dịch vụ) & Ưu đãi ----------
+const catalog = require('../lib/catalog');
+const offerLib = require('../lib/offer');
+const mediaLib = require('../lib/media');
+
+router.get('/prices', csrf, (req, res) => {
+  res.render('admin/prices', { title: 'Bảng giá & ưu đãi', data: catalog.editorData(), offer: offerLib.offerConfig(getSettings()), OFFER_GROUPS: offerLib.GROUPS, s: getSettings() });
+});
+
+router.post('/prices', csrf, (req, res) => {
+  let payload = {};
+  try { payload = JSON.parse(qs(req.body.payload, 1024 * 1024) || '{}') || {}; } catch { payload = {}; }
+  if (!payload.tables && !payload.texts) { flash(req, 'error', 'Không đọc được dữ liệu bảng giá. Vui lòng tải lại trang (cần bật JavaScript) rồi thử lại.'); return res.redirect('/admin/prices'); }
+  payload.reset = [].concat(req.body.reset || []).filter((x) => typeof x === 'string');
+  const r = catalog.saveOverrides(payload);
+  flash(req, r.errors.length ? 'error' : 'success', r.errors.length ? `Đã lưu các bảng hợp lệ. Chưa lưu: ${r.errors.join(' ')}` : 'Đã lưu bảng giá. Website đã cập nhật.');
+  res.redirect('/admin/prices' + (qs(req.body.tab, 30).match(/^[a-z]+$/) ? '#' + req.body.tab : ''));
+});
+
+router.post('/offer', csrf, (req, res) => {
+  const b = req.body;
+  const groups = [].concat(b.groups || []).filter((g) => typeof g === 'string' && Object.hasOwn(offerLib.GROUPS, g));
+  setSettings({
+    offer_enabled: b.offer_enabled ? '1' : '0',
+    offer_vnd: String(Math.min(100000000, Math.max(0, parseInt(qs(b.offer_vnd, 15).replace(/\D/g, ''), 10) || 0))),
+    offer_usd: String(Math.min(10000, Math.max(0, parseInt(qs(b.offer_usd, 8).replace(/\D/g, ''), 10) || 0))),
+    offer_groups: groups.join(','),
+  });
+  flash(req, 'success', b.offer_enabled ? 'Đã lưu ưu đãi. Giá niêm yết trên website đã cộng thêm số tiền ưu đãi.' : 'Đã tắt ưu đãi. Website hiện giá thật như cũ.');
+  res.redirect('/admin/prices');
+});
+
+// ---------- Ảnh & video hiển thị trên website ----------
+router.get('/media', csrf, (req, res) => {
+  res.render('admin/media', { title: 'Ảnh & video', SLOTS: mediaLib.SLOTS, GROUPS: mediaLib.GROUPS, s: getSettings() });
+});
+
+router.post('/media', csrf, (req, res) => {
+  const update = {}; const warnings = [];
+  for (const slot of mediaLib.SLOTS) {
+    const v = qs(req.body[`media_${slot.key}`], 400).trim();
+    const okRe = slot.type === 'video' ? mediaLib.SAFE_VIDEO : mediaLib.SAFE_IMAGE;
+    if (v && !okRe.test(v)) warnings.push(`"${slot.label}": ${slot.type === 'video' ? 'cần file .mp4/.webm' : 'cần file ảnh .jpg/.png/.webp'} (tải lên hoặc link https)`);
+    update[`media_${slot.key}`] = v && okRe.test(v) ? v : '';
+    if (slot.type === 'video') {
+      const p = qs(req.body[`media_${slot.key}__poster`], 400).trim();
+      if (p && !mediaLib.SAFE_IMAGE.test(p)) warnings.push(`Ảnh chờ của "${slot.label}" không hợp lệ`);
+      update[`media_${slot.key}__poster`] = p && mediaLib.SAFE_IMAGE.test(p) ? p : '';
+    }
+  }
+  setSettings(update);
+  flash(req, warnings.length ? 'error' : 'success', warnings.length ? `Đã lưu, trừ: ${warnings.join('; ')}.` : 'Đã lưu ảnh & video. Website đã cập nhật.');
+  res.redirect('/admin/media');
+});
+
+// Tải video (MP4/WebM) cho video nền. Kiểm tra "chữ ký" đầu file, không tin phần mở rộng hay loại file trình duyệt khai báo.
+const VIDEO_MAX_MB = 40;
+const uploadVideo = multer({ storage: multer.memoryStorage(), limits: { fileSize: VIDEO_MAX_MB * 1024 * 1024, files: 1 } });
+router.post('/upload-video', (req, res, next) => uploadVideo.single('file')(req, res, (err) => {
+  if (!err) return next();
+  return res.status(400).json({ ok: false, error: err.code === 'LIMIT_FILE_SIZE' ? `Video quá lớn (tối đa ${VIDEO_MAX_MB}MB). Hãy nén lại hoặc cắt ngắn.` : 'Không tải lên được video.' });
+}), csrf, (req, res) => {
+  const buf = req.file && req.file.buffer;
+  if (!buf || buf.length < 16) return res.status(400).json({ ok: false, error: 'Chưa chọn video.' });
+  const isMp4 = buf.toString('latin1', 4, 8) === 'ftyp';
+  const isWebm = buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3;
+  if (!isMp4 && !isWebm) return res.status(400).json({ ok: false, error: 'Chỉ nhận video MP4 hoặc WebM.' });
+  const name = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${isMp4 ? 'mp4' : 'webm'}`;
+  fs.writeFileSync(path.join(config.uploadDir, name), buf);
+  res.json({ ok: true, url: `/uploads/${name}` });
 });
 
 // ---------- Đánh giá của khách ----------

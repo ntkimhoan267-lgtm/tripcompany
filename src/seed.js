@@ -144,7 +144,7 @@ const TOURS = [
     highlights: 'Thuyền thúng rừng dừa\nPhố cổ Hội An' },
   { slug: 'tour-hue-1-ngay', image: '/img/tours/hue.jpg', title: 'Tour Huế 1 ngày từ Đà Nẵng', destination: 'Huế', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Đại Nội Huế\nChùa Thiên Mụ\nLăng Khải Định' },
-  { slug: 'tour-vinwonders-nam-hoi-an', image: '/img/tours/hoi-an-dem.jpg', title: 'Tour VinWonders Nam Hội An 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-vinwonders-nam-hoi-an', image: '/img/tours/vinwonders-nam-hoi-an.jpg', title: 'Tour VinWonders Nam Hội An 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Công viên chủ đề\nRiver Safari\nBiểu diễn thực cảnh' },
 ];
 
@@ -213,6 +213,17 @@ function seedBase() {
 
 // Bài viết SEO mới bổ sung theo từng đợt: thêm 1 lần (kể cả database đang chạy), không tạo lại nếu đã xoá trong Dashboard
 function seedArticles() {
+  // Ảnh mới do TRIP cung cấp (11/2026): cập nhật cho database đang chạy, 1 lần. Chỉ thay ảnh mặc định cũ,
+  // không đụng tới ảnh / nội dung mà quản trị viên đã tự sửa trong Dashboard.
+  if (!db.prepare("SELECT 1 FROM settings WHERE key = 'backfill_images_v2'").get()) {
+    db.prepare("UPDATE tours SET image = '/img/tours/vinwonders-nam-hoi-an.jpg' WHERE slug = 'tour-vinwonders-nam-hoi-an' AND image = '/img/tours/hoi-an-dem.jpg'").run();
+    const a = require('./data/articles/lam-ho-chieu-nhanh');
+    // Bài chưa từng được sửa trong Dashboard (updated_at = created_at): cập nhật ảnh bìa và nội dung mới
+    db.prepare(`UPDATE posts SET cover = ?, cover_alt = ?, content = ? WHERE slug = ? AND cover = '/img/services/ho-chieu.jpg' AND updated_at = created_at`)
+      .run(a.cover, a.cover_alt, a.content, a.slug);
+    db.prepare("INSERT INTO settings (key, value) VALUES ('backfill_images_v2', datetime('now'))").run();
+  }
+
   for (const [flag, file] of SEO_ARTICLES) {
     if (db.prepare('SELECT 1 FROM settings WHERE key = ?').get(flag)) continue;
     const a = require(file);

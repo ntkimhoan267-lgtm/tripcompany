@@ -131,6 +131,8 @@ Video nền phần đầu trang chủ (`hero-montage.mp4`), video 4 thị trư�
 
 Ảnh tạo bằng AI chỉ mang tính minh hoạ, không dùng làm bằng chứng về phương tiện hay địa điểm cụ thể của tour.
 
+Ảnh hộ chiếu thật (`public/img/services/ho-chieu-viet-nam.jpg`, `public/img/blog/ho-chieu-san-bay.jpg`), ảnh Núi Thần Tài (`public/img/tours/nui-than-tai.jpg`) và VinWonders Nam Hội An (`public/img/tours/vinwonders-nam-hoi-an.jpg`) do TRIP cung cấp tháng 11/2026.
+
 `public/img/tours/nhat-ban.jpg` lấy từ Mixkit. `public/img/logo-plane.png` là hình máy bay tách từ logo TRIP, dùng làm logo chìm ở đầu các trang con.
 
 ## Cấu trúc thư mục

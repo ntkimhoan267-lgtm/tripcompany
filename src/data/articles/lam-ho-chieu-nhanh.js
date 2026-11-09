@@ -12,8 +12,8 @@ module.exports = {
   meta_desc: 'Sắp bay mà hộ chiếu sắp hết hạn, còn dưới 6 tháng hay bị mất? Quy định mới, thời gian cấp 3–8 ngày làm việc, giấy tờ cần có và cách làm hộ chiếu nhanh.',
   focus_kw: 'làm hộ chiếu nhanh',
   category: 'Hộ chiếu',
-  cover: '/img/services/ho-chieu.jpg',
-  cover_alt: 'Hộ chiếu và thẻ lên máy bay đặt trên vali tại sân bay',
+  cover: '/img/blog/ho-chieu-san-bay.jpg',
+  cover_alt: 'Hộ chiếu Việt Nam và thẻ lên máy bay trên tay hành khách tại sân bay Tân Sơn Nhất',
   author: 'Đội ngũ tư vấn hộ chiếu TRIP',
   layout: 'guide',
   theme: 'accent',
@@ -112,6 +112,8 @@ Lệ phí nộp cho cơ quan Quản lý xuất nhập cảnh (theo Thông tư 25
 Từ **15/8/2026 đến hết 28/02/2027**, người làm thủ tục **trực tuyến toàn trình** qua tài khoản định danh điện tử (VNeID) **mức độ 2** và đáp ứng các điều kiện tích hợp thông tin theo Nghị quyết 66.22/2026/NQ-CP có thể được áp dụng **lệ phí 0 đồng**. Điều kiện khá cụ thể, nên hãy kiểm tra trên ứng dụng VNeID hoặc [Cổng dịch vụ công Bộ Công an](https://dichvucong.bocongan.gov.vn) trước khi nộp.
 
 Bạn cũng có thể chọn **hộ chiếu gắn chip** hoặc **không gắn chip** khi khai tờ khai; lệ phí như nhau.
+
+![Hộ chiếu phổ thông Việt Nam có gắn chip điện tử, bìa xanh tím than](/img/services/ho-chieu-viet-nam.jpg)
 
 ## Quy trình làm hộ chiếu nhanh cùng TRIP
 

@@ -9,7 +9,7 @@ const vid = (key, group, label, def, poster, hint = '') => ({ key, group, label,
 const SVC = [
   ['dich-thuat', 'Dịch thuật công chứng', '/img/services/dich-thuat.jpg'],
   ['hop-phap-hoa', 'Hợp pháp hoá lãnh sự', '/img/services/hop-phap-hoa.jpg'],
-  ['ho-chieu', 'Làm hộ chiếu', '/img/services/ho-chieu.jpg'],
+  ['ho-chieu', 'Làm hộ chiếu', '/img/services/ho-chieu-viet-nam.jpg'],
   ['ve-may-bay', 'Vé máy bay & vé tàu', '/img/services/ve-may-bay.jpg'],
   ['tour', 'Tour du lịch', '/img/tours/ba-na.jpg'],
   ['thue-xe', 'Xe đưa đón & thuê xe', '/img/services/thue-xe.jpg'],

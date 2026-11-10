@@ -20,7 +20,7 @@
 <form class="card form" method="post" action="/admin/offer" id="offer">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <h2>🎁 Ưu đãi "giảm giá khi để lại SĐT hoặc Gmail"</h2>
-  <p class="hint" style="margin-top:0">Khi bật: giá <strong>niêm yết</strong> trên website = giá trong bảng bên dưới <strong>+ số tiền ưu đãi</strong>. Khách để lại số điện thoại hoặc Gmail (form tư vấn, form nhận tin hoặc nút 🎁) thì giá niêm yết bị gạch và hiện đúng giá trong bảng. Khách để lại SĐT được ghi vào <a href="/admin/leads">Khách tư vấn</a> với ghi chú <em>[Ưu đãi]</em>; khách để lại Gmail vào <a href="/admin/subscribers">Đăng ký nhận tin</a>.</p>
+  <p class="hint" style="margin-top:0">Khi bật: giá <strong>niêm yết</strong> trên website = giá trong bảng bên dưới <strong>+ số tiền ưu đãi</strong>. Khách để lại số điện thoại hoặc Gmail (form tư vấn, form nhận tin hoặc nút 🎁) thì giá niêm yết bị gạch và hiện đúng giá trong bảng. Khách để lại SĐT được ghi vào <a href="/admin/leads">Khách tư vấn</a> với ghi chú <em>[Ưu đãi]</em>; khách để lại Gmail vào <a href="/admin/subscribers">Đăng ký nhận tin</a> với trạng thái <em>Chỉ nhận ưu đãi</em> (không gửi bản tin, trừ khi khách tick ô nhận bản tin).</p>
   <label class="check"><input type="checkbox" name="offer_enabled" value="1"<%= offer.enabled || s.offer_enabled === '1' ? ' checked' : '' %>> Bật ưu đãi</label>
   <div class="form-row">
     <div><label for="offer_vnd">Số tiền giảm cho giá VNĐ</label><input type="text" inputmode="numeric" id="offer_vnd" name="offer_vnd" value="<%= Number(offer.vnd).toLocaleString('vi-VN').replace(/,/g, '.') %>"><p class="hint">Mặc định 500.000đ.</p></div>

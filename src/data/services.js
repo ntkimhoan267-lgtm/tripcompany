@@ -212,6 +212,17 @@ const translation = {
 
 const passport = {
   rows: [{ type: 'Hộ chiếu phổ thông', time: '8–10 ngày làm việc', price: 500000 }],
+  // Làm nhanh: theo số ngày khách cần có hộ chiếu; price null = "Liên hệ tư vấn" (sửa trong Dashboard → Bảng giá)
+  express: [
+    { label: 'Cần trong 1 ngày', time: '', price: null },
+    { label: 'Cần trong 2 ngày', time: '', price: null },
+    { label: 'Cần trong 3 ngày', time: '', price: null },
+    { label: 'Cần trong 4 ngày', time: '', price: null },
+    { label: 'Cần trong 5 ngày', time: '', price: null },
+    { label: 'Cần trong 6 ngày', time: '', price: null },
+    { label: 'Cần trong 7 ngày', time: '', price: null },
+  ],
+  expressNote: 'Chọn số ngày bạn cần có hộ chiếu (tính tới ngày bay). TRIP chuẩn bị và nộp hồ sơ ngay, tư vấn phương án nhanh nhất theo đúng quy định (kể cả trường hợp cấp thiết) và báo trước khả năng đáp ứng, chi phí. Thời gian cấp hộ chiếu do cơ quan Quản lý xuất nhập cảnh quyết định; TRIP không cam kết thay cơ quan nhà nước.',
   notes: [
     'Mất hộ chiếu, cấp lại: cộng thêm 100.000đ.',
     'Giá chưa bao gồm phí chuyển phát hộ chiếu. Chuyển phát hoả tốc HCM – Đà Nẵng: 1–2 ngày 130.000đ; trong ngày 330.000đ.',
@@ -223,20 +234,20 @@ const passport = {
 const carTransfer = {
   area: 'Khu vực Đà Nẵng – Hội An – Huế',
   rows: [
-    { route: 'Sân bay / Ga ⇄ Khách sạn Đà Nẵng', way: '1 chiều', p4: 120000, p7: 150000, p16: 300000 },
-    { route: 'KS Đà Nẵng – Phố cổ Hội An', way: '2 chiều', p4: 500000, p7: 600000, p16: 1000000 },
-    { route: 'KS Đà Nẵng – Bà Nà Hills', way: '2 chiều', p4: 600000, p7: 700000, p16: 1100000 },
-    { route: 'KS Đà Nẵng – Núi Thần Tài', way: '2 chiều', p4: 700000, p7: 800000, p16: 1200000 },
-    { route: 'KS Đà Nẵng – Sơn Trà', way: '2 chiều', p4: 300000, p7: 350000, p16: 750000 },
-    { route: 'KS Đà Nẵng – VinWonders Nam Hội An', way: '2 chiều', p4: 800000, p7: 900000, p16: 1300000 },
-    { route: 'KS Đà Nẵng – VinWonders – Phố cổ Hội An', way: '2 chiều', p4: 900000, p7: 1100000, p16: 1400000 },
-    { route: 'KS Đà Nẵng – Rừng dừa Bảy Mẫu – Phố cổ Hội An', way: '2 chiều', p4: 600000, p7: 750000, p16: 1200000 },
-    { route: 'KS Đà Nẵng – Huế', way: '2 chiều', p4: 1800000, p7: 2000000, p16: 2700000 },
+    { route: 'Sân bay / Ga ⇄ Khách sạn Đà Nẵng', way: '1 chiều', p4: 120000, p7: 150000, p16: 300000, image: '/img/services/ve-may-bay.jpg' },
+    { route: 'KS Đà Nẵng – Phố cổ Hội An', way: '2 chiều', p4: 500000, p7: 600000, p16: 1000000, image: '/img/tours/hoi-an-dem.jpg' },
+    { route: 'KS Đà Nẵng – Bà Nà Hills', way: '2 chiều', p4: 600000, p7: 700000, p16: 1100000, image: '/img/tours/ba-na.jpg' },
+    { route: 'KS Đà Nẵng – Núi Thần Tài', way: '2 chiều', p4: 700000, p7: 800000, p16: 1200000, image: '/img/tours/nui-than-tai.jpg' },
+    { route: 'KS Đà Nẵng – Sơn Trà', way: '2 chiều', p4: 300000, p7: 350000, p16: 750000, image: '/img/tours/son-tra-hoi-an.jpg' },
+    { route: 'KS Đà Nẵng – VinWonders Nam Hội An', way: '2 chiều', p4: 800000, p7: 900000, p16: 1300000, image: '/img/tours/vinwonders-nam-hoi-an.jpg' },
+    { route: 'KS Đà Nẵng – VinWonders – Phố cổ Hội An', way: '2 chiều', p4: 900000, p7: 1100000, p16: 1400000, image: '/img/tours/hoi-an-dem.jpg' },
+    { route: 'KS Đà Nẵng – Rừng dừa Bảy Mẫu – Phố cổ Hội An', way: '2 chiều', p4: 600000, p7: 750000, p16: 1200000, image: '/img/tours/bay-mau.jpg' },
+    { route: 'KS Đà Nẵng – Huế', way: '2 chiều', p4: 1800000, p7: 2000000, p16: 2700000, image: '/img/tours/hue.jpg' },
   ],
   selfDrive: [
-    { car: 'Kia Seltos', seats: '4 chỗ', price: 800000 },
-    { car: 'Mazda CX-5', seats: '4 chỗ', price: 800000 },
-    { car: 'Toyota Veloz Cross', seats: '7 chỗ', price: 800000 },
+    { car: 'Kia Seltos', seats: '4 chỗ', price: 800000, image: '' },
+    { car: 'Mazda CX-5', seats: '4 chỗ', price: 800000, image: '' },
+    { car: 'Toyota Veloz Cross', seats: '7 chỗ', price: 800000, image: '' },
   ],
   notes: [
     'Giá áp dụng đón – trả tại 1 điểm trong trung tâm TP Đà Nẵng. Khu vực ngoại ô cộng 50.000đ/chuyến.',

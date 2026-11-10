@@ -16,7 +16,7 @@
         <td class="nowrap small"><%= h.fmtDate(s.created_at, true) %></td>
         <td><a href="mailto:<%= s.email %>"><%= s.email %></a></td>
         <td><%= s.name %></td>
-        <td><span class="badge badge--<%= s.status %>"><%= s.status === 'active' ? 'Đang nhận' : 'Đã huỷ' %></span></td>
+        <td><span class="badge badge--<%= s.status === 'offer' ? 'contacting' : s.status %>"><%= s.status === 'active' ? 'Đang nhận' : s.status === 'offer' ? 'Chỉ nhận ưu đãi' : 'Đã huỷ' %></span></td>
         <td class="small muted"><%= s.source_page %></td>
         <td><form method="post" action="/admin/subscribers/<%= s.id %>/delete" data-confirm="Xoá <%= s.email %> khỏi danh sách?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--sm btn--danger">✕</button></form></td>
       </tr>

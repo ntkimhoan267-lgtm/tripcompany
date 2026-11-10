@@ -126,7 +126,17 @@
     }
   });
 
+  // ---------- Ưu đãi "giảm giá khi để lại SĐT / Gmail" ----------
+  // Máy chủ đặt cookie trip_offer khi khách gửi SĐT/email; localStorage giữ thêm 1 bản phòng khi cookie bị xoá
+  function unlockOffer() {
+    document.documentElement.classList.add('offer-on');
+    store.set('trip_offer', '1');
+  }
+  if (store.get('trip_offer') === '1') document.documentElement.classList.add('offer-on');
+
   var leadModal = $('#lead-modal');
+  var offerModal = $('#offer-modal');
+  var autoNote = '';
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-open-lead]');
     if (t) {
@@ -134,7 +144,24 @@
       var svc = t.getAttribute('data-service');
       var sel = $('select[name="service"]', leadModal);
       if (sel && svc) sel.value = svc;
+      // data-note: điền sẵn ghi chú (VD: "Cần làm hộ chiếu nhanh (cần trong 2 ngày)…").
+      // Nút khác không có data-note: xoá ghi chú điền sẵn lần trước (nếu khách chưa sửa) để không gửi nhầm sang dịch vụ khác.
+      var note = $('textarea[name="note"]', leadModal);
+      if (note) {
+        if (t.hasAttribute('data-note')) { note.value = t.getAttribute('data-note'); autoNote = note.value; }
+        else if (autoNote && note.value === autoNote) { note.value = ''; autoNote = ''; }
+      }
       openModal(leadModal);
+    }
+    var o = e.target.closest('[data-open-offer]');
+    if (o && offerModal) {
+      e.preventDefault(); e.stopPropagation();
+      var hidden = $('input[name="service"]', offerModal);
+      if (hidden) hidden.value = o.getAttribute('data-service') || '';
+      // Nhãn ưu đãi theo đúng giá vừa bấm (VNĐ: "Giảm 500.000đ", USD: "Giảm $20")
+      var pill = $('[data-offer-pill]', offerModal);
+      if (pill) pill.textContent = o.getAttribute('data-label') ? '🎁 ' + o.getAttribute('data-label') : pill.getAttribute('data-default');
+      openModal(offerModal);
     }
     if (e.target.closest('[data-open-news]')) { e.preventDefault(); openModal($('#news-modal')); }
   });
@@ -182,6 +209,13 @@
       var svcField = $('[name="service"]', form);
       if (svcField && svcField.required && !data.service) errs.service = 'Vui lòng chọn dịch vụ.';
       if ('email' in data && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(String(data.email).trim())) errs.email = 'Email chưa đúng định dạng.';
+      // Popup ưu đãi: nhận số điện thoại HOẶC email
+      if ('contact' in data) {
+        var c = String(data.contact || '').trim();
+        var isPhone = /^(0|\+?84)(3|5|7|8|9)\d{8}$/.test(c.replace(/[\s.\-()]/g, ''));
+        var isMail = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(c);
+        if (!isPhone && !isMail) errs.contact = 'Vui lòng nhập số điện thoại (VD: 0935 191 394) hoặc Gmail hợp lệ.';
+      }
       // Form đánh giá: phải tự chọn số sao (không chọn sẵn) và viết đủ dài (giống kiểm tra phía máy chủ)
       if ($('[name="rating"]', form) && !data.rating) errs.rating = 'Vui lòng chọn số sao.';
       var contentField = $('[name="content"]', form);
@@ -216,6 +250,7 @@
   // Sau khi gửi form tư vấn: thay form bằng màn hình cảm ơn (tránh gửi trùng) + nút Zalo/Gọi
   function showThanks(form, message, service) {
     store.set('trip_lead', String(Date.now()));
+    unlockOffer();
     // Trong popup: ẩn tiêu đề + dòng "Hoặc gọi ngay" để không lặp với màn hình cảm ơn
     var modal = form.closest('.modal');
     var hiddenBits = modal ? $$('.modal__head, .form-note', modal) : [];
@@ -254,7 +289,17 @@
   $$('.js-lead-form').forEach(function (f) { bindForm(f); });
   $$('.js-review-form').forEach(function (f) { bindForm(f, function () {}); });
   $$('.js-sub-form').forEach(function (f) {
-    bindForm(f, function () { store.set('trip_subscribed', '1'); setTimeout(function () { closeModal($('#news-modal')); }, 2500); });
+    bindForm(f, function () { store.set('trip_subscribed', '1'); unlockOffer(); setTimeout(function () { closeModal($('#news-modal')); }, 2500); });
+  });
+  $$('.js-offer-form').forEach(function (f) {
+    bindForm(f, function () {
+      unlockOffer(); store.set('trip_lead', String(Date.now()));
+      setTimeout(function () {
+        closeModal(offerModal);
+        var target = $('.offer-bar') || $('#main');
+        if (target) { target.tabIndex = -1; target.focus({ preventScroll: true }); }
+      }, 2500);
+    });
   });
 
   // ---------- Chấm sao (trang Đánh giá): tô sao 1..n theo lựa chọn ----------

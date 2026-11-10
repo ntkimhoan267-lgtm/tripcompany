@@ -5,7 +5,8 @@
   headingEm: 'minh bạch, trọn gói',
   sub: 'Chọn nhóm dịch vụ để xem giá. Phí visa có thể thay đổi theo quy định của Đại sứ quán / Lãnh sự quán tại thời điểm nộp hồ sơ.',
   actions: {},
-  visual: '/img/team/team.jpg',
+  visual: media('page_pricing'),
+  video: 'bg_bang-gia',
   cloudEnd: '#f4f8fb',
   badge: { value: 'Miễn phí', label: 'Kiểm tra hồ sơ' },
   stamp: { top: 'TRIP · ĐÀ NẴNG · TRỌN GÓI · ', mid: 'TRIP', sub: 'PRICE', cls: 'stamp--hero' },
@@ -14,19 +15,20 @@
   const ORDER = { kr: 0, jp: 1 };
   const rank = (v) => v.code in ORDER ? ORDER[v.code] : v.region === 'chau-au' ? 2 : 3;
   const world = services.worldVisa.slice().sort((a, b) => rank(a) - rank(b));
-  const cnItems = services.chinaVisa.rows.map((r, i) => ({ title: r.type, tag: r.detail, time: r.time, price: h.vnd(r.price), popular: i === 0 }));
+  const cnItems = services.chinaVisa.rows.map((r, i) => ({ title: r.type, tag: r.detail, time: r.time, priceHtml: price(r.price, 'vnd', 'cn', { service: 'Visa Trung Quốc' }), popular: i === 0 }));
   const tabs = [
     { id: 'visa-trung-quoc', icon: 'passport', label: 'Visa Trung Quốc', sub: 'Quốc tịch Việt Nam · VNĐ' },
     { id: 'visa-cac-nuoc', icon: 'globe', label: 'Visa các nước', sub: 'Hàn, Nhật, Châu Âu, Mỹ…' },
     { id: 'dich-thuat', icon: 'lang', label: 'Dịch thuật', sub: 'Giá theo trang' },
     { id: 'e-visa', icon: 'ticket', label: 'E-visa Việt Nam', sub: 'Cho người nước ngoài · USD' },
-    { id: 'ho-chieu', icon: 'file', label: 'Hộ chiếu', sub: 'Phổ thông' },
+    { id: 'ho-chieu', icon: 'file', label: 'Hộ chiếu', sub: 'Thường & làm nhanh' },
     { id: 'xe', icon: 'car', label: 'Xe đưa đón', sub: services.carTransfer.area },
   ];
 %>
 
 <section class="section section--pricing">
   <div class="container">
+    <%- include('../partials/offer-bar', { groups: ['cn', 'world', 'translation', 'fees', 'evisa', 'passport', 'cars'] }) %>
     <nav class="ptabs" role="tablist" aria-label="Nhóm dịch vụ" data-tabs>
       <% tabs.forEach(function (t, i) { %>
         <a class="ptab" href="#<%= t.id %>" role="tab" id="tab-<%= t.id %>" aria-controls="<%= t.id %>" aria-selected="<%= i === 0 %>">
@@ -86,17 +88,20 @@
           <a class="btn btn--ghost btn--sm" href="/dich-vu/ho-chieu">Thủ tục chi tiết <%- icon('arrow') %></a>
         </header>
         <div class="feature-price">
-          <%- h.picture('/img/services/ho-chieu.jpg', { width: 1200, height: 800, sizes: '(max-width: 700px) 92vw, 520px' }) %>
+          <%- h.picture(media('svc_ho-chieu'), { width: 1200, height: 800, sizes: '(max-width: 700px) 92vw, 520px' }) %>
           <div>
             <% services.passport.rows.forEach(function (r) { %>
               <span class="pcard__tag"><%- icon('clock') %> <%= r.time %></span>
               <h3><%= r.type %></h3>
-              <div class="feature-price__num"><%= h.vnd(r.price) %></div>
+              <div class="feature-price__num"><%- price(r.price, 'vnd', 'passport', { service: 'Hộ chiếu' }) %></div>
             <% }) %>
             <ul class="checklist"><% services.passport.notes.slice(0, 2).forEach(function (n) { %><li><%- icon('info') %><%= n %></li><% }) %></ul>
             <button class="btn btn--accent mt-2" data-open-lead data-service="Hộ chiếu">Đăng ký làm hộ chiếu</button>
           </div>
         </div>
+        <h3 class="ppanel__sub">Làm hộ chiếu <em>nhanh</em> 1 – 7 ngày</h3>
+        <%- include('../partials/passport-express') %>
+        <p class="mt-2"><a href="/blog/lam-ho-chieu-nhanh-khi-sap-bay">Sắp bay mà hộ chiếu sắp hết hạn? Xem hướng dẫn chi tiết <%- icon('arrow') %></a></p>
       </section>
 
       <section class="ppanel" id="xe" role="tabpanel" aria-labelledby="tab-xe">

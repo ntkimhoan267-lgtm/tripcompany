@@ -1,13 +1,15 @@
 <%- include('../partials/head') %>
 <%
   const HERO = {
-    'ho-chieu': { img: '/img/services/ho-chieu.jpg', stamp: { top: 'PASSPORT · HỘ CHIẾU · ', mid: 'VN', cls: 'stamp--cn' } },
-    've-may-bay': { img: '/img/services/ve-may-bay.jpg', stamp: { top: 'BOARDING · DAD · ', mid: '✈', cls: 'stamp--kr' } },
-    tour: { img: '/img/tours/ba-na.jpg', stamp: { top: 'DA NANG · HOI AN · HUE · ', mid: 'TOUR', cls: 'stamp--eu' } },
-    'thue-xe': { img: '/img/services/thue-xe.jpg', stamp: { top: 'DA NANG · TRANSFER · ', mid: 'CAR', cls: 'stamp--kr' } },
-    'bao-hiem-esim': { img: '/img/services/bao-hiem.jpg', stamp: { top: 'TRAVEL · INSURANCE · ESIM · ', mid: '✓', cls: 'stamp--jp' } },
+    'ho-chieu': { stamp: { top: 'PASSPORT · HỘ CHIẾU · ', mid: 'VN', cls: 'stamp--cn' } },
+    've-may-bay': { stamp: { top: 'BOARDING · DAD · ', mid: '✈', cls: 'stamp--kr' } },
+    tour: { stamp: { top: 'DA NANG · HOI AN · HUE · ', mid: 'TOUR', cls: 'stamp--eu' } },
+    'thue-xe': { stamp: { top: 'DA NANG · TRANSFER · ', mid: 'CAR', cls: 'stamp--kr' } },
+    'bao-hiem-esim': { stamp: { top: 'TRAVEL · INSURANCE · ESIM · ', mid: '✓', cls: 'stamp--jp' } },
   };
-  const hero = HERO[svc.slug] || { img: '/img/services/thue-xe.jpg', stamp: { top: 'TRIP · ĐÀ NẴNG · ', mid: 'TRIP', cls: 'stamp--kr' } };
+  const hero = Object.assign({}, HERO[svc.slug] || { stamp: { top: 'TRIP · ĐÀ NẴNG · ', mid: 'TRIP', cls: 'stamp--kr' } });
+  // Ảnh dịch vụ: Dashboard → Ảnh & video
+  hero.img = media('svc_' + svc.slug) || media('svc_thue-xe');
   hero.stamp = Object.assign({ sub: 'TRIP' }, hero.stamp, { cls: 'stamp--hero ' + hero.stamp.cls });
 %>
 <%- include('../partials/page-hero', {
@@ -16,6 +18,7 @@
   sub: svc.intro,
   actions: { service: svc.leadService },
   visual: hero.img,
+  video: 'bg_' + svc.slug,
   stamp: hero.stamp,
 }) %>
 
@@ -29,8 +32,17 @@
           <div class="feature-trio__item"><span><%- icon('passport') %></span><h3>Nhận tận nơi</h3><p>Hỗ trợ chuyển phát hộ chiếu khi có kết quả.</p></div>
         </div>
         <div class="block-head mt-4"><span class="eyebrow">Bảng giá</span><h2>Phí dịch vụ <em>hộ chiếu</em></h2></div>
-        <%- include('../partials/price/options', { items: services.passport.rows.map(function (r) { return { title: r.type, time: r.time, price: h.vnd(r.price), flag: 'vn' }; }), service: 'Hộ chiếu' }) %>
+        <%- include('../partials/offer-bar', { service: 'Hộ chiếu', groups: ['passport'], cur: 'vnd' }) %>
+        <%- include('../partials/price/options', { items: services.passport.rows.map(function (r) { return { title: r.type, time: r.time, priceHtml: price(r.price, 'vnd', 'passport', { service: 'Hộ chiếu' }), flag: 'vn' }; }), service: 'Hộ chiếu' }) %>
         <div class="notice mt-2"><%- icon('info') %><div><% services.passport.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>
+
+        <div class="block-head mt-4" id="lam-nhanh"><span class="eyebrow">Cần gấp?</span><h2>Làm hộ chiếu <em>nhanh</em> 1 – 7 ngày</h2>
+          <p>Sắp bay mà hộ chiếu hết hạn, còn dưới 6 tháng, bị mất hoặc hết trang? Chọn số ngày bạn cần có hộ chiếu, TRIP tư vấn phương án nhanh nhất theo đúng quy định và báo giá riêng.</p></div>
+        <%- include('../partials/passport-express') %>
+        <a class="photo-link mt-3" href="/blog/lam-ho-chieu-nhanh-khi-sap-bay">
+          <%- h.picture(media('svc_ho-chieu'), { width: 1200, height: 800, sizes: '(max-width: 760px) 92vw, 500px' }) %>
+          <div><span class="eyebrow">Cẩm nang</span><h3>Sắp bay mà hộ chiếu sắp hết hạn hoặc còn dưới 6 tháng?</h3><p>Quy định mới, thời gian cấp theo luật, giấy tờ cần có và cách làm nhanh nhất.</p><span class="more">Đọc hướng dẫn <%- icon('arrow') %></span></div>
+        </a>
 
       <% } else if (svc.slug === 've-may-bay') { %>
         <div class="feature-trio">
@@ -43,6 +55,7 @@
         <div class="notice mt-3"><%- icon('info') %><div>Giá vé thay đổi theo thời điểm đặt và hạng ghế. Gửi yêu cầu để TRIP báo giá chính xác nhất cho hành trình của bạn.</div></div>
 
       <% } else if (svc.slug === 'tour') { %>
+        <% if (tours.some(function (t) { return t.price; })) { %><%- include('../partials/offer-bar', { service: 'Tour du lịch', groups: ['tours'], cur: 'vnd' }) %><% } %>
         <% if (tours.length) { %>
           <div class="grid grid--2"><% tours.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %></div>
           <p class="mt-3"><a class="btn btn--navy" href="/tour">Xem tất cả tour <%- icon('arrow') %></a></p>
@@ -53,11 +66,14 @@
 
       <% } else if (svc.slug === 'thue-xe') { %>
         <div class="block-head"><span class="eyebrow"><%= services.carTransfer.area %></span><h2>Xe <em>đưa đón</em></h2></div>
+        <%- include('../partials/offer-bar', { service: 'Thuê xe / Xe đưa đón', groups: ['cars', 'selfdrive'], cur: 'vnd' }) %>
         <%- include('../partials/price/cars') %>
         <div class="block-head mt-4"><span class="eyebrow">Giao xe tại Đà Nẵng</span><h2>Thuê xe <em>tự lái</em></h2></div>
         <div class="feature-trio">
           <% services.carTransfer.selfDrive.forEach(function (c) { %>
-            <div class="feature-trio__item"><span><%- icon('car') %></span><h3><%= c.car %></h3><p><%= c.seats %></p><p class="mt-2"><strong style="color:var(--navy);font-size:1.2rem"><%= h.vnd(c.price) %></strong> <span class="muted">/ngày</span></p></div>
+            <div class="feature-trio__item<%= c.image ? ' feature-trio__item--photo' : '' %>">
+              <% if (c.image) { %><div class="feature-trio__img"><%- h.picture(c.image, { alt: c.car, width: 800, height: 533, sizes: '(max-width: 640px) 100vw, 300px' }) %></div><% } else { %><span><%- icon('car') %></span><% } %>
+              <h3><%= c.car %></h3><p><%= c.seats %></p><p class="mt-2"><strong style="color:var(--navy);font-size:1.2rem"><%- price(c.price, 'vnd', 'selfdrive', { service: 'Thuê xe / Xe đưa đón' }) %></strong> <span class="muted">/ngày</span></p></div>
           <% }) %>
         </div>
         <div class="notice mt-2"><%- icon('info') %><div><% services.carTransfer.notes.forEach(function (n) { %><div><%= n %></div><% }) %></div></div>

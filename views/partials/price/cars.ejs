@@ -1,25 +1,14 @@
-<%
-  const pic = function (route) {
-    if (/Huế/.test(route)) return '/img/tours/hue.jpg';
-    if (/Bảy Mẫu/.test(route)) return '/img/tours/bay-mau.jpg';
-    if (/Bà Nà/.test(route)) return '/img/tours/ba-na.jpg';
-    if (/Sơn Trà/.test(route)) return '/img/tours/son-tra-hoi-an.jpg';
-    if (/Phố cổ Hội An/.test(route)) return '/img/tours/hoi-an-dem.jpg';
-    if (/Sân bay/.test(route)) return '/img/services/ve-may-bay.jpg';
-    return '/img/services/thue-xe.jpg';
-  };
-%>
 <div class="routes">
   <% services.carTransfer.rows.forEach(function (r) { %>
     <article class="route">
-      <div class="route__img"><%- h.picture(pic(r.route), { width: 800, height: 600, sizes: '(max-width: 640px) 100vw, 400px' }) %><span><%= r.way %></span></div>
+      <div class="route__img"><%- h.picture(r.image || media('svc_thue-xe'), { alt: r.route, width: 800, height: 600, sizes: '(max-width: 640px) 100vw, 400px' }) %><% if (r.way) { %><span><%= r.way %></span><% } %></div>
       <div class="route__body">
         <h3><%= r.route.replace(/^KS Đà Nẵng – /, '') %></h3>
         <p><%= /^KS Đà Nẵng/.test(r.route) ? 'Từ khách sạn Đà Nẵng' : 'Đưa đón trong thành phố' %></p>
         <ul class="route__prices">
-          <li><small>4 chỗ</small><b><%= h.vnd(r.p4) %></b></li>
-          <li><small>7 chỗ</small><b><%= h.vnd(r.p7) %></b></li>
-          <li><small>16 chỗ</small><b><%= h.vnd(r.p16) %></b></li>
+          <li><small>4 chỗ</small><b><%- price(r.p4, 'vnd', 'cars', { service: 'Thuê xe / Xe đưa đón' }) %></b></li>
+          <li><small>7 chỗ</small><b><%- price(r.p7, 'vnd', 'cars', { service: 'Thuê xe / Xe đưa đón' }) %></b></li>
+          <li><small>16 chỗ</small><b><%- price(r.p16, 'vnd', 'cars', { service: 'Thuê xe / Xe đưa đón' }) %></b></li>
         </ul>
       </div>
     </article>

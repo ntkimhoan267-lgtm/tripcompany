@@ -160,7 +160,7 @@ test('dashboard: viết bài và tour hiển thị ra website', async () => {
   const r = await fetch(base + '/admin/posts/new', { method: 'POST', redirect: 'manual', headers: { cookie }, body: fd });
   assert.equal(r.status, 302);
   const page = await (await fetch(base + '/blog/bai-kiem-thu-visa-han')).text();
-  assert.match(page, /<h2>Xin chào<\/h2>/);
+  assert.match(page, /<h2 id="xin-chao">Xin chào<\/h2>/);
   assert.ok(!page.includes('<script>alert(1)</script>'), 'đã lọc script');
 
   csrf = await getCsrf('/admin/tours/new');

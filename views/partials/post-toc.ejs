@@ -1,0 +1,16 @@
+<%
+  // Mục lục "Nội dung chính" (thu gọn / mở rộng được). Tham số: toc, faq, open (mặc định mở)
+  const tocOpen = typeof open === 'undefined' ? true : open;
+  const faqItems = typeof faq !== 'undefined' && faq ? faq : [];
+%>
+<details class="toc"<%= tocOpen ? ' open' : '' %>>
+  <summary><span>Nội dung chính</span><span class="toc__toggle" aria-hidden="true"><%- icon('chevron') %></span></summary>
+  <nav aria-label="Nội dung chính">
+    <ol>
+      <% toc.forEach(function (t) { %>
+        <li class="toc--l<%= t.level %>"><a href="#<%= t.id %>"><span class="toc__num"><%= t.num %>.</span><span><%- t.text %></span></a></li>
+      <% }) %>
+      <% if (faqItems.length) { %><li class="toc--l2"><a href="#cau-hoi-thuong-gap"><span class="toc__num"><%= toc.filter(function (t) { return t.level === 2; }).length + 1 %>.</span><span>Câu hỏi thường gặp</span></a></li><% } %>
+    </ol>
+  </nav>
+</details>

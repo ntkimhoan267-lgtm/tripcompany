@@ -1,13 +1,15 @@
 <%
   const m = typeof meta !== 'undefined' ? meta : {};
-  const fullTitle = m.title && !/TRIP/.test(m.title) ? `${m.title} | TRIP Đà Nẵng` : (m.title || 'TRIP Đà Nẵng');
+  // rawTitle: tiêu đề SEO viết riêng cho bài (đã tối ưu độ dài) -> giữ nguyên, không thêm "| TRIP Đà Nẵng"
+  const fullTitle = m.rawTitle ? m.title : (m.title && !/TRIP/.test(m.title) ? `${m.title} | TRIP Đà Nẵng` : (m.title || 'TRIP Đà Nẵng'));
   const desc = m.description || 'TRIP – Dịch vụ Visa, Dịch thuật công chứng và Du lịch trọn gói tại Đà Nẵng.';
-  const canonical = siteUrl + path;
+  // Đường dẫn chuẩn không có "/" cuối: /blog/abc/ và /blog/abc là cùng một trang
+  const canonical = siteUrl + (path.length > 1 ? path.replace(/\/+$/, '') : path);
   const ogImage = m.image ? (m.image.startsWith('http') ? m.image : siteUrl + m.image) : siteUrl + '/img/og-image.jpg';
   const s = settings;
   const isActive = (p) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'is-active' : '';
 %><!doctype html>
-<html lang="vi" class="no-js">
+<html lang="vi" class="no-js<%= offerUnlocked ? ' offer-on' : '' %>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -22,6 +24,9 @@
   <meta property="og:url" content="<%= canonical %>">
   <meta property="og:image" content="<%= ogImage %>">
   <meta property="og:locale" content="vi_VN">
+  <meta name="twitter:card" content="summary_large_image">
+  <% if (m.published) { %><meta property="article:published_time" content="<%= m.published %>"><% } %>
+  <% if (m.modified) { %><meta property="article:modified_time" content="<%= m.modified %>"><% } %>
   <meta name="theme-color" content="#1f3a52">
   <link rel="icon" type="image/png" href="/img/favicon.png">
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
@@ -29,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/site.css?v=<%= assetV %>">
-  <% if (path === '/') { %><link rel="preload" as="image" href="/media/hero-montage.jpg"><% } %>
+  <% if (path === '/') { %><link rel="preload" as="image" href="<%= mediaPoster('home_hero') %>"><% } %>
   <script type="application/ld+json"><%- JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'TravelAgency',
@@ -45,6 +50,8 @@
     openingHours: ['Mo-Fr 08:00-17:00', 'Sa 08:00-12:00'],
     sameAs: [s.facebook].filter(Boolean),
   }).replace(/</g, '\\u003c') %></script>
+  <% (m.jsonld || []).forEach(function (j) { %><script type="application/ld+json"><%- JSON.stringify(j).replace(/</g, '\\u003c') %></script>
+  <% }) %>
 </head>
 <body>
 <%- include('icons') %>

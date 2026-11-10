@@ -5,12 +5,13 @@
   headingEm: 'tại Đà Nẵng',
   sub: 'Anh – Trung – Hàn – Nhật – Thái – Lào. Công chứng dấu công ty hoặc dấu tư pháp, hợp pháp hoá lãnh sự. Nhận hồ sơ online, trả bản dịch nhanh.',
   actions: { service: 'Dịch thuật công chứng', phone: settings.hotline_translation },
-  visual: '/img/services/dich-thuat.jpg',
+  visual: media('svc_dich-thuat'),
+  video: 'bg_dich-thuat',
   cloudEnd: '#f4f8fb',
   stamp: { top: 'CERTIFIED · TRANSLATION · ', mid: '译', sub: 'TRIP', cls: 'stamp--hero stamp--cn' },
   badge: { value: '6+', label: 'Ngôn ngữ' },
   facts: [
-    { icon: 'wallet', label: 'Dịch thuật từ', value: h.vnd(services.translation.languages[0].rows[0].price) + '/trang' },
+    { icon: 'wallet', label: 'Dịch thuật từ', html: price(h.minPrice(services.translation.languages[0].rows), 'vnd', 'translation', { service: 'Dịch thuật công chứng', suffix: '/trang' }) },
     { icon: 'zap', label: 'Có gói', value: 'Hoả tốc' },
   ],
 }) %>
@@ -26,6 +27,7 @@
 
     <div class="ppanel mt-4" id="bang-gia">
       <div class="block-head"><span class="eyebrow">Bảng giá</span><h2>Chọn <em>ngôn ngữ</em> cần dịch</h2></div>
+      <%- include('../partials/offer-bar', { service: 'Dịch thuật công chứng', groups: ['translation', 'fees'], cur: 'vnd' }) %>
       <%- include('../partials/price/translation') %>
       <h3 class="ppanel__sub">Phụ phí công chứng & in ấn</h3>
       <%- include('../partials/price/fees') %>
@@ -45,7 +47,7 @@
       </div>
 
       <a class="photo-link" href="/dich-vu/hop-phap-hoa-lanh-su">
-        <%- h.picture('/img/services/hop-phap-hoa.jpg', { width: 1200, height: 800, sizes: '(max-width: 760px) 92vw, 500px' }) %>
+        <%- h.picture(media('svc_hop-phap-hoa'), { width: 1200, height: 800, sizes: '(max-width: 760px) 92vw, 500px' }) %>
         <div><span class="eyebrow">Giấy tờ dùng ở nước ngoài</span><h3>Cần hợp pháp hoá / chứng nhận lãnh sự?</h3><p>Xem thủ tục và bảng giá trọn gói, kèm dịch thuật công chứng.</p><span class="more">Xem trang Hợp pháp hoá lãnh sự <%- icon('arrow') %></span></div>
       </a>
 

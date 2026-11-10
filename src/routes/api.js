@@ -9,6 +9,9 @@ const SUBSCRIBE_OK = 'Cảm ơn bạn! Mỗi tháng TRIP sẽ gửi cập nhật
 const LEAD_OK = 'TRIP đã nhận thông tin! Tư vấn viên sẽ gọi lại cho bạn trong giờ làm việc.';
 const REVIEW_OK = 'Cảm ơn bạn đã đánh giá! TRIP sẽ hiển thị sau khi xác nhận.';
 const google = require('../lib/google');
+const { setOfferCookie, offerConfig } = require('../lib/offer');
+const { getSettings, vnd } = require('../lib/helpers');
+const OFFER_OK = 'Đã mở giá ưu đãi! Giá bên dưới đã được giảm. Tư vấn viên TRIP sẽ liên hệ và áp dụng ưu đãi khi báo giá.';
 
 const router = express.Router();
 
@@ -82,6 +85,7 @@ router.post('/leads', (req, res) => {
   const lead = db.prepare('SELECT * FROM leads WHERE id = ?').get(info.lastInsertRowid);
 
   google.syncLead(lead).catch((e) => console.error(e)); // không bắt khách chờ Google
+  setOfferCookie(res); // khách đã để lại SĐT: hiện giá ưu đãi
   reply(req, res, 200, { ok: true, message: LEAD_OK, service });
 });
 
@@ -98,6 +102,11 @@ router.post('/subscribe', subscribeLimiter, (req, res) => {
   if (!isValidEmail(email)) return reply(req, res, 400, { ok: false, errors: { email: 'Email chưa đúng định dạng.' } });
 
   const existing = db.prepare('SELECT * FROM subscribers WHERE email = ?').get(email);
+  setOfferCookie(res); // khách đã để lại email: hiện giá ưu đãi
+  if (existing && existing.status === 'offer') {
+    db.prepare("UPDATE subscribers SET status = 'active' WHERE id = ?").run(existing.id);
+    return reply(req, res, 200, { ok: true, message: SUBSCRIBE_OK });
+  }
   if (existing) {
     // Không tự kích hoạt lại email đã huỷ (tránh người khác đăng ký hộ); khách muốn nhận lại thì liên hệ TRIP
     return reply(req, res, 200, { ok: true, message: SUBSCRIBE_OK });
@@ -108,6 +117,50 @@ router.post('/subscribe', subscribeLimiter, (req, res) => {
 
   google.syncSubscriber(sub).catch((e) => console.error(e));
   reply(req, res, 200, { ok: true, message: SUBSCRIBE_OK });
+});
+
+// Popup "Nhận giá ưu đãi": khách nhập SĐT (-> khách tư vấn) HOẶC email (-> danh sách nhận tin)
+const offerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 8, standardHeaders: 'draft-7', legacyHeaders: false,
+  skipFailedRequests: true, handler: limitHandler,
+  message: { ok: false, error: 'Bạn đã gửi quá nhiều lần trong 1 giờ. Vui lòng gọi hotline để được báo giá ưu đãi.' } });
+
+router.post('/offer', offerLimiter, (req, res) => {
+  const b = req.body || {};
+  if (b.website) return reply(req, res, 200, { ok: true, message: OFFER_OK });
+  const contact = clean(b.contact, 200);
+  const name = clean(b.name, 100);
+  const source = clean(b.source, 200) || refererPath(req);
+  const service = leadServiceOptions.includes(clean(b.service, 100)) ? clean(b.service, 100) : 'Khác';
+  const cfg = offerConfig(getSettings());
+  const label = cfg.vnd ? `giảm ${vnd(cfg.vnd)}` : 'ưu đãi';
+  const wantsNews = b.newsletter === true || b.newsletter === '1' || b.newsletter === 'on';
+  if (isValidVnPhone(contact)) {
+    const phone = normalizePhone(contact);
+    // Cùng số đã nhận ưu đãi trong 24 giờ qua: không tạo thêm khách trùng (và không gửi thêm email báo)
+    const dup = db.prepare("SELECT id FROM leads WHERE phone = ? AND note LIKE '[Ưu đãi]%' AND created_at >= datetime('now', '-1 day')").get(phone);
+    if (!dup) {
+      const info = db.prepare('INSERT INTO leads (name, phone, service, note, source_page) VALUES (?, ?, ?, ?, ?)')
+        .run(name.length >= 2 ? name : 'Khách nhận ưu đãi', phone, service, `[Ưu đãi] Khách nhận giá ${label} trên website.`, source);
+      google.syncLead(db.prepare('SELECT * FROM leads WHERE id = ?').get(info.lastInsertRowid)).catch((e) => console.error(e));
+    }
+  } else if (isValidEmail(contact)) {
+    const email = contact.toLowerCase();
+    // Chỉ đưa vào danh sách nhận bản tin khi khách tick đồng ý; không tick: lưu trạng thái 'offer' để TRIP liên hệ tư vấn
+    const status = wantsNews ? 'active' : 'offer';
+    const existing = db.prepare('SELECT id, status FROM subscribers WHERE email = ?').get(email);
+    if (!existing) {
+      const note = wantsNews ? 'nhận ưu đãi + đăng ký bản tin' : 'chỉ nhận ưu đãi, KHÔNG đăng ký bản tin';
+      const info = db.prepare('INSERT INTO subscribers (email, name, source_page, token, status) VALUES (?, ?, ?, ?, ?)')
+        .run(email, name, `${source} (${note}${service !== 'Khác' ? ': ' + service : ''})`.slice(0, 200), crypto.randomBytes(16).toString('hex'), status);
+      google.syncSubscriber(db.prepare('SELECT * FROM subscribers WHERE id = ?').get(info.lastInsertRowid)).catch((e) => console.error(e));
+    } else if (wantsNews && existing.status === 'offer') {
+      db.prepare("UPDATE subscribers SET status = 'active' WHERE id = ?").run(existing.id);
+    }
+  } else {
+    return reply(req, res, 400, { ok: false, errors: { contact: 'Vui lòng nhập số điện thoại (VD: 0935 191 394) hoặc Gmail hợp lệ.' } });
+  }
+  setOfferCookie(res);
+  reply(req, res, 200, { ok: true, message: OFFER_OK });
 });
 
 // Khách tự gửi đánh giá: luôn ở trạng thái chờ duyệt, chỉ hiện lên web khi nhân viên duyệt

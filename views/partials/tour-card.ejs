@@ -24,7 +24,7 @@
     </div>
     <div class="tour-card__foot">
       <div>
-        <% if (t.price) { %><small>Giá từ</small><strong><%= h.vnd(t.price) %></strong><small>/khách</small>
+        <% if (t.price) { %><small>Giá từ</small><strong><%- price(t.price, 'vnd', 'tours', { inLink: true }) %></strong><small>/khách</small>
         <% } else { %><small>Giá tour</small><strong class="tour-card__ask">Liên hệ báo giá</strong><% } %>
       </div>
       <span class="btn btn--ghost btn--sm">Chi tiết</span>

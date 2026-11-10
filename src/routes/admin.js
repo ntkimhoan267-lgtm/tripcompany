@@ -13,6 +13,7 @@ const company = require('../data/company');
 const { csrf, requireAdmin, ah } = require('../lib/security');
 const { slugify, setSettings, getSettings, fmtDate, parseVideo } = require('../lib/helpers');
 const { leadServiceOptions } = require('../data/services');
+const { LAYOUTS, THEMES } = require('../lib/toc');
 
 const router = express.Router();
 
@@ -22,7 +23,11 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024, fieldSize: 2 * 1024 * 1024, files: 1 },
-  fileFilter: (req, file, cb) => cb(null, /^image\/(jpeg|png|webp|gif|heic|heif|avif)$/.test(file.mimetype)),
+  fileFilter: (req, file, cb) => {
+    const ok = /^image\/(jpeg|png|webp|gif|heic|heif|avif)$/.test(file.mimetype);
+    if (!ok) req.fileRejected = true; // báo lỗi rõ ràng thay vì lặng lẽ bỏ qua tệp
+    cb(null, ok);
+  },
 });
 
 const withUpload = (field) => (req, res, next) => upload.single(field)(req, res, (err) => {
@@ -30,6 +35,8 @@ const withUpload = (field) => (req, res, next) => upload.single(field)(req, res,
   const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Ảnh quá lớn (tối đa 8MB).'
     : err.code === 'LIMIT_FIELD_VALUE' ? 'Nội dung quá dài (tối đa khoảng 2MB chữ).' : 'Không tải lên được tệp.';
   if (req.path === '/upload') return res.status(400).json({ ok: false, error: msg });
+  // Bài viết: không chuyển hướng (sẽ mất nội dung đang gõ) mà để route hiện lại form với lỗi
+  if (req.path.startsWith('/posts')) { req.uploadError = msg; return next(); }
   flash(req, 'error', msg);
   return res.redirect(req.originalUrl);
 });
@@ -138,12 +145,15 @@ router.use((req, res, next) => {
 const NOT_OWNER = 'Chỉ tài khoản chủ mới dùng được chức năng này.';
 const requireOwner = (req, res, next) => {
   if (req.user.id === ownerId()) return next();
-  if (req.method === 'GET' || req.method === 'HEAD') return res.status(403).send(NOT_OWNER);
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    return res.status(403).send(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Không có quyền · Quản trị TRIP</title><link rel="stylesheet" href="/css/admin.css"></head><body><div class="forbidden"><h1>Không có quyền truy cập</h1><p>${NOT_OWNER}</p><p><a class="btn" href="/admin">← Về trang Tổng quan</a></p></div></body></html>`);
+  }
   flash(req, 'error', NOT_OWNER);
   res.redirect('/admin');
 };
 // Khoá theo tiền tố đường dẫn: route con thêm về sau cũng tự được khoá
-router.use(['/subscribers', '/subscribers.csv', '/newsletter', '/reviews', '/settings', '/sync', '/test-google', '/leads.csv'], requireOwner);
+router.use(['/subscribers', '/subscribers.csv', '/newsletter', '/reviews', '/settings', '/sync', '/test-google', '/leads.csv',
+  '/prices', '/offer', '/media', '/upload-video'], requireOwner);
 
 // ---------- Tổng quan ----------
 router.get('/', csrf, (req, res) => {
@@ -249,7 +259,7 @@ router.get('/subscribers.csv', (req, res) => {
   const rows = db.prepare('SELECT * FROM subscribers ORDER BY id DESC').all();
   sendCsv(res, `trip-dang-ky-nhan-tin-${new Date().toISOString().slice(0, 10)}.csv`,
     ['Thời gian', 'Email', 'Tên', 'Trạng thái', 'Trang nguồn'],
-    rows.map((s) => [fmtDate(s.created_at, true), s.email, s.name, s.status === 'active' ? 'Đang nhận' : 'Đã huỷ', s.source_page]));
+    rows.map((s) => [fmtDate(s.created_at, true), s.email, s.name, s.status === 'active' ? 'Đang nhận' : s.status === 'offer' ? 'Chỉ nhận ưu đãi (không gửi bản tin)' : 'Đã huỷ', s.source_page]));
 });
 
 // ---------- Bản tin tháng (gửi theo đợt, vừa hạn mức Gmail) ----------
@@ -378,15 +388,32 @@ function uniqueSlug(table, base, fallback, id) {
 }
 
 router.get('/posts', csrf, (req, res) => {
-  const posts = db.prepare('SELECT * FROM posts ORDER BY COALESCE(published_at, created_at) DESC').all();
-  res.render('admin/posts', { title: 'Bài viết', posts });
+  const posts = db.prepare("SELECT *, (status = 'published' AND published_at > datetime('now')) AS scheduled FROM posts ORDER BY COALESCE(published_at, created_at) DESC").all();
+  res.render('admin/posts', { title: 'Bài viết', posts, LAYOUTS });
 });
 
-router.get('/posts/new', csrf, (req, res) => res.render('admin/post-form', { title: 'Viết bài mới', post: { status: 'draft' } }));
+// Giờ đăng: SQLite lưu UTC ('2026-11-09 03:00:00'); ô nhập dùng giờ Việt Nam ('2026-11-09T10:00')
+const toLocalInput = (utc) => (utc ? new Date(new Date(String(utc).replace(' ', 'T') + 'Z').getTime() + 7 * 3600e3).toISOString().slice(0, 16) : '');
+// Trả về chuỗi UTC cho SQLite, '' khi ô để trống, hoặc undefined khi ngày giờ không hợp lệ
+function fromLocalInput(v) {
+  v = String(v || '').trim();
+  if (!v) return '';
+  const m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?$/.exec(v);
+  if (!m) return undefined;
+  const [y, mo, d, h, mi, se = '0'] = m.slice(1).map((x) => (x == null ? x : Number(x)));
+  const local = new Date(Date.UTC(y, mo - 1, d, h, mi, se));
+  // Ngày giờ không có thật (tháng 13, 31/02, 25 giờ…) -> Date tự "tràn" sang ngày khác: từ chối
+  if (local.getUTCFullYear() !== y || local.getUTCMonth() !== mo - 1 || local.getUTCDate() !== d || local.getUTCHours() !== h || local.getUTCMinutes() !== mi) return undefined;
+  return new Date(local.getTime() - 7 * 3600e3).toISOString().slice(0, 19).replace('T', ' ');
+}
+const isFuture = (utc) => Boolean(utc) && new Date(String(utc).replace(' ', 'T') + 'Z').getTime() > Date.now();
+const postFormLocals = (post) => ({ post, LAYOUTS, THEMES, publishAt: toLocalInput(post.published_at), scheduled: post.status === 'published' && isFuture(post.published_at), siteUrl: config.siteUrl });
+
+router.get('/posts/new', csrf, (req, res) => res.render('admin/post-form', { title: 'Viết bài mới', ...postFormLocals({ status: 'draft', toc: 1, layout: 'classic', theme: 'sky' }) }));
 router.get('/posts/:id(\\d+)', csrf, (req, res, next) => {
   const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
   if (!post) return next();
-  res.render('admin/post-form', { title: 'Sửa bài viết', post });
+  res.render('admin/post-form', { title: 'Sửa bài viết', ...postFormLocals(post) });
 });
 
 router.post(['/posts/new', '/posts/:id(\\d+)'], withUpload('cover_file'), csrf, ah(async (req, res) => {
@@ -394,23 +421,70 @@ router.post(['/posts/new', '/posts/:id(\\d+)'], withUpload('cover_file'), csrf, 
   if (id && !db.prepare('SELECT id FROM posts WHERE id = ?').get(id)) { flash(req, 'error', 'Không tìm thấy bài viết.'); return res.redirect('/admin/posts'); }
   const b = req.body;
   const title = qs(b.title, 200).trim();
-  if (!title) { flash(req, 'error', 'Bài viết cần có tiêu đề.'); return res.redirect(req.originalUrl); }
+  // Có lỗi: hiện lại form với đúng nội dung vừa gõ (không chuyển hướng làm mất bài)
+  const again = (msg) => {
+    const current = id ? db.prepare('SELECT * FROM posts WHERE id = ?').get(id) : { status: 'draft' };
+    const typed = {};
+    for (const k of ['title', 'excerpt', 'content', 'category', 'slug', 'seo_title', 'meta_desc', 'focus_kw', 'cover_alt', 'author', 'faq', 'layout', 'theme', 'status']) {
+      if (typeof b[k] === 'string') typed[k] = b[k];
+    }
+    if (typeof b.layout === 'string') { typed.toc = b.toc ? 1 : 0; typed.noindex = b.noindex ? 1 : 0; }
+    res.locals.flash = { type: 'error', msg };
+    const locals = postFormLocals({ ...current, ...typed });
+    if (typeof b.publish_at === 'string') locals.publishAt = b.publish_at.slice(0, 19);
+    return res.status(400).render('admin/post-form', { title: id ? 'Sửa bài viết' : 'Viết bài mới', ...locals });
+  };
+  if (req.uploadError) return again(`${req.uploadError} Bài chưa được lưu: hãy chọn lại ảnh nhỏ hơn rồi bấm Lưu.`);
+  if (req.fileRejected) return again('Ảnh bìa phải là file ảnh JPG, PNG hoặc WEBP. Bài chưa được lưu: hãy chọn lại ảnh rồi bấm Lưu.');
+  if (!title) return again('Bài viết cần có tiêu đề.');
+  const publishAtRaw = fromLocalInput(qs(b.publish_at, 25));
+  if (publishAtRaw === undefined) return again('Ngày giờ đăng không hợp lệ. Chọn lại ngày giờ hoặc để trống để đăng ngay.');
   const uploaded = await saveImage(req.file);
-  if (req.file && !uploaded) { flash(req, 'error', 'Ảnh bìa không hợp lệ. Chỉ nhận ảnh JPG, PNG, WEBP.'); return res.redirect(req.originalUrl); }
+  if (req.file && !uploaded) return again('Ảnh bìa không đọc được. Chỉ nhận ảnh JPG, PNG, WEBP. Bài chưa được lưu: hãy chọn lại ảnh rồi bấm Lưu.');
   const keepCover = qs(b.cover, 300).trim();
   const cover = uploaded || (b.remove_cover ? null : (SAFE_IMAGE_PATH.test(keepCover) ? keepCover : null));
   const status = b.status === 'published' ? 'published' : 'draft';
-  const fields = [uniqueSlug('posts', slugify(qs(b.slug, 200) || title), 'bai-viet', id), title, qs(b.excerpt, 400), qs(b.content, 2 * 1024 * 1024), cover, qs(b.category, 50).trim(), status];
-  if (id) {
-    db.prepare(`UPDATE posts SET slug=?, title=?, excerpt=?, content=?, cover=?, category=?, status=?,
-      published_at = CASE WHEN ? = 'published' AND published_at IS NULL THEN datetime('now') ELSE published_at END,
-      updated_at = datetime('now') WHERE id = ?`).run(...fields, status, id);
-  } else {
-    db.prepare(`INSERT INTO posts (slug, title, excerpt, content, cover, category, status, published_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN datetime('now') END)`).run(...fields, status);
-  }
-  flash(req, 'success', status === 'published' ? 'Đã lưu và xuất bản bài viết.' : 'Đã lưu bản nháp.');
-  res.redirect('/admin/posts');
+  const slug = uniqueSlug('posts', slugify(qs(b.slug, 200) || title), 'bai-viet', id);
+  const fields = [slug, title, qs(b.excerpt, 400), qs(b.content, 2 * 1024 * 1024), cover, qs(b.category, 50).trim(), status];
+  // Trường SEO & giao diện
+  const seo = [
+    qs(b.seo_title, 120).trim(), qs(b.meta_desc, 320).trim(), qs(b.focus_kw, 100).trim(), qs(b.cover_alt, 200).trim(),
+    qs(b.author, 80).trim(), qs(b.faq, 20000).replace(/\r/g, '').trim(),
+    Object.hasOwn(LAYOUTS, b.layout) ? b.layout : 'classic', Object.hasOwn(THEMES, b.theme) ? b.theme : 'sky',
+    b.toc ? 1 : 0, b.noindex ? 1 : 0,
+  ];
+  // Hẹn giờ đăng (giờ Việt Nam). Trống = đăng ngay khi xuất bản lần đầu.
+  // Trống = đăng ngay (bỏ cả hẹn giờ cũ nếu có)
+  const publishAt = publishAtRaw || null;
+  const old = id ? db.prepare('SELECT slug, status, published_at FROM posts WHERE id = ?').get(id) : null;
+  let postId = id;
+  db.exec('BEGIN');
+  try {
+    if (id) {
+      db.prepare(`UPDATE posts SET slug=?, title=?, excerpt=?, content=?, cover=?, category=?, status=?,
+        seo_title=?, meta_desc=?, focus_kw=?, cover_alt=?, author=?, faq=?, layout=?, theme=?, toc=?, noindex=?,
+        published_at = CASE WHEN ? = 'published'
+          THEN COALESCE(?, CASE WHEN published_at > datetime('now') THEN datetime('now') ELSE published_at END, datetime('now'))
+          ELSE COALESCE(?, published_at) END,
+        updated_at = datetime('now') WHERE id = ?`).run(...fields, ...seo, status, publishAt, publishAt, id);
+      // Đổi đường dẫn bài đã đăng: giữ đường dẫn cũ để chuyển hướng 301
+      if (old && old.slug !== slug && old.published_at) {
+        db.prepare('INSERT INTO post_redirects (old_slug, post_id) VALUES (?, ?) ON CONFLICT(old_slug) DO UPDATE SET post_id = excluded.post_id').run(old.slug, id);
+      }
+    } else {
+      postId = db.prepare(`INSERT INTO posts (slug, title, excerpt, content, cover, category, status,
+        seo_title, meta_desc, focus_kw, cover_alt, author, faq, layout, theme, toc, noindex, published_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CASE WHEN ? = 'published' THEN COALESCE(?, datetime('now')) ELSE ? END)`)
+        .run(...fields, ...seo, status, publishAt, publishAt).lastInsertRowid;
+    }
+    // Đường dẫn mới không còn là "đường dẫn cũ" của bài nào (tránh chuyển hướng vòng)
+    db.prepare('DELETE FROM post_redirects WHERE old_slug = ?').run(slug);
+    db.exec('COMMIT');
+  } catch (e) { db.exec('ROLLBACK'); throw e; }
+  const saved = db.prepare("SELECT published_at > datetime('now') AS future, published_at FROM posts WHERE id = ?").get(postId);
+  flash(req, 'success', status !== 'published' ? 'Đã lưu bản nháp.'
+    : saved.future ? `Đã lưu. Bài sẽ tự hiện trên website lúc ${fmtDate(saved.published_at, true)}.` : 'Đã lưu và xuất bản bài viết.');
+  res.redirect(b.stay ? `/admin/posts/${postId}` : '/admin/posts');
 }));
 
 router.post('/posts/:id(\\d+)/delete', csrf, (req, res) => {
@@ -471,6 +545,89 @@ router.post('/tours/:id(\\d+)/delete', csrf, (req, res) => {
   const r = db.prepare('DELETE FROM tours WHERE id = ?').run(req.params.id);
   flash(req, r.changes ? 'success' : 'error', r.changes ? 'Đã xoá tour.' : 'Không tìm thấy tour.');
   res.redirect('/admin/tours');
+});
+
+// ---------- Bảng giá (sửa giá mọi dịch vụ) & Ưu đãi ----------
+const catalog = require('../lib/catalog');
+const offerLib = require('../lib/offer');
+const mediaLib = require('../lib/media');
+
+router.get('/prices', csrf, (req, res) => {
+  res.render('admin/prices', { title: 'Bảng giá & ưu đãi', data: catalog.editorData(), offer: offerLib.offerConfig(getSettings()), OFFER_GROUPS: offerLib.GROUPS, s: getSettings() });
+});
+
+router.post('/prices', csrf, (req, res) => {
+  let payload = {};
+  try { payload = JSON.parse(qs(req.body.payload, 1024 * 1024) || '{}') || {}; } catch { payload = {}; }
+  if (!payload.tables && !payload.texts) { flash(req, 'error', 'Không đọc được dữ liệu bảng giá. Vui lòng tải lại trang (cần bật JavaScript) rồi thử lại.'); return res.redirect('/admin/prices'); }
+  payload.reset = [].concat(req.body.reset || []).filter((x) => typeof x === 'string');
+  const r = catalog.saveOverrides(payload);
+  flash(req, r.errors.length ? 'error' : 'success', r.errors.length ? `Đã lưu các bảng hợp lệ. Chưa lưu: ${r.errors.join(' ')}` : 'Đã lưu bảng giá. Website đã cập nhật.');
+  res.redirect('/admin/prices' + (qs(req.body.tab, 30).match(/^[a-z]+$/) ? '#' + req.body.tab : ''));
+});
+
+router.post('/offer', csrf, (req, res) => {
+  const b = req.body;
+  const groups = [].concat(b.groups || []).filter((g) => typeof g === 'string' && Object.hasOwn(offerLib.GROUPS, g));
+  const amount = (v, cur) => { const p = catalog.parsePrice(qs(v, 20), cur); return p.error ? { error: p.error } : { value: p.value || 0 }; };
+  const vndAmount = amount(b.offer_vnd, 'vnd'); const usdAmount = amount(b.offer_usd, 'usd');
+  if (vndAmount.error || usdAmount.error) {
+    flash(req, 'error', `Chưa lưu ưu đãi: số tiền giảm ${vndAmount.error ? 'VNĐ' : 'USD'} ${vndAmount.error || usdAmount.error}.`);
+    return res.redirect('/admin/prices');
+  }
+  setSettings({
+    offer_enabled: b.offer_enabled ? '1' : '0',
+    offer_vnd: String(Math.min(100000000, Math.round(vndAmount.value))),
+    offer_usd: String(Math.min(10000, Math.round(usdAmount.value))),
+    offer_groups: groups.join(','),
+  });
+  const on = b.offer_enabled && (vndAmount.value > 0 || usdAmount.value > 0) && groups.length;
+  flash(req, 'success', !b.offer_enabled ? 'Đã tắt ưu đãi. Website hiện giá thật như cũ.'
+    : on ? 'Đã lưu ưu đãi. Giá niêm yết trên website đã cộng thêm số tiền ưu đãi.'
+      : 'Đã lưu, nhưng ưu đãi chưa có hiệu lực: số tiền giảm đang là 0 hoặc chưa chọn nhóm dịch vụ nào.');
+  res.redirect('/admin/prices');
+});
+
+// ---------- Ảnh & video hiển thị trên website ----------
+router.get('/media', csrf, (req, res) => {
+  res.render('admin/media', { title: 'Ảnh & video', SLOTS: mediaLib.SLOTS, GROUPS: mediaLib.GROUPS, s: getSettings() });
+});
+
+router.post('/media', csrf, (req, res) => {
+  const update = {}; const warnings = [];
+  for (const slot of mediaLib.SLOTS) {
+    const v = qs(req.body[`media_${slot.key}`], 400).trim();
+    const okRe = slot.type === 'video' ? mediaLib.SAFE_VIDEO : mediaLib.SAFE_IMAGE;
+    // Giá trị sai: báo lỗi và GIỮ giá trị cũ (không xoá ảnh/video đang dùng)
+    if (v && !okRe.test(v)) warnings.push(`"${slot.label}": ${slot.type === 'video' ? 'cần file .mp4/.webm' : 'cần file ảnh .jpg/.png/.webp'} (tải lên hoặc link https), đã giữ giá trị cũ`);
+    else update[`media_${slot.key}`] = v;
+    if (slot.type === 'video') {
+      const p = qs(req.body[`media_${slot.key}__poster`], 400).trim();
+      if (p && !mediaLib.SAFE_IMAGE.test(p)) warnings.push(`Ảnh chờ của "${slot.label}" không hợp lệ, đã giữ giá trị cũ`);
+      else update[`media_${slot.key}__poster`] = p;
+    }
+  }
+  setSettings(update);
+  flash(req, warnings.length ? 'error' : 'success', warnings.length ? `Đã lưu, trừ: ${warnings.join('; ')}.` : 'Đã lưu ảnh & video. Website đã cập nhật.');
+  res.redirect('/admin/media');
+});
+
+// Tải video (MP4/WebM) cho video nền. Kiểm tra "chữ ký" đầu file, không tin phần mở rộng hay loại file trình duyệt khai báo.
+const VIDEO_MAX_MB = 40;
+const uploadVideo = multer({ storage: multer.memoryStorage(), limits: { fileSize: VIDEO_MAX_MB * 1024 * 1024, files: 1 } });
+router.post('/upload-video', (req, res, next) => uploadVideo.single('file')(req, res, (err) => {
+  if (!err) return next();
+  return res.status(400).json({ ok: false, error: err.code === 'LIMIT_FILE_SIZE' ? `Video quá lớn (tối đa ${VIDEO_MAX_MB}MB). Hãy nén lại hoặc cắt ngắn.` : 'Không tải lên được video.' });
+}), csrf, (req, res) => {
+  const buf = req.file && req.file.buffer;
+  if (!buf || buf.length < 16) return res.status(400).json({ ok: false, error: 'Chưa chọn video.' });
+  const brand = buf.toString('latin1', 8, 12);
+  const isMp4 = buf.toString('latin1', 4, 8) === 'ftyp' && /^(isom|iso[2-9]|mp4[12]|avc1|M4V |M4VH|dash|MSNV|f4v |3gp[4-6]|3g2a|mmp4)$/.test(brand);
+  const isWebm = buf[0] === 0x1a && buf[1] === 0x45 && buf[2] === 0xdf && buf[3] === 0xa3;
+  if (!isMp4 && !isWebm) return res.status(400).json({ ok: false, error: 'Chỉ nhận video MP4 (H.264) hoặc WebM. Video từ iPhone (.mov) hãy xuất lại dạng MP4.' });
+  const name = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${isMp4 ? 'mp4' : 'webm'}`;
+  fs.writeFileSync(path.join(config.uploadDir, name), buf);
+  res.json({ ok: true, url: `/uploads/${name}` });
 });
 
 // ---------- Đánh giá của khách ----------

@@ -7,6 +7,9 @@ const config = require('./src/config');
 const { seed } = require('./src/seed');
 const helpers = require('./src/lib/helpers');
 const company = require('./src/data/company');
+const catalog = require('./src/lib/catalog');
+const media = require('./src/lib/media');
+const offer = require('./src/lib/offer');
 
 seed();
 
@@ -136,6 +139,13 @@ app.use((req, res, next) => {
   res.locals.siteUrl = config.siteUrl;
   res.locals.path = req.path;
   res.locals.leadServiceOptions = require('./src/data/services').leadServiceOptions;
+  // Bảng giá đang dùng (mặc định + phần đã sửa trong Dashboard), ảnh/video sửa được, và giá có ưu đãi
+  res.locals.services = catalog.getServices();
+  res.locals.media = (key) => media.mediaUrl(key, res.locals.settings);
+  res.locals.mediaPoster = (key) => media.mediaPoster(key, res.locals.settings);
+  res.locals.price = offer.makePricer(res.locals.settings);
+  res.locals.offerCfg = res.locals.price.cfg;
+  res.locals.offerUnlocked = offer.hasOfferCookie(req);
   next();
 });
 

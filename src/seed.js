@@ -17,6 +17,11 @@ const DEFAULT_SETTINGS = {
   hero_teaser: '/media/trip-teaser.mp4',
   popup_newsletter_enabled: '1',
   popup_newsletter_delay: '45',
+  // Ưu đãi: giá niêm yết = giá thật + 500.000đ; khách để lại SĐT/Gmail thì thấy giá thật (Dashboard → Ưu đãi)
+  offer_enabled: '1',
+  offer_vnd: '500000',
+  offer_usd: '20',
+  offer_groups: require('./lib/offer').DEFAULT_GROUPS.join(','),
 };
 
 const POSTS = [
@@ -139,11 +144,16 @@ const TOURS = [
     highlights: 'Thuyền thúng rừng dừa\nPhố cổ Hội An' },
   { slug: 'tour-hue-1-ngay', image: '/img/tours/hue.jpg', title: 'Tour Huế 1 ngày từ Đà Nẵng', destination: 'Huế', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Đại Nội Huế\nChùa Thiên Mụ\nLăng Khải Định' },
-  { slug: 'tour-vinwonders-nam-hoi-an', image: '/img/tours/hoi-an-dem.jpg', title: 'Tour VinWonders Nam Hội An 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
+  { slug: 'tour-vinwonders-nam-hoi-an', image: '/img/tours/vinwonders-nam-hoi-an.jpg', title: 'Tour VinWonders Nam Hội An 1 ngày', destination: 'Hội An', region: 'trong-ngay', duration: '1 ngày', departure: 'Đà Nẵng', price: null,
     highlights: 'Công viên chủ đề\nRiver Safari\nBiểu diễn thực cảnh' },
 ];
 
-function seed() {
+// [khoá đánh dấu đã thêm, file bài viết]
+const SEO_ARTICLES = [
+  ['seed_post_lam_ho_chieu_nhanh_v1', './data/articles/lam-ho-chieu-nhanh'],
+];
+
+function seedBase() {
   // Tài khoản admin
   const userCount = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
   if (userCount === 0) {
@@ -199,6 +209,41 @@ function seed() {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
     TOURS.forEach((t, i) => ins.run(t.slug, t.title, t.destination, t.region, t.duration, t.departure, t.price, t.image || null, t.highlights, t.featured || 0, i));
   }
+}
+
+// Bài viết SEO mới bổ sung theo từng đợt: thêm 1 lần (kể cả database đang chạy), không tạo lại nếu đã xoá trong Dashboard
+function seedArticles() {
+  // Ảnh mới do TRIP cung cấp (11/2026): cập nhật cho database đang chạy, 1 lần. Chỉ thay ảnh mặc định cũ,
+  // không đụng tới ảnh / nội dung mà quản trị viên đã tự sửa trong Dashboard.
+  if (!db.prepare("SELECT 1 FROM settings WHERE key = 'backfill_images_v2'").get()) {
+    db.prepare("UPDATE tours SET image = '/img/tours/vinwonders-nam-hoi-an.jpg' WHERE slug = 'tour-vinwonders-nam-hoi-an' AND image = '/img/tours/hoi-an-dem.jpg'").run();
+    db.prepare("INSERT INTO settings (key, value) VALUES ('backfill_images_v2', datetime('now'))").run();
+  }
+  // Bài "Làm hộ chiếu nhanh" đã đăng từ bản trước: cập nhật lên nội dung mới nhất nếu quản trị viên chưa từng sửa
+  // (updated_at = created_at). Bài đã sửa trong Dashboard thì giữ nguyên.
+  if (!db.prepare("SELECT 1 FROM settings WHERE key = 'article_lam_ho_chieu_v3'").get()) {
+    const a = require('./data/articles/lam-ho-chieu-nhanh');
+    db.prepare(`UPDATE posts SET cover = ?, cover_alt = ?, content = ?, faq = ?, excerpt = ?, seo_title = ?, meta_desc = ?
+      WHERE slug = ? AND updated_at = created_at`).run(a.cover, a.cover_alt, a.content, a.faq, a.excerpt, a.seo_title, a.meta_desc, a.slug);
+    db.prepare("INSERT INTO settings (key, value) VALUES ('article_lam_ho_chieu_v3', datetime('now'))").run();
+  }
+
+  for (const [flag, file] of SEO_ARTICLES) {
+    if (db.prepare('SELECT 1 FROM settings WHERE key = ?').get(flag)) continue;
+    const a = require(file);
+    if (!db.prepare('SELECT 1 FROM posts WHERE slug = ?').get(a.slug)) {
+      db.prepare(`INSERT INTO posts (slug, title, excerpt, content, cover, category, status, published_at,
+        seo_title, meta_desc, focus_kw, cover_alt, author, faq, layout, theme, toc, noindex)
+        VALUES (?, ?, ?, ?, ?, ?, 'published', datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, 1, 0)`)
+        .run(a.slug, a.title, a.excerpt, a.content, a.cover, a.category, a.seo_title, a.meta_desc, a.focus_kw, a.cover_alt, a.author, a.faq, a.layout, a.theme);
+    }
+    db.prepare("INSERT INTO settings (key, value) VALUES (?, datetime('now'))").run(flag);
+  }
+}
+
+function seed() {
+  seedBase();
+  seedArticles();
 }
 
 module.exports = { seed, DEFAULT_SETTINGS };

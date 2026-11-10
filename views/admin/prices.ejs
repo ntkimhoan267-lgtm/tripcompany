@@ -1,0 +1,84 @@
+<%- include('_head') %>
+<%
+  const fmtCell = function (f, v) {
+    if (v == null) return '';
+    if (f.type === 'vnd') return Number(v).toLocaleString('vi-VN').replace(/,/g, '.');
+    return String(v);
+  };
+  const cell = function (f, v) {
+    const val = fmtCell(f, v);
+    if (f.type === 'readonly') return '<span class="ro">' + h.escAttr(val) + '</span>';
+    if (f.type === 'select') return '<select data-f="' + f.k + '">' + Object.entries(f.options).map(function ([k, l]) { return '<option value="' + k + '"' + (k === v ? ' selected' : '') + '>' + h.escAttr(l) + '</option>'; }).join('') + '</select>';
+    if (f.type === 'image') return '<div class="img-cell" data-upload-box>' + (v ? '<img src="' + h.escAttr(v) + '" alt="">' : '') + '<input type="text" data-f="' + f.k + '" value="' + h.escAttr(val) + '" placeholder="/uploads/…">'
+      + '<label class="btn btn--sm btn--ghost">Tải ảnh<input type="file" accept="image/*" data-upload-to="@cell" hidden></label><span class="upload-status small muted"></span></div>';
+    const num = f.type === 'vnd' || f.type === 'num';
+    return '<input type="text" data-f="' + f.k + '" value="' + h.escAttr(val) + '"' + (num ? ' inputmode="decimal" class="num" placeholder="Liên hệ"' : '') + (f.type === 'code' ? ' maxlength="2" class="code"' : '') + (f.max ? ' maxlength="' + f.max + '"' : '') + (f.required ? ' data-required' : '') + '>';
+  };
+%>
+<div class="topline"><h1>Bảng giá & ưu đãi</h1><a class="btn btn--ghost" href="/bang-gia" target="_blank">Xem trang Bảng giá</a></div>
+
+<form class="card form" method="post" action="/admin/offer" id="offer">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <h2>🎁 Ưu đãi "giảm giá khi để lại SĐT hoặc Gmail"</h2>
+  <p class="hint" style="margin-top:0">Khi bật: giá <strong>niêm yết</strong> trên website = giá trong bảng bên dưới <strong>+ số tiền ưu đãi</strong>. Khách để lại số điện thoại hoặc Gmail (form tư vấn, form nhận tin hoặc nút 🎁) thì giá niêm yết bị gạch và hiện đúng giá trong bảng. Khách để lại SĐT được ghi vào <a href="/admin/leads">Khách tư vấn</a> với ghi chú <em>[Ưu đãi]</em>; khách để lại Gmail vào <a href="/admin/subscribers">Đăng ký nhận tin</a> với trạng thái <em>Chỉ nhận ưu đãi</em> (không gửi bản tin, trừ khi khách tick ô nhận bản tin).</p>
+  <label class="check"><input type="checkbox" name="offer_enabled" value="1"<%= offer.enabled || s.offer_enabled === '1' ? ' checked' : '' %>> Bật ưu đãi</label>
+  <div class="form-row">
+    <div><label for="offer_vnd">Số tiền giảm cho giá VNĐ</label><input type="text" inputmode="numeric" id="offer_vnd" name="offer_vnd" value="<%= Number(offer.vnd).toLocaleString('vi-VN').replace(/,/g, '.') %>"><p class="hint">Mặc định 500.000đ.</p></div>
+    <div><label for="offer_usd">Số tiền giảm cho giá USD</label><input type="text" inputmode="numeric" id="offer_usd" name="offer_usd" value="<%= offer.usd %>"><p class="hint">Áp dụng cho visa tính bằng USD (Hàn, Châu Âu, Mỹ…). Mặc định 20 USD ≈ 500.000đ.</p></div>
+  </div>
+  <div>
+    <label>Áp dụng cho</label>
+    <div class="check-grid">
+      <% Object.entries(OFFER_GROUPS).forEach(function ([k, l]) { %><label class="check"><input type="checkbox" name="groups" value="<%= k %>"<%= offer.groups.has(k) ? ' checked' : '' %>> <%= l %></label><% }) %>
+    </div>
+    <p class="hint">Gợi ý: không nên bật cho dịch thuật / phụ phí / xe đưa đón ngắn: giảm 500.000đ trên giá 40.000đ/trang hay 120.000đ/chuyến làm khách thấy thiếu tin cậy.</p>
+  </div>
+  <div class="actions"><button class="btn">Lưu ưu đãi</button></div>
+</form>
+
+<form class="form mt-3" method="post" action="/admin/prices" id="price-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <input type="hidden" name="payload" value="">
+  <div class="card">
+    <h2>Giá dịch vụ</h2>
+    <p class="hint" style="margin-top:0">Nhập <strong>giá thật</strong> (chưa cộng ưu đãi). Ô giá để trống = hiện "Liên hệ". Giá VNĐ gõ <code>2800000</code>, <code>2.800.000</code>, <code>2,8tr</code> hoặc <code>500k</code> đều được. Chỉ bảng nào khác giá mặc định mới hiện nhãn "Đã sửa". Tour sửa giá và ảnh ở mục <a href="/admin/tours">Tour</a>; ảnh/video các trang ở mục <a href="/admin/media">Ảnh & video</a>.</p>
+    <nav class="tabs-nav"><% Object.entries(data.groups).forEach(function ([g, l]) { %><a href="#<%= g %>"><%= l %></a><% }) %></nav>
+  </div>
+
+  <% Object.entries(data.groups).forEach(function ([g, gl]) { %>
+    <h2 class="group-title" id="<%= g %>"><%= gl %></h2>
+    <% data.tables.filter(function (t) { return t.group === g; }).forEach(function (t) { %>
+      <div class="card">
+        <h3><%= t.title %> <% if (t.edited) { %><span class="badge badge--contacting">Đã sửa</span><% } else { %><span class="badge">Giá mặc định</span><% } %></h3>
+        <div class="table-wrap"><table class="edit-table" data-table="<%= t.id %>">
+          <thead><tr><% t.fields.forEach(function (f) { %><th><%= f.label %></th><% }) %><th></th></tr></thead>
+          <tbody>
+            <% t.rows.forEach(function (r) { %>
+              <tr><% t.fields.forEach(function (f) { %><td><%- cell(f, r[f.k]) %></td><% }) %>
+                <td class="nowrap"><% if (!t.fixed) { %><button type="button" class="btn btn--sm btn--ghost" data-up-row title="Đưa lên">↑</button> <button type="button" class="btn btn--sm btn--danger" data-del-row title="Xoá dòng">✕</button><% } %></td></tr>
+            <% }) %>
+            <% if (!t.fixed) { %>
+              <tr data-template hidden><% t.fields.forEach(function (f) { %><td><%- cell(f, f.type === 'select' ? Object.keys(f.options)[0] : null) %></td><% }) %>
+                <td class="nowrap"><button type="button" class="btn btn--sm btn--ghost" data-up-row title="Đưa lên">↑</button> <button type="button" class="btn btn--sm btn--danger" data-del-row title="Xoá dòng">✕</button></td></tr>
+            <% } %>
+          </tbody>
+        </table></div>
+        <div class="actions mt-2">
+          <% if (!t.fixed) { %><button type="button" class="btn btn--sm btn--ghost" data-add-row="<%= t.id %>">+ Thêm dòng</button><% } %>
+          <% if (t.edited) { %><label class="check small"><input type="checkbox" name="reset" value="<%= t.id %>"> Khôi phục giá mặc định của bảng này</label><% } %>
+        </div>
+      </div>
+    <% }) %>
+    <% data.texts.filter(function (x) { return x.group === g; }).forEach(function (x) { %>
+      <div class="card">
+        <label for="text-<%= x.id %>"><%= x.label %> <% if (x.edited) { %><span class="badge badge--contacting">Đã sửa</span><% } %></label>
+        <% if (x.lines) { %><textarea id="text-<%= x.id %>" data-text="<%= x.id %>" style="min-height:90px"><%= x.value %></textarea>
+        <% } else { %><input type="text" id="text-<%= x.id %>" data-text="<%= x.id %>" value="<%= x.value %>" maxlength="2000"><% } %>
+        <% if (x.edited) { %><label class="check small mt-2"><input type="checkbox" name="reset" value="<%= x.id %>"> Khôi phục mặc định</label><% } %>
+      </div>
+    <% }) %>
+  <% }) %>
+
+  <div class="sticky-save"><button class="btn">Lưu bảng giá</button><span class="hint">Lưu tất cả bảng trên trang này cùng lúc.</span></div>
+</form>
+<%- include('_foot') %>

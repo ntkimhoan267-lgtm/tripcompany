@@ -1,0 +1,17 @@
+<%
+  // Bảng làm hộ chiếu nhanh 1–7 ngày (giá trống = "Liên hệ tư vấn")
+  const px = services.passport.express || [];
+%>
+<% if (px.length) { %>
+<div class="express">
+  <% px.forEach(function (r, i) { %>
+    <article class="express__item<%= i === 0 ? ' express__item--hot' : '' %>">
+      <span class="express__days"><%- icon('zap') %><%= r.label %></span>
+      <% if (r.time) { %><small class="express__time"><%= r.time %></small><% } %>
+      <strong class="express__price"><% if (r.price != null) { %><%- price(r.price, 'vnd', 'passport', { service: 'Hộ chiếu' }) %><% } else { %>Liên hệ tư vấn<% } %></strong>
+      <button class="btn btn--sm <%= i === 0 ? 'btn--accent' : 'btn--ghost' %>" type="button" data-open-lead data-service="Hộ chiếu" data-note="Cần làm hộ chiếu nhanh (<%= r.label.toLowerCase() %>). Ngày bay dự kiến: ">Tư vấn ngay</button>
+    </article>
+  <% }) %>
+</div>
+<% if (services.passport.expressNote) { %><p class="ppanel__note"><%- icon('info') %><%= services.passport.expressNote %></p><% } %>
+<% } %>

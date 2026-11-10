@@ -1119,7 +1119,7 @@ html[data-preview] body::before { content: 'Bản xem trước giao diện · Fo
 .speed--std .speed__row small { color: #b9cde0; }
 
 /* Xe đưa đón */
-.routes { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+.routes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
 .route { background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; transition: .2s; }
 .route:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
 .route__img { position: relative; aspect-ratio: 16 / 9; background: var(--sky-50); }
@@ -1128,10 +1128,10 @@ html[data-preview] body::before { content: 'Bản xem trước giao diện · Fo
 .route__body { padding: 14px 16px 16px; }
 .route__body h3 { font-size: 1.02rem; margin: 0 0 2px; }
 .route__body p { font-size: .8rem; color: var(--muted); margin: 0 0 12px; }
-.route__prices { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.route__prices li { background: var(--sky-50); border-radius: 10px; padding: 7px 4px; text-align: center; }
+.route__prices { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.route__prices li { background: var(--sky-50); border-radius: 10px; padding: 7px 2px; text-align: center; min-width: 0; }
 .route__prices small { display: block; font-size: .7rem; color: var(--muted); }
-.route__prices b { font-size: .8rem; color: var(--navy); white-space: nowrap; }
+.route__prices b { font-size: .78rem; color: var(--navy); white-space: nowrap; }
 
 /* Trang Bảng giá: tab theo nhóm */
 .section--pricing { background: var(--bg-soft); }
@@ -1359,6 +1359,7 @@ p, li { text-wrap: pretty; }
 
 /* <picture> chứa ảnh WebP nhiều cỡ: không tạo hộp riêng để mọi CSS viết cho img (width/height 100%, object-fit) vẫn áp dụng */
 picture.pic { display: contents; }
+picture.pic > source { display: none; }
 /* Thumbnail video là ảnh chân dung: hạ nút play xuống vùng cổ áo để không che khuôn mặt */
 .porthole__glass .porthole__play .porthole__btn { top: 64%; }
 .porthole__thumb { object-position: center top; }
@@ -1378,3 +1379,113 @@ picture.pic { display: contents; }
   .porthole__glass .porthole__play .porthole__btn { top: 68%; width: 64px; height: 64px; }
   .porthole__label small { letter-spacing: .06em; font-size: .66rem; white-space: nowrap; }
 }
+
+/* ============ Ưu đãi "giảm giá khi để lại SĐT / Gmail" ============
+   Mặc định (chưa nhận ưu đãi): hiện giá niêm yết + nút 🎁. Khi <html class="offer-on">: gạch giá niêm yết, hiện giá ưu đãi.
+   Bộ chọn viết dạng ".op.op" / ".op > …" để thắng các luật "<khung> span" (.ccard__list span, .plan__list span,
+   .fees span, .other-visas span…): nếu không, giá ưu đãi lộ ra khi chưa nhận và chữ giá bị thu nhỏ, đổi màu. */
+.op.op { display: inline-flex; flex: none; flex-wrap: wrap; align-items: baseline; justify-content: inherit; gap: .1em .45em; white-space: normal; font-size: inherit; font-weight: inherit; color: inherit; line-height: inherit; margin: 0; }
+.op > .op__list, .op > .op__deal { flex: none; font-size: inherit; font-weight: inherit; color: inherit; line-height: inherit; margin: 0; }
+.op > .op__list { display: inline; }
+.op > .op__deal { display: none; }
+.op > .op__btn, .op > .op__tag { flex: none; display: inline-block; font-family: var(--font); font-size: .72rem; font-weight: 700; line-height: 1; letter-spacing: 0; margin: 0; padding: 5px 8px; border-radius: 999px; border: 0; background: #fff1eb; color: var(--accent-600); white-space: nowrap; align-self: center; }
+.op > .op__btn { cursor: pointer; transition: .15s; }
+.op > .op__btn:hover, .op > .op__btn:focus-visible { background: var(--accent); color: #fff; }
+/* Giá niêm yết bị gạch: nhỏ hơn giá ưu đãi nhưng không dưới ~12px (vẫn đọc được trong ô giá nhỏ) */
+.offer-on .op > .op__list { text-decoration: line-through; text-decoration-thickness: 1.5px; opacity: .6; font-size: max(.68em, .75rem); font-weight: 500; }
+.offer-on .op > .op__deal { display: inline; }
+.offer-on .op > .op__btn, .offer-on .op > .op__tag { display: none; }
+.op__unit { font-size: .75em; font-weight: 500; }
+.ccard__price { white-space: normal; text-align: right; }
+.ccard__price .op { justify-content: flex-end; }
+/* Ô giá nhỏ (xe, phụ phí): không chen nút, dải ưu đãi phía trên đã giải thích */
+.route__prices .op > .op__btn, .fees .op > .op__btn, .speed__row .op > .op__btn, .plan__list .op > .op__btn { display: none; }
+.plan__from .op { position: relative; z-index: 1; }
+.route__prices .op { justify-content: center; }
+.offer-unlocked { display: none !important; }
+.offer-on .offer-unlocked { display: block !important; }
+.offer-on .offer-locked { display: none !important; }
+.offer-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; margin: 0 0 22px; border-radius: 16px; background: linear-gradient(120deg, #fff4ec, #fff); border: 1.5px dashed #f3b392; }
+.offer-bar__icon { font-size: 1.6rem; line-height: 1; }
+.offer-bar__text { margin: 0; flex: 1 1 260px; color: var(--ink); font-size: .95rem; }
+.offer-on .offer-bar { background: linear-gradient(120deg, #e9f8f0, #fff); border-color: #9fd9bb; }
+.offer-pill { display: inline-block; background: #fff1eb; color: var(--accent-600); font-weight: 700; font-size: .85rem; padding: 6px 12px; border-radius: 999px; margin-bottom: 10px; }
+.modal--offer .modal__dialog { max-width: 460px; }
+
+/* ============ Hộ chiếu làm nhanh 1–7 ngày ============ */
+.express { display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 12px; }
+.express__item { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 16px; }
+.express__item--hot { border-color: #f3b392; background: linear-gradient(160deg, #fff4ec, #fff); }
+.express__days { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--navy); }
+.express__days .icon { width: 16px; height: 16px; color: var(--accent); }
+.express__time { color: var(--muted); font-size: .8rem; }
+.express__price { font-family: var(--serif); color: var(--accent); font-size: 1.15rem; margin-bottom: 4px; }
+.feature-trio__item--photo { padding: 0 0 18px; overflow: hidden; }
+.feature-trio__item--photo > *:not(.feature-trio__img) { padding: 0 18px; }
+.feature-trio__img { margin-bottom: 14px; }
+.feature-trio__img img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
+.photo-link.mt-3 { margin-top: 18px; }
+
+/* ============ Bài viết: mục lục, tác giả, FAQ, nhiều bố cục ============ */
+.post-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; color: var(--muted); font-size: .9rem; margin: 0 0 22px; }
+.post-meta span { display: inline-flex; gap: 6px; align-items: center; }
+.post-meta .icon { width: 16px; height: 16px; }
+.toc { background: var(--sky-50); border: 1px solid var(--sky-100); border-radius: 16px; padding: 4px 20px; margin: 0 0 28px; }
+.toc > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; font-weight: 700; color: var(--navy); font-size: 1.05rem; }
+.toc > summary::-webkit-details-marker { display: none; }
+.toc__toggle { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--sky-100); background: #fff; display: grid; place-items: center; color: var(--navy); flex: none; }
+.toc__toggle .icon { width: 18px; height: 18px; transition: transform .2s; }
+.toc[open] .toc__toggle .icon { transform: rotate(180deg); }
+.toc ol { list-style: none; margin: 0; padding: 0 0 14px; counter-reset: none; }
+.toc li { margin: 0; }
+.toc a { display: flex; gap: 8px; padding: 5px 0; color: var(--sky-700); font-size: .95rem; line-height: 1.45; text-decoration: none; }
+.toc a:hover { color: var(--accent-600); text-decoration: underline; }
+.toc .toc__num { color: var(--muted); min-width: 1.6em; font-variant-numeric: tabular-nums; }
+.toc .toc--l3 a { padding-left: 1.6em; font-size: .9rem; }
+.prose :is(h2, h3)[id], .faq h2[id] { scroll-margin-top: calc(var(--header-h) + 20px); }
+.faq { margin-top: 36px; }
+.faq details { border: 1px solid var(--line); border-radius: 14px; padding: 0 18px; margin-bottom: 10px; background: #fff; }
+.faq summary { cursor: pointer; padding: 14px 0; font-weight: 600; color: var(--navy); }
+.faq details[open] summary { border-bottom: 1px dashed var(--line); }
+.faq details > div { padding: 12px 0 16px; color: var(--ink); }
+.faq details > div p:last-child { margin-bottom: 0; }
+
+/* Màu nhấn của bài (Dashboard → Bài viết → Màu nhấn) */
+.post--accent { --sky-50: #fff4ec; --sky-100: #f8d8c5; --sky-700: #a8441a; --sky: #e0602f; }
+.post--navy { --sky-50: #eef2f6; --sky-100: #d3dde8; --sky-700: #1f3a52; --sky: #1f3a52; }
+
+/* Bố cục "Hướng dẫn": mục lục dính bên trái */
+.post-guide { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 40px; align-items: start; }
+.post-guide__toc { position: sticky; top: calc(var(--header-h) + 20px); max-height: calc(100vh - var(--header-h) - 40px); display: flex; flex-direction: column; gap: 16px; }
+.post-guide__toc .toc { margin: 0; overflow: auto; flex: 0 1 auto; min-height: 120px; }
+.post-guide__toc .card { flex: none; margin-top: 0; padding: 20px; }
+/* Máy tính: mục lục ở cột trái (ẩn bản trong bài). Điện thoại: ẩn cột trái, dùng mục lục trong bài (sau ảnh bìa và đoạn mở đầu) */
+.post-guide > article > .toc { display: none; }
+@media (max-width: 980px) {
+  .post-guide { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .post-guide__toc { display: none; }
+  .post-guide > article > .toc { display: block; }
+}
+
+/* Bố cục "Tạp chí": ảnh bìa lớn, chữ trên ảnh, cột đọc hẹp */
+.post-cover { position: relative; min-height: clamp(360px, 58vh, 620px); display: flex; align-items: flex-end; color: #fff; background: var(--navy); overflow: hidden; }
+.post-cover__img, .post-cover__img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.post-cover::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17,34,51,.15) 0%, rgba(17,34,51,.85) 85%); }
+.post-cover .container { position: relative; z-index: 1; padding-top: 80px; padding-bottom: 48px; }
+.post-cover h1 { color: #fff; font-size: clamp(2rem, 4.4vw, 3.4rem); max-width: 900px; margin: 10px 0 12px; }
+.post-cover .breadcrumb a, .post-cover .breadcrumb li { color: rgba(255,255,255,.85); }
+.post-cover .post-meta { color: rgba(255,255,255,.85); margin: 0; }
+.post-narrow { max-width: 780px; margin: 0 auto; }
+
+/* Bố cục "Tối giản": tiêu đề chữ đơn giản, không video nền */
+.post-plain { padding: clamp(36px, 6vw, 64px) 0 10px; background: linear-gradient(180deg, var(--sky-50), #fff); }
+.post-plain .breadcrumb, .post-plain .breadcrumb a { color: var(--muted); }
+.post-plain h1 { font-size: clamp(1.9rem, 3.8vw, 3rem); margin: 10px 0 14px; }
+.post-cta { margin-top: 32px; }
+.prose table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: .95rem; display: block; overflow-x: auto; }
+.prose th, .prose td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+.prose th { background: var(--sky-50); color: var(--navy); font-weight: 700; }
+.prose tr:nth-child(even) td { background: #fbfdff; }
+.check-line { display: flex; gap: 8px; align-items: flex-start; font-size: .88rem; color: var(--muted); font-weight: 400; cursor: pointer; }
+.check-line input { margin-top: 3px; accent-color: var(--accent); }
+.h3-like { font-family: var(--font); font-weight: 700; font-size: 1.2rem; line-height: 1.3; color: var(--navy); margin: 0 0 6px; }

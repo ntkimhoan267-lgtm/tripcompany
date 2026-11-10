@@ -8,8 +8,8 @@
   if (page.id === 'nuoc-khac') rows = services.worldVisa.filter(v => !['kr', 'jp'].includes(v.code) && v.region !== 'chau-au');
   const multiCountry = ['chau-au', 'nuoc-khac'].includes(page.id);
   let items = [];
-  if (page.id === 'trung-quoc') items = services.chinaVisa.rows.map((r, i) => ({ title: r.type, tag: r.detail, time: r.time, price: h.vnd(r.price), popular: i === 0 }));
-  else if (!multiCountry && !isEvisa) items = rows.map((v, i) => ({ title: v.type, time: v.time, price: v.vnd ? h.vnd(v.vnd) : h.usd(v.usd), note: v.note, popular: i === 0 }));
+  if (page.id === 'trung-quoc') items = services.chinaVisa.rows.map((r, i) => ({ title: r.type, tag: r.detail, time: r.time, priceHtml: price(r.price, 'vnd', 'cn', { service: page.leadService }), popular: i === 0 }));
+  else if (!multiCountry && !isEvisa) items = rows.map((v, i) => ({ title: v.type, time: v.time, priceHtml: v.vnd != null ? price(v.vnd, 'vnd', 'world', { service: page.leadService }) : price(v.usd, 'usd', 'world', { service: page.leadService }), note: v.note, popular: i === 0 }));
   const STAMPS = {
     cn: { top: 'VISA · CHINA · TRUNG QUỐC · ', mid: '中国', cls: 'stamp--cn' },
     kr: { top: 'VISA · KOREA · HÀN QUỐC · ', mid: '한국', cls: 'stamp--kr' },
@@ -17,7 +17,7 @@
     eu: { top: 'SCHENGEN · EUROPE · ', mid: 'EU', cls: 'stamp--eu' },
   };
   const st = STAMPS[page.art] || { top: isEvisa ? 'E-VISA · VIETNAM · WELCOME · ' : 'VISA · WORLD · TRIP · ', mid: isEvisa ? 'VN' : '✦', cls: 'stamp--kr' };
-  const visual = page.art ? '/img/visa/' + page.art + '.jpg' : isEvisa ? '/img/visa/e-visa-viet-nam.jpg' : '/img/visa/nuoc-khac.jpg';
+  const visual = media('visa_' + (page.art || page.id));
 %>
 <%- include('../partials/page-hero', {
   crumbs: [{ label: 'Visa', href: '/visa' }, { label: page.short || page.country }],
@@ -30,7 +30,7 @@
   stamp: Object.assign({ sub: 'APPROVED' }, st, { cls: 'stamp--hero ' + st.cls }),
   badge: { value: company.stats[2].value + '%', label: 'Tỉ lệ đậu visa' },
   facts: [
-    { icon: 'wallet', label: 'Trọn gói từ', value: h.money(page.from) },
+    { icon: 'wallet', label: 'Trọn gói từ', html: price.from(page.from, page.offerGroup, { service: page.leadService }) },
     { icon: 'clock', label: 'Xét duyệt', value: page.time },
   ],
 }) %>
@@ -43,6 +43,13 @@
           <span class="eyebrow">Bảng giá</span>
           <h2>Chọn loại <em><%= isEvisa ? 'E-visa' : 'visa' %></em> phù hợp</h2>
         </div>
+        <%
+          const ownGroup = isEvisa ? 'evisa' : page.id === 'trung-quoc' ? 'cn' : 'world';
+          const hasVnd = page.id === 'trung-quoc' || rows.some(function (v) { return v.vnd != null; });
+          const hasUsd = isEvisa || rows.some(function (v) { return v.vnd == null && v.usd != null; });
+          const ownBar = offerCfg.enabled && offerCfg.groups.has(ownGroup);
+        %>
+        <%- include('../partials/offer-bar', { service: page.leadService, groups: [ownGroup], cur: hasVnd && hasUsd ? '' : hasVnd ? 'vnd' : 'usd' }) %>
         <% if (isEvisa) { %>
           <%- include('../partials/price/evisa') %>
           <h3 class="ppanel__sub">Hỗ trợ tại sân bay (Fast Track)</h3>
@@ -92,9 +99,10 @@
 
       <div>
         <div class="block-head"><span class="eyebrow">Khám phá thêm</span><h2>Visa <em>nước khác</em></h2></div>
+        <% if (!ownBar) { %><%- include('../partials/offer-bar', { groups: ['markets', 'world', 'evisa'] }) %><% } %>
         <div class="other-visas">
           <% others.forEach(function (o) { %>
-            <a href="/visa/<%= o.id %>"><img src="<%= flag(o.code) %>" alt="" width="32" height="32"><span><strong><%= o.short || 'Visa ' + o.country %></strong>Từ <%= h.money(o.from) %></span><%- icon('arrow') %></a>
+            <a href="/visa/<%= o.id %>"><img src="<%= flag(o.code) %>" alt="" width="32" height="32"><span><strong><%= o.short || 'Visa ' + o.country %></strong><% if (price.fromText(o.from, o.offerGroup)) { %>Từ <%- price.from(o.from, o.offerGroup, { inLink: true }) %><% } else { %>Liên hệ báo giá<% } %></span><%- icon('arrow') %></a>
           <% }) %>
         </div>
       </div>

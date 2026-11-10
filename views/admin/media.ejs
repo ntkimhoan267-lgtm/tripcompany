@@ -1,0 +1,54 @@
+<%- include('_head') %>
+<div class="topline"><h1>Ảnh & video trên website</h1></div>
+<div class="card">
+  <p style="margin-top:0">Đổi ảnh và video nền của từng dịch vụ, trang visa và trang chủ. Với mỗi ô: bấm <strong>Tải lên</strong> để chọn file từ máy, hoặc dán đường dẫn (link https tới file ảnh/video). Để trống = dùng ảnh/video mặc định. Xong bấm <strong>Lưu</strong> ở cuối trang.</p>
+  <ul class="hint" style="margin:0;padding-left:18px">
+    <li>Ảnh: JPG/PNG/WEBP tối đa 8MB, tự nén sang WebP. Ảnh ngang 3:2 hoặc 16:9 đẹp nhất.</li>
+    <li>Video nền: MP4 tối đa 40MB, không tiếng, 10–20 giây. Nên nén còn dưới 8MB để trang tải nhanh. <strong>Ảnh chờ</strong> là ảnh hiện trong lúc video chưa tải và trên điện thoại.</li>
+    <li>Ảnh từng tuyến xe đưa đón và xe tự lái: sửa ở <a href="/admin/prices#cars">Bảng giá → Xe</a>. Ảnh tour: sửa ở <a href="/admin/tours">Tour</a>.</li>
+  </ul>
+  <nav class="tabs-nav mt-2"><% Object.entries(GROUPS).forEach(function ([g, l]) { %><a href="#m-<%= g %>"><%= l %></a><% }) %></nav>
+</div>
+
+<form method="post" action="/admin/media" class="form mt-3">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <% Object.entries(GROUPS).forEach(function ([g, gl]) { %>
+    <h2 class="group-title" id="m-<%= g %>"><%= gl %></h2>
+    <div class="media-grid">
+      <% SLOTS.filter(function (x) { return x.group === g; }).forEach(function (slot) {
+        const id = 'media_' + slot.key; const cur = s[id] || '';
+        const pid = id + '__poster'; const pcur = s[pid] || ''; %>
+        <div class="card media-card">
+          <h3><%= slot.label %> <% if (cur) { %><span class="badge badge--contacting">Đã đổi</span><% } %></h3>
+          <div class="media-card__preview" data-preview-for="<%= id %>" data-kind="<%= slot.type %>" data-default="<%= slot.def %>">
+            <% const show = cur || slot.def; %>
+            <% if (!show) { %>Đang dùng video nền chung<% } else if (slot.type === 'video') { %><video src="<%= show %>" muted loop playsinline preload="metadata"<% if (pcur || slot.poster) { %> poster="<%= pcur || slot.poster %>"<% } %>></video><% } else { %><img src="<%= show %>" alt=""><% } %>
+          </div>
+          <div data-upload-box>
+            <label for="<%= id %>"><%= slot.type === 'video' ? 'Video (MP4)' : 'Ảnh' %></label>
+            <div class="media-card__row">
+              <input type="text" id="<%= id %>" name="<%= id %>" value="<%= cur %>" placeholder="<%= slot.def || 'Để trống = video nền chung' %>">
+              <label class="btn btn--sm btn--ghost">Tải lên<input type="file" accept="<%= slot.type === 'video' ? 'video/mp4,video/webm' : 'image/*' %>" data-upload-to="<%= id %>" data-kind="<%= slot.type %>" hidden></label>
+              <% if (cur) { %><button type="button" class="btn btn--sm btn--ghost" data-clear="<%= id %>" title="Dùng lại mặc định">Mặc định</button><% } %>
+            </div>
+            <span class="upload-status small muted"></span>
+          </div>
+          <% if (slot.type === 'video') { %>
+            <div data-upload-box>
+              <label for="<%= pid %>">Ảnh chờ (poster)</label>
+              <div class="media-card__row">
+                <input type="text" id="<%= pid %>" name="<%= pid %>" value="<%= pcur %>" placeholder="<%= slot.poster || 'Ảnh hiện khi video chưa chạy' %>">
+                <label class="btn btn--sm btn--ghost">Tải ảnh<input type="file" accept="image/*" data-upload-to="<%= pid %>" hidden></label>
+                <% if (pcur) { %><button type="button" class="btn btn--sm btn--ghost" data-clear="<%= pid %>" title="Dùng lại ảnh chờ mặc định">Mặc định</button><% } %>
+              </div>
+              <span class="upload-status small muted"></span>
+            </div>
+          <% } %>
+          <% if (slot.hint) { %><p class="hint"><%= slot.hint %></p><% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% }) %>
+  <div class="sticky-save"><button class="btn">Lưu ảnh & video</button></div>
+</form>
+<%- include('_foot') %>

@@ -147,7 +147,7 @@
   <div class="modal__dialog">
     <button class="modal__close" data-close aria-label="Đóng"><%- icon('x') %></button>
     <div class="modal__head">
-      <span class="offer-pill">🎁 <%= offerCfg.label %></span>
+      <span class="offer-pill" data-offer-pill data-default="🎁 <%= offerCfg.labels.both %>">🎁 <%= offerCfg.labels.both %></span>
       <h3 id="offer-modal-title">Nhận giá ưu đãi ngay</h3>
       <p>Để lại <strong>số điện thoại</strong> hoặc <strong>Gmail</strong>, website hiện ngay giá đã giảm cho mọi dịch vụ có biểu tượng 🎁. Tư vấn viên TRIP áp dụng ưu đãi khi báo giá cho bạn.</p>
     </div>
@@ -155,7 +155,7 @@
       <form class="js-offer-form form-grid" action="/api/offer" method="post" novalidate>
         <div class="field">
           <label for="offer-contact">Số điện thoại hoặc Gmail <span class="req">*</span></label>
-          <input class="input" id="offer-contact" name="contact" autocomplete="tel" inputmode="email" placeholder="0935 191 394 hoặc ban@gmail.com" required maxlength="200">
+          <input class="input" id="offer-contact" name="contact" autocomplete="tel" inputmode="email" placeholder="SĐT hoặc Gmail của bạn" required maxlength="200">
           <span class="field__error" data-error="contact"></span>
         </div>
         <div class="field">

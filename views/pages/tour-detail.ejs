@@ -18,10 +18,10 @@
       <div class="grid grid--3">
         <div class="card"><div class="card__icon"><%- icon('clock') %></div><h3>Thời gian</h3><p><%= tour.duration || 'Liên hệ' %></p></div>
         <div class="card"><div class="card__icon"><%- icon('pin') %></div><h3>Khởi hành</h3><p><%= tour.departure || 'Đà Nẵng' %></p></div>
-        <div class="card"><div class="card__icon"><%- icon('wallet') %></div><h3><%= tour.price ? 'Giá từ' : 'Giá tour' %></h3><p><strong style="color:var(--accent-600);font-size:1.2rem"><%- tour.price ? price(tour.price, 'vnd', 'tours', { service: 'Tour du lịch' }) : 'Liên hệ báo giá' %></strong><%= tour.price ? ' /khách' : '' %></p></div>
+        <div class="card"><div class="card__icon"><%- icon('wallet') %></div><h3><%= tour.price ? 'Giá từ' : 'Giá tour' %></h3><p><strong style="color:var(--accent-600);font-size:1.2rem"><%- tour.price ? price(tour.price, 'vnd', 'tours', { service: 'Tour du lịch', suffix: ' /khách' }) : 'Liên hệ báo giá' %></strong></p></div>
       </div>
 
-      <% if (tour.price) { %><%- include('../partials/offer-bar', { service: 'Tour du lịch', groups: ['tours'] }) %><% } %>
+      <% if (tour.price || related.some(function (t) { return t.price; })) { %><%- include('../partials/offer-bar', { service: 'Tour du lịch', groups: ['tours'], cur: 'vnd' }) %><% } %>
       <% if (highlights.length) { %>
         <div>
           <h2>Điểm nổi bật</h2>

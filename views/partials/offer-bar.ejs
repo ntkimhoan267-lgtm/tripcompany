@@ -1,15 +1,19 @@
 <%
-  // Dải thông báo ưu đãi "giảm X khi để lại SĐT/Gmail". Tham số: service (dịch vụ gửi kèm khi khách nhận ưu đãi),
-  // groups (các nhóm giá có trên trang; không nhóm nào đang bật ưu đãi thì không hiện dải)
+  // Dải thông báo ưu đãi "giảm X khi để lại SĐT/Gmail". Tham số:
+  //   service: dịch vụ gửi kèm khi khách nhận ưu đãi
+  //   groups:  các nhóm giá có trên trang; không nhóm nào đang bật ưu đãi thì không hiện dải
+  //   cur:     'vnd' | 'usd' nếu mọi giá trên trang cùng một loại tiền; bỏ trống = trang có cả hai
   const osvc = typeof service !== 'undefined' ? service : '';
   const ogroups = typeof groups !== 'undefined' && groups ? groups : null;
+  const ocur = typeof cur !== 'undefined' && (cur === 'vnd' || cur === 'usd') ? cur : 'both';
+  const olabel = offerCfg.labels[ocur];
   const oshow = offerCfg.enabled && (!ogroups || ogroups.some(function (g) { return offerCfg.groups.has(g); }));
 %>
 <% if (oshow) { %>
 <div class="offer-bar" role="note">
   <span class="offer-bar__icon" aria-hidden="true">🎁</span>
-  <p class="offer-bar__text offer-locked"><strong><%= offerCfg.label %></strong> cho các dịch vụ có biểu tượng 🎁 khi bạn để lại <strong>số điện thoại</strong> hoặc <strong>Gmail</strong>. Giá đang hiện là giá niêm yết.</p>
-  <p class="offer-bar__text offer-unlocked"><strong>Bạn đã nhận ưu đãi!</strong> Giá bên dưới đã trừ <%= offerCfg.label.replace(/^Giảm /, '') %>. Tư vấn viên TRIP sẽ áp dụng khi báo giá cho bạn.</p>
-  <button class="btn btn--accent btn--sm offer-locked" type="button" data-open-offer<% if (osvc) { %> data-service="<%= osvc %>"<% } %>>Nhận giá ưu đãi</button>
+  <p class="offer-bar__text offer-locked"><strong><%= olabel %></strong> cho các dịch vụ có biểu tượng 🎁 khi bạn để lại <strong>số điện thoại</strong> hoặc <strong>Gmail</strong>. Giá đang hiện là giá niêm yết.</p>
+  <p class="offer-bar__text offer-unlocked"><strong>Bạn đã nhận ưu đãi!</strong> Giá bên dưới là giá đã giảm. Tư vấn viên TRIP sẽ áp dụng khi báo giá cho bạn.</p>
+  <button class="btn btn--accent btn--sm offer-locked" type="button" data-open-offer data-label="<%= olabel %>"<% if (osvc) { %> data-service="<%= osvc %>"<% } %>>Nhận giá ưu đãi</button>
 </div>
 <% } %>

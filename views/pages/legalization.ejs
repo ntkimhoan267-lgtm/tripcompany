@@ -23,7 +23,7 @@
 
       <div>
         <div class="block-head"><span class="eyebrow">Bảng giá</span><h2>Chứng nhận lãnh sự <em>Trung Quốc</em></h2></div>
-        <%- include('../partials/offer-bar', { service: 'Hợp pháp hoá lãnh sự', groups: ['legal'] }) %>
+        <%- include('../partials/offer-bar', { service: 'Hợp pháp hoá lãnh sự', groups: ['legal'], cur: 'vnd' }) %>
         <%- include('../partials/price/options', { items: tr.legalization.map(function (x) { return { title: x.name, tag: x.detail, priceHtml: price(x.price, 'vnd', 'legal', { service: 'Hợp pháp hoá lãnh sự' }), flag: 'cn' }; }), service: 'Hợp pháp hoá lãnh sự' }) %>
         <p class="ppanel__note"><%- icon('info') %>Hợp pháp hoá lãnh sự cho các nước khác: vui lòng liên hệ để được báo giá theo loại giấy tờ và quốc gia sử dụng.</p>
       </div>

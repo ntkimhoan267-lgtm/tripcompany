@@ -35,6 +35,12 @@ function offerConfig(settings) {
     usd: amountUsd,
     groups: new Set(groups),
     label: amountVnd ? `Giảm ${vnd(amountVnd)}` : `Giảm ${usd(amountUsd)}`,
+    // Nhãn theo tiền tệ của trang: trang giá USD ghi "Giảm $20", trang có cả hai ghi đủ cả hai
+    labels: {
+      vnd: amountVnd ? `Giảm ${vnd(amountVnd)}` : `Giảm ${usd(amountUsd)}`,
+      usd: amountUsd ? `Giảm ${usd(amountUsd)}` : `Giảm ${vnd(amountVnd)}`,
+      both: amountVnd && amountUsd ? `Giảm ${vnd(amountVnd)} (giá USD: giảm ${usd(amountUsd)})` : (amountVnd ? `Giảm ${vnd(amountVnd)}` : `Giảm ${usd(amountUsd)}`),
+    },
   };
 }
 
@@ -45,16 +51,17 @@ const shortVnd = (n) => (n >= 1000 && n % 1000 === 0 ? `${(n / 1000).toLocaleStr
 function makePricer(settings) {
   const cfg = offerConfig(settings);
   const price = (amount, cur = 'vnd', group = '', opts = {}) => {
-    const suffix = opts.suffix ? esc(opts.suffix) : '';
+    const suffix = opts.suffix ? `<span class="op__unit">${esc(opts.suffix)}</span>` : '';
     if (amount == null || amount === '' || Number.isNaN(Number(amount))) return esc(opts.empty || 'Liên hệ');
     const n = Number(amount);
     const fmt = cur === 'usd' ? usd : vnd;
     const off = cur === 'usd' ? cfg.usd : cfg.vnd;
     if (!cfg.enabled || !off || !cfg.groups.has(group) || n <= 0) return esc(fmt(n)) + suffix;
     const tag = cur === 'usd' ? usd(off) : shortVnd(off);
+    const lbl = cur === 'usd' ? cfg.labels.usd : cfg.labels.vnd;
     const badge = opts.inLink
-      ? `<span class="op__tag">−${esc(tag)}</span>`
-      : `<button type="button" class="op__btn" data-open-offer${opts.service ? ` data-service="${esc(opts.service)}"` : ''} title="${esc(cfg.label)} khi để lại SĐT hoặc Gmail">🎁 −${esc(tag)}</button>`;
+      ? `<span class="op__tag" title="${esc(lbl)} khi để lại SĐT hoặc Gmail">🎁 −${esc(tag)}</span>`
+      : `<button type="button" class="op__btn" data-open-offer data-label="${esc(lbl)}"${opts.service ? ` data-service="${esc(opts.service)}"` : ''} title="${esc(lbl)} khi để lại SĐT hoặc Gmail">🎁 −${esc(tag)}</button>`;
     return `<span class="op"><span class="op__list"><span class="sr-only">Giá niêm yết </span>${esc(fmt(n + off))}${suffix}</span>`
       + `<span class="op__deal"><span class="sr-only">, giá ưu đãi </span>${esc(fmt(n))}${suffix}</span>${badge}</span>`;
   };

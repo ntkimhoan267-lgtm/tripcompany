@@ -19,7 +19,7 @@
       </nav>
       <span class="muted">Tìm thấy <strong><%= tours.length %></strong> tour</span>
     </div>
-    <% if (tours.some(function (t) { return t.price; })) { %><%- include('../partials/offer-bar', { service: 'Tour du lịch', groups: ['tours'] }) %><% } %>
+    <% if (tours.some(function (t) { return t.price; })) { %><%- include('../partials/offer-bar', { service: 'Tour du lịch', groups: ['tours'], cur: 'vnd' }) %><% } %>
     <% if (tours.length) { %>
       <div class="grid grid--3"><% tours.forEach(function (t) { %><%- include('../partials/tour-card', { t }) %><% }) %></div>
     <% } else { %>

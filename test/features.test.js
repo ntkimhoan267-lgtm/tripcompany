@@ -432,3 +432,16 @@ test('mô tả Google và giá "từ" theo bảng giá hiện tại; đường d
   assert.match(await text('/visa/e-visa'), /<meta name="description" content="[^"]*Giá trọn gói từ \$40\./);
   assert.match(await text('/blog/lam-ho-chieu-nhanh-khi-sap-bay/'), /<link rel="canonical" href="https:\/\/tripdn\.com\/blog\/lam-ho-chieu-nhanh-khi-sap-bay">/);
 });
+
+test('ưu đãi: nhãn theo tiền tệ của trang; thẻ giá trong link có 🎁; trang chỉ có thẻ giá vẫn có dải giải thích', async () => {
+  const kr = await text('/visa/han-quoc');
+  assert.match(kr, /<strong>Giảm \$20<\/strong> cho các dịch vụ có biểu tượng/);
+  assert.match(kr, /data-label="Giảm \$20"/);
+  const cn = await text('/visa/trung-quoc');
+  assert.match(cn, /<strong>Giảm 500\.000đ<\/strong> cho các dịch vụ/);
+  assert.match(await text('/bang-gia'), /<strong>Giảm 500\.000đ \(giá USD: giảm \$20\)<\/strong>/);
+  const home = await text('/');
+  assert.match(home, /<span class="op__tag" title="[^"]*">🎁 −500k<\/span>/);
+  for (const u of ['/dich-vu', '/dich-vu/tour', '/visa/e-visa']) assert.match(await text(u), /class="offer-bar"/, u);
+  assert.match(await text('/tour/tour-bac-kinh-7n6d'), /<span class="op__unit"> \/khách<\/span>/);
+});

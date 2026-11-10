@@ -43,7 +43,13 @@
           <span class="eyebrow">Bảng giá</span>
           <h2>Chọn loại <em><%= isEvisa ? 'E-visa' : 'visa' %></em> phù hợp</h2>
         </div>
-        <%- include('../partials/offer-bar', { service: page.leadService, groups: [isEvisa ? 'evisa' : page.id === 'trung-quoc' ? 'cn' : 'world'] }) %>
+        <%
+          const ownGroup = isEvisa ? 'evisa' : page.id === 'trung-quoc' ? 'cn' : 'world';
+          const hasVnd = page.id === 'trung-quoc' || rows.some(function (v) { return v.vnd != null; });
+          const hasUsd = isEvisa || rows.some(function (v) { return v.vnd == null && v.usd != null; });
+          const ownBar = offerCfg.enabled && offerCfg.groups.has(ownGroup);
+        %>
+        <%- include('../partials/offer-bar', { service: page.leadService, groups: [ownGroup], cur: hasVnd && hasUsd ? '' : hasVnd ? 'vnd' : 'usd' }) %>
         <% if (isEvisa) { %>
           <%- include('../partials/price/evisa') %>
           <h3 class="ppanel__sub">Hỗ trợ tại sân bay (Fast Track)</h3>
@@ -93,6 +99,7 @@
 
       <div>
         <div class="block-head"><span class="eyebrow">Khám phá thêm</span><h2>Visa <em>nước khác</em></h2></div>
+        <% if (!ownBar) { %><%- include('../partials/offer-bar', { groups: ['markets', 'world', 'evisa'] }) %><% } %>
         <div class="other-visas">
           <% others.forEach(function (o) { %>
             <a href="/visa/<%= o.id %>"><img src="<%= flag(o.code) %>" alt="" width="32" height="32"><span><strong><%= o.short || 'Visa ' + o.country %></strong><% if (price.fromText(o.from, o.offerGroup)) { %>Từ <%- price.from(o.from, o.offerGroup, { inLink: true }) %><% } else { %>Liên hệ báo giá<% } %></span><%- icon('arrow') %></a>

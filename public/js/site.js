@@ -136,6 +136,7 @@
 
   var leadModal = $('#lead-modal');
   var offerModal = $('#offer-modal');
+  var autoNote = '';
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-open-lead]');
     if (t) {
@@ -143,9 +144,13 @@
       var svc = t.getAttribute('data-service');
       var sel = $('select[name="service"]', leadModal);
       if (sel && svc) sel.value = svc;
-      // data-note: điền sẵn ghi chú (VD: "Cần làm hộ chiếu nhanh: lấy trong 2 ngày")
+      // data-note: điền sẵn ghi chú (VD: "Cần làm hộ chiếu nhanh (cần trong 2 ngày)…").
+      // Nút khác không có data-note: xoá ghi chú điền sẵn lần trước (nếu khách chưa sửa) để không gửi nhầm sang dịch vụ khác.
       var note = $('textarea[name="note"]', leadModal);
-      if (note && t.hasAttribute('data-note')) note.value = t.getAttribute('data-note');
+      if (note) {
+        if (t.hasAttribute('data-note')) { note.value = t.getAttribute('data-note'); autoNote = note.value; }
+        else if (autoNote && note.value === autoNote) { note.value = ''; autoNote = ''; }
+      }
       openModal(leadModal);
     }
     var o = e.target.closest('[data-open-offer]');
@@ -153,6 +158,9 @@
       e.preventDefault(); e.stopPropagation();
       var hidden = $('input[name="service"]', offerModal);
       if (hidden) hidden.value = o.getAttribute('data-service') || '';
+      // Nhãn ưu đãi theo đúng giá vừa bấm (VNĐ: "Giảm 500.000đ", USD: "Giảm $20")
+      var pill = $('[data-offer-pill]', offerModal);
+      if (pill) pill.textContent = o.getAttribute('data-label') ? '🎁 ' + o.getAttribute('data-label') : pill.getAttribute('data-default');
       openModal(offerModal);
     }
     if (e.target.closest('[data-open-news]')) { e.preventDefault(); openModal($('#news-modal')); }
@@ -284,7 +292,14 @@
     bindForm(f, function () { store.set('trip_subscribed', '1'); unlockOffer(); setTimeout(function () { closeModal($('#news-modal')); }, 2500); });
   });
   $$('.js-offer-form').forEach(function (f) {
-    bindForm(f, function () { unlockOffer(); store.set('trip_lead', String(Date.now())); setTimeout(function () { closeModal(offerModal); }, 2500); });
+    bindForm(f, function () {
+      unlockOffer(); store.set('trip_lead', String(Date.now()));
+      setTimeout(function () {
+        closeModal(offerModal);
+        var target = $('.offer-bar') || $('#main');
+        if (target) { target.tabIndex = -1; target.focus({ preventScroll: true }); }
+      }, 2500);
+    });
   });
 
   // ---------- Chấm sao (trang Đánh giá): tô sao 1..n theo lựa chọn ----------

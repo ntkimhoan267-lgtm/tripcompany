@@ -43,7 +43,7 @@
         <aside class="post-guide__toc"><% if (hasToc) { %><%- include('../partials/post-toc', { toc, faq, open: true }) %><% } %>
           <div class="card mt-3"><p class="h3-like">Cần làm gấp?</p><p class="muted">Gửi giấy tờ qua Zalo, TRIP kiểm tra miễn phí.</p><button class="btn btn--accent btn--block" data-open-lead>Tư vấn miễn phí</button></div>
         </aside>
-        <%- include('../partials/post-article', { showCover: true, showTocInline: false }) %>
+        <%- include('../partials/post-article', { showCover: true, showTocInline: true }) %>
       </div>
     <% } else { %>
       <div class="container layout-side">

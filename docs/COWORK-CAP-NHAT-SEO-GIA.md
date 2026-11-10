@@ -21,7 +21,8 @@ Quy tắc giữ nguyên như trước: **không tự nhập hay đọc mật kh�
    - Khung **"Kiểm tra SEO"** chấm điểm /100 và xem trước kết quả Google ngay khi gõ.
    - Website tự thêm dữ liệu có cấu trúc cho Google (BlogPosting, FAQPage, Breadcrumb), ngày cập nhật trong `sitemap.xml`, và **tự chuyển hướng 301** khi đổi đường dẫn bài đã đăng.
 6. **Bài viết mới đã đăng sẵn**: "Làm hộ chiếu nhanh khi sắp bay: hộ chiếu sắp hết hạn hoặc còn dưới 6 tháng phải làm sao?" tại `/blog/lam-ho-chieu-nhanh-khi-sap-bay` (tự thêm 1 lần khi website khởi động bản mới).
-7. Database **tự nâng cấp** khi khởi động (thêm cột cho bài viết, bảng chuyển hướng). **Không có biến môi trường mới. Apps Script (`Code.gs`) không đổi**, không cần cập nhật Google.
+7. **Mô tả trên Google** của trang Visa, Visa từng nước và Dịch thuật tự lấy giá theo Bảng giá trong Dashboard (không còn gõ cứng); giá "từ" của trang Mỹ · Úc · Canada & nước khác và E-visa cũng tính từ Bảng giá.
+8. Database **tự nâng cấp** khi khởi động (thêm cột cho bài viết, bảng chuyển hướng). **Không có biến môi trường mới. Apps Script (`Code.gs`) không đổi**, không cần cập nhật Google.
 
 ## Việc cần làm
 
@@ -33,12 +34,12 @@ Quy tắc giữ nguyên như trước: **không tự nhập hay đọc mật kh�
 3. Mở `https://<địa-chỉ-website>/healthz`: phải hiện **`ok`**.
 
 ### Bước 2: Kiểm tra nhanh trên website (máy tính và điện thoại)
-1. **Bảng giá** (`/bang-gia`): visa Du lịch (L) 15 ngày hiện **3.300.000đ** kèm nút **🎁 −500k**; có dải thông báo "Giảm 500.000đ… khi để lại số điện thoại hoặc Gmail".
-2. Bấm **🎁 −500k** → popup "Nhận giá ưu đãi ngay" → nhập SĐT thử `0905000000` → bấm "Xem giá ưu đãi": giá 3.300.000đ bị gạch, hiện **2.800.000đ**. Tải lại trang: vẫn hiện giá ưu đãi.
+1. **Bảng giá** (`/bang-gia`): visa Du lịch (L) 15 ngày hiện **3.300.000đ** kèm nút **🎁 −500k**; có dải thông báo "Giảm 500.000đ (giá USD: giảm $20) cho các dịch vụ có biểu tượng 🎁 khi bạn để lại số điện thoại hoặc Gmail". Ở trang visa tính bằng USD (ví dụ `/visa/han-quoc`) dải này ghi "Giảm $20".
+2. Bấm **🎁 −500k** → popup "Nhận giá ưu đãi ngay" → nhập SĐT thử `0905000000` (**không** tick ô "Nhận bản tin") → bấm "Xem giá ưu đãi": giá 3.300.000đ bị gạch, hiện **2.800.000đ**, dải thông báo đổi thành "Bạn đã nhận ưu đãi!". Tải lại trang: vẫn hiện giá ưu đãi.
 3. Mở **Dashboard** → **dừng lại để tôi tự nhập mật khẩu**. Vào **Khách tư vấn**: có khách "Khách nhận ưu đãi" SĐT `0905000000` với ghi chú [Ưu đãi] → **xoá khách thử này** (và dòng tương ứng trong Google Sheet nếu có).
 4. **Hộ chiếu** (`/dich-vu/ho-chieu`): ảnh đầu trang là ảnh hộ chiếu Việt Nam thật; có mục "Làm hộ chiếu nhanh 1 – 7 ngày" với 7 thẻ "Liên hệ tư vấn"; bấm "Tư vấn ngay" ở thẻ "Cần trong 2 ngày" → form mở sẵn dịch vụ "Hộ chiếu" và ghi chú "Cần làm hộ chiếu nhanh (cần trong 2 ngày). Ngày bay dự kiến:" (chỉ kiểm tra, **không gửi**).
 5. **Xe đưa đón** (`/dich-vu/thue-xe`): tuyến Núi Thần Tài có ảnh suối khoáng nóng, tuyến VinWonders Nam Hội An có ảnh VinWonders.
-6. **Bài viết mới** (`/blog/lam-ho-chieu-nhanh-khi-sap-bay`): ảnh bìa là hộ chiếu cầm tay kèm vé máy bay; có khung "Nội dung chính" bên trái (trên điện thoại ở đầu bài), bấm một mục thì nhảy tới đúng phần; cuối bài có "Câu hỏi thường gặp".
+6. **Bài viết mới** (`/blog/lam-ho-chieu-nhanh-khi-sap-bay`): ảnh bìa là hộ chiếu cầm tay kèm vé máy bay; có khung "Nội dung chính" bên trái (trên điện thoại: nằm trong bài, sau ảnh bìa và đoạn mở đầu), bấm một mục thì nhảy tới đúng phần và tiêu đề không bị thanh menu che; cuối bài có "Câu hỏi thường gặp".
 7. Mở `/sitemap.xml`: có dòng `lam-ho-chieu-nhanh-khi-sap-bay` kèm `<lastmod>`.
 
 ### Bước 3: Xem các mục mới trong Dashboard (không lưu thay đổi nếu tôi chưa duyệt)

@@ -27,7 +27,7 @@
       <% if (withLd) { %><script type="application/ld+json"><%- JSON.stringify({
         '@context': 'https://schema.org', '@type': 'BreadcrumbList',
         itemListElement: [{ name: 'Trang chủ', href: '/' }].concat(crumbs || []).map(function (c, i, all) {
-          return { '@type': 'ListItem', position: i + 1, name: c.label || c.name, item: siteUrl + (c.href || (i === all.length - 1 ? path : '/')) };
+          return { '@type': 'ListItem', position: i + 1, name: c.label || c.name, item: siteUrl + (c.href || (i === all.length - 1 ? (path.length > 1 ? path.replace(/\/+$/, '') : path) : '/')) };
         }),
       }).replace(/</g, '\\u003c') %></script><% } %>
       <ol class="breadcrumb" aria-label="Breadcrumb">

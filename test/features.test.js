@@ -423,3 +423,12 @@ test('bài viết hẹn giờ: xoá ô ngày giờ đăng -> đăng ngay', async
   await savePost(loc.split('/').pop(), { title: 'Bài hẹn rồi đăng ngay', status: 'published', content: 'x', publish_at: '' });
   assert.equal((await get('/blog/bai-hen-roi-dang-ngay')).status, 200);
 });
+
+test('mô tả Google và giá "từ" theo bảng giá hiện tại; đường dẫn chuẩn không có "/" cuối', async () => {
+  const visa = await text('/visa');
+  assert.match(visa, /<meta name="description" content="[^"]*Trung Quốc từ 3\.300\.000đ, Hàn Quốc từ \$140/);
+  assert.match(await text('/visa/nuoc-khac'), /<meta name="description" content="[^"]*Giá trọn gói từ \$90\./);
+  // E-visa không bật ưu đãi mặc định: giữ giá thật
+  assert.match(await text('/visa/e-visa'), /<meta name="description" content="[^"]*Giá trọn gói từ \$40\./);
+  assert.match(await text('/blog/lam-ho-chieu-nhanh-khi-sap-bay/'), /<link rel="canonical" href="https:\/\/tripdn\.com\/blog\/lam-ho-chieu-nhanh-khi-sap-bay">/);
+});

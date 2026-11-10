@@ -52,46 +52,69 @@ router.get('/dich-vu', (req, res) => {
 });
 
 // ----- Visa: trang tổng quan + mỗi thị trường một trang riêng -----
+// offerGroup: nhóm ưu đãi của giá "từ" (xem src/lib/offer.js)
 const VISA_EXTRA = {
   'nuoc-khac': {
     id: 'nuoc-khac', country: 'Mỹ · Úc · Canada & nước khác', short: 'Mỹ, Úc, Canada & nước khác', code: 'us',
-    leadService: 'Visa Mỹ / Úc / Canada', from: { usd: 70 }, time: '2–5 tuần',
+    leadService: 'Visa Mỹ / Úc / Canada', from: { usd: 70 }, time: '2–5 tuần', offerGroup: 'world',
     blurb: 'Hoa Kỳ, Canada, Úc, New Zealand, Đài Loan, Hồng Kông, Macau, Ấn Độ, Dubai…',
   },
   'e-visa': {
     id: 'e-visa', country: 'E-visa Việt Nam', short: 'E-visa Việt Nam', code: 'vn',
-    leadService: 'E-visa Việt Nam (người nước ngoài)', from: { usd: 40 }, time: 'Từ 2 giờ',
+    leadService: 'E-visa Việt Nam (người nước ngoài)', from: { usd: 40 }, time: 'Từ 2 giờ', offerGroup: 'evisa',
     blurb: 'Dành cho người nước ngoài nhập cảnh Việt Nam, kèm Fast Track tại sân bay.',
   },
 };
-const visaPageOf = (slug) => getServices().markets.find((m) => m.id === slug) || (Object.hasOwn(VISA_EXTRA, slug) ? VISA_EXTRA[slug] : null);
+const minOf = (list) => { const n = list.filter((x) => typeof x === 'number' && x > 0); return n.length ? Math.min(...n) : null; };
+// Giá "từ" của 2 trang này tính theo bảng giá hiện tại (Dashboard → Bảng giá), không gõ cứng
+function visaExtras() {
+  const s = getServices();
+  const otherUsd = minOf(s.worldVisa.filter((v) => !['kr', 'jp'].includes(v.code) && v.region !== 'chau-au').map((v) => v.usd));
+  const evisaUsd = minOf(s.evisa.rows.flatMap((r) => [r.single, r.multiple]));
+  return {
+    'nuoc-khac': { ...VISA_EXTRA['nuoc-khac'], from: otherUsd == null ? {} : { usd: otherUsd } },
+    'e-visa': { ...VISA_EXTRA['e-visa'], from: evisaUsd == null ? {} : { usd: evisaUsd } },
+  };
+}
+const visaPageOf = (slug) => {
+  const market = getServices().markets.find((m) => m.id === slug);
+  if (market) return { ...market, offerGroup: 'markets' };
+  return Object.hasOwn(VISA_EXTRA, slug) ? visaExtras()[slug] : null;
+};
 
 router.get('/dich-vu/visa', (req, res) => res.redirect(301, '/visa'));
 
 router.get('/visa', (req, res) => {
+  // Giá trong mô tả Google khớp với giá đang hiện trên trang (theo bảng giá và ưu đãi hiện tại)
+  const names = { 'trung-quoc': 'Trung Quốc', 'han-quoc': 'Hàn Quốc', 'nhat-ban': 'Nhật Bản', 'chau-au': 'Schengen' };
+  const prices = res.locals.services.markets
+    .map((m) => [names[m.id] || m.country, res.locals.price.fromText(m.from, 'markets')])
+    .filter(([, p]) => p).map(([n, p]) => `${n} từ ${p}`).join(', ');
   res.render('pages/visa-index', {
-    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: 'Dịch vụ visa du lịch trọn gói tại TRIP Đà Nẵng: Trung Quốc từ 2.800.000đ, Hàn Quốc từ $120, Nhật Bản từ 3.800.000đ, Schengen từ 220 USD. Luyện phỏng vấn 1 kèm 1.' },
-    extras: Object.values(VISA_EXTRA),
+    meta: { title: 'Visa Trung Quốc, Hàn Quốc, Nhật Bản & Châu Âu trọn gói', description: `Dịch vụ visa du lịch trọn gói tại TRIP Đà Nẵng${prices ? ': ' + prices : ''}. Luyện phỏng vấn 1 kèm 1.` },
+    extras: Object.values(visaExtras()),
   });
 });
 
 router.get('/visa/:slug', (req, res, next) => {
   const page = visaPageOf(req.params.slug);
   if (!page) return next();
-  const others = [...getServices().markets, ...Object.values(VISA_EXTRA)].filter((m) => m.id !== page.id);
+  const others = [...getServices().markets.map((m) => ({ ...m, offerGroup: 'markets' })), ...Object.values(visaExtras())].filter((m) => m.id !== page.id);
+  const fromText = res.locals.price.fromText(page.from, page.offerGroup);
   res.render('pages/visa-market', {
     meta: {
       title: page.id === 'e-visa' ? 'E-visa Việt Nam cho người nước ngoài' : `Visa ${page.country} trọn gói`,
-      description: `${page.blurb} Giá trọn gói từ ${require('../lib/helpers').money(page.from)}. Tư vấn miễn phí tại TRIP Đà Nẵng.`,
-      image: page.art ? `/img/visa/${page.art}.jpg` : undefined,
+      description: `${page.blurb}${fromText ? ` Giá trọn gói từ ${fromText}.` : ''} Tư vấn miễn phí tại TRIP Đà Nẵng.`,
+      image: res.locals.media(`visa_${page.art || page.id}`) || undefined,
     },
     page, others,
   });
 });
 
 router.get('/dich-vu/dich-thuat', (req, res) => {
+  const from = res.locals.price.text(res.locals.h.minPrice(res.locals.services.translation.languages[0].rows), 'vnd', 'translation');
   res.render('pages/service-translation', {
-    meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật', description: 'Dịch thuật từ 40.000đ/trang, công chứng dấu công ty hoặc dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự. Có gói dịch hoả tốc tại TRIP Đà Nẵng.' },
+    meta: { title: 'Dịch thuật công chứng Anh – Trung – Hàn – Nhật', description: `Dịch thuật${from ? ` từ ${from}/trang` : ''}, công chứng dấu công ty hoặc dấu tư pháp. Hợp pháp hoá, chứng nhận lãnh sự. Có gói dịch hoả tốc tại TRIP Đà Nẵng.` },
   });
 });
 

@@ -60,6 +60,14 @@ function makePricer(settings) {
   };
   // Giá dạng { vnd } hoặc { usd } (giá "từ" của các thị trường visa)
   price.from = (from, group, opts) => (from && from.vnd != null ? price(from.vnd, 'vnd', group, opts) : price(from && from.usd, 'usd', group, opts));
+  // Giá dạng chữ thuần (thẻ mô tả cho Google): đúng con số khách thấy trên trang khi chưa nhận ưu đãi. null = chưa có giá
+  price.text = (amount, cur = 'vnd', group = '') => {
+    if (amount == null || amount === '' || !(Number(amount) > 0)) return null;
+    const n = Number(amount);
+    const off = cur === 'usd' ? cfg.usd : cfg.vnd;
+    return (cur === 'usd' ? usd : vnd)(cfg.enabled && off && cfg.groups.has(group) ? n + off : n);
+  };
+  price.fromText = (from, group) => (from && from.vnd != null ? price.text(from.vnd, 'vnd', group) : price.text(from && from.usd, 'usd', group));
   price.cfg = cfg;
   return price;
 }

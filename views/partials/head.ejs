@@ -3,7 +3,8 @@
   // rawTitle: tiêu đề SEO viết riêng cho bài (đã tối ưu độ dài) -> giữ nguyên, không thêm "| TRIP Đà Nẵng"
   const fullTitle = m.rawTitle ? m.title : (m.title && !/TRIP/.test(m.title) ? `${m.title} | TRIP Đà Nẵng` : (m.title || 'TRIP Đà Nẵng'));
   const desc = m.description || 'TRIP – Dịch vụ Visa, Dịch thuật công chứng và Du lịch trọn gói tại Đà Nẵng.';
-  const canonical = siteUrl + path;
+  // Đường dẫn chuẩn không có "/" cuối: /blog/abc/ và /blog/abc là cùng một trang
+  const canonical = siteUrl + (path.length > 1 ? path.replace(/\/+$/, '') : path);
   const ogImage = m.image ? (m.image.startsWith('http') ? m.image : siteUrl + m.image) : siteUrl + '/img/og-image.jpg';
   const s = settings;
   const isActive = (p) => (p === '/' ? path === '/' : path.startsWith(p)) ? 'is-active' : '';

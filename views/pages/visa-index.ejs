@@ -39,7 +39,7 @@
       <% extras.forEach(function (x) { %>
         <a class="card card--link visa-extra reveal" href="/visa/<%= x.id %>">
           <img src="<%= flag(x.code) %>" alt="" width="56" height="56">
-          <div><h3><%= x.country %></h3><p><%= x.blurb %></p><span class="more">Từ <%= h.money(x.from) %> · Xem chi tiết <%- icon('arrow') %></span></div>
+          <div><h3><%= x.country %></h3><p><%= x.blurb %></p><span class="more"><% if (price.fromText(x.from, x.offerGroup)) { %>Từ <%- price.from(x.from, x.offerGroup, { inLink: true }) %> · <% } %>Xem chi tiết <%- icon('arrow') %></span></div>
         </a>
       <% }) %>
     </div>

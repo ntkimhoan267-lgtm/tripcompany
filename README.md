@@ -167,3 +167,7 @@ Giá **mặc định** nằm trong `src/data/services.js`. Bảng nào đã sử
 
 **Chỉ nhập giá khách lẻ (Public), giá thật.** Khi bật ưu đãi, website tự cộng số tiền ưu đãi (mặc định 500.000đ / 20 USD)
 để làm giá niêm yết; khách để lại SĐT hoặc Gmail thì thấy giá thật.
+
+## Bộ Skill xây website đa ngành
+
+Quy trình đã dùng cho TRIP được đóng gói thành bộ skill trong `.claude/skills/` (nghiên cứu thị trường → chọn 3–5 đối thủ REACH cao nhất → brief → thiết kế → code → kiểm tra → triển khai). Xem [docs/BO-SKILL-BUILD-WEBSITE.md](docs/BO-SKILL-BUILD-WEBSITE.md).

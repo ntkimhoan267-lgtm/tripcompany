@@ -7,8 +7,8 @@ description: >-
   code → kiểm tra nhiều vòng → triển khai → bàn giao. Luôn dùng skill này khi người dùng nói "làm
   website", "xây web", "thiết kế web", "landing page", "web cho công ty/quán/phòng khám của tôi",
   "làm lại website", kể cả khi họ chỉ mô tả doanh nghiệp và chưa biết bắt đầu từ đâu. Skill này là
-  bản điều phối; nó chỉ ra skill con (web-market-research, web-competitor-research, web-brief, web-
-  design, web-build, web-content-seo, web-qa, web-launch) cần chạy ở từng bước.
+  bản điều phối; nó chỉ ra skill con (web-market-research, web-competitor-research, web-brief,
+  web-design, web-build, web-content-seo, web-qa, web-launch) cần chạy ở từng bước.
 ---
 
 # Website Builder – quy trình điều phối
